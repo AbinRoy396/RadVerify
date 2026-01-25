@@ -1,0 +1,107 @@
+# RadVerify Configuration File
+
+# Image Processing Settings
+image_processing:
+  target_size: [512, 512]
+  normalize: true
+  grayscale: false  # Keep color for ultrasound
+  enhancement:
+    enabled: true
+    method: "realesrgan"  # Options: realesrgan, edsr, swinir
+    scale_factor: 2  # 2x or 4x upscaling
+
+# AI Model Settings
+ai_model:
+  framework: "tensorflow"
+  model_name: "efficientnet-b0"
+  confidence_threshold: 0.8
+  batch_size: 1
+  
+# Fetal Structure Detection
+fetal_structures:
+  biometry:
+    - head
+    - abdomen
+    - femur
+  brain:
+    - skull
+    - ventricles
+    - cerebellum
+  face:
+    - profile
+    - nasal_bone
+    - lips
+  spine:
+    - vertebrae
+    - skin_coverage
+  heart:
+    - four_chamber_view
+  organs:
+    - stomach
+    - kidneys
+    - bladder
+  limbs:
+    - arms
+    - legs
+    - hands
+    - feet
+  maternal:
+    - placenta
+    - amniotic_fluid
+    - umbilical_cord
+
+# NLP Settings
+nlp:
+  language: "en"
+  model: "en_core_web_sm"
+  negation_keywords:
+    - "no"
+    - "absent"
+    - "negative"
+    - "not"
+    - "without"
+    - "unremarkable"
+  uncertainty_keywords:
+    - "possible"
+    - "probable"
+    - "likely"
+    - "suggests"
+    - "may indicate"
+
+# Verification Settings
+verification:
+  confidence_thresholds:
+    high: 0.8
+    medium: 0.5
+    low: 0.3
+  severity_levels:
+    high:
+      - mismatch
+    medium:
+      - omission
+      - overstatement
+    low:
+      - match
+  measurement_tolerance:
+    BPD: 2.0  # mm
+    HC: 5.0   # mm
+    AC: 5.0   # mm
+    FL: 2.0   # mm
+
+# Report Generation
+report:
+  template_engine: "jinja2"
+  output_formats:
+    - markdown
+    - json
+    - text
+  include_confidence_scores: true
+  include_timestamps: true
+
+# Comparison Settings
+comparison:
+  agreement_threshold: 0.85  # 85% agreement rate
+  risk_levels:
+    low: 0.85
+    medium: 0.70
+    high: 0.50
