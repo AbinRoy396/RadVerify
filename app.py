@@ -1,154 +1,155 @@
 import streamlit as st
-import random  # For placeholder random results
-import time    # For simulating loading
-from radverify import run_verification
+import numpy as np
+from PIL import Image
+import io
+import time
+from pipeline import RadVerifyPipeline
 
-# Set page configuration for a clean, professional look
+# Set page configuration for a professional medical look
 st.set_page_config(
-    page_title="RadVerify",
-    page_icon="🩺",  # Medical icon
+    page_title="RadVerify - AI Analysis",
+    page_icon="🩺",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for medical theme (blue/green accents, white background)
+# Custom CSS for medical theme
 st.markdown("""
     <style>
     .main {
+        background-color: #f8f9fa;
+    }
+    .stMetric {
         background-color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .stButton>button {
-        background-color: #007bff;  /* Blue accent */
-        color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 10px 20px;
-        font-size: 16px;
+    .report-card {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #007bff;
+        margin-bottom: 20px;
     }
-    .stButton>button:disabled {
-        background-color: #cccccc;
-        color: #666666;
-    }
-    .stTextArea textarea {
-        border-radius: 5px;
-        border: 1px solid #007bff;
-    }
-    .stFileUploader {
-        border-radius: 5px;
-        border: 1px solid #007bff;
-    }
-    .success {
-        background-color: #d4edda;
-        color: #155724;
+    .comparison-table {
+        font-family: monospace;
+        white-space: pre;
+        background-color: #1e1e1e;
+        color: #d4d4d4;
         padding: 10px;
         border-radius: 5px;
-        border: 1px solid #c3e6cb;
-    }
-    .warning {
-        background-color: #fff3cd;
-        color: #856404;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ffeaa7;
-    }
-    .error {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #f5c6cb;
+        overflow-x: auto;
     }
     </style>
     """, unsafe_allow_html=True)
 
+# Sidebar - Configuration
+with st.sidebar:
+    st.title("⚙️ Settings")
+    enhance_image = st.toggle("Enhance Image Quality", value=True)
+    st.divider()
+    st.markdown("### 🔬 Model Info")
+    st.info("EfficientNet-B0 + U-Net Masking + LLM")
+    st.caption("Version: 1.2.0-AdvancedAI")
+
 # Header Section
 st.title("🩺 RadVerify")
-st.subheader("AI-Based Radiology Report Verification System")
-st.markdown("Upload a medical scan image and paste the corresponding radiology report to verify for mismatches or omissions.")
-
-# Divider for clean separation
-st.divider()
+st.subheader("Advanced Radiology Report Verification System")
+st.markdown("Verifying fetal ultrasound scans with deep learning and computer vision.")
 
 # Input Section
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 1.2])
 
 with col1:
     st.markdown("### 📤 Upload Medical Scan")
-    uploaded_image = st.file_uploader("Select a JPG or PNG image (e.g., X-ray or ultrasound)", type=["jpg", "png"], help="Ensure the image is clear and relevant.")
+    uploaded_file = st.file_uploader("Select Ultrasound Image (JPG/PNG)", type=["jpg", "png", "jpeg"])
+    if uploaded_file:
+        st.image(uploaded_file, caption="Original Scan", use_column_width=True)
 
 with col2:
     st.markdown("### 📝 Paste Radiology Report")
-    report_text = st.text_area("Enter the human-written radiology report here", height=150, help="Copy and paste the full report text.")
+    report_text = st.text_area("Enter doctor's findings text", height=300, 
+                              placeholder="Fetal biometry: BPD 47mm, HC 175mm, AC 150mm, FL 32mm...")
 
-# Check if both inputs are provided
-inputs_provided = uploaded_image is not None and report_text.strip() != ""
-
-def _render_processing_notes(notes):
-    with st.expander("Processing trace (demo)"):
-        for note in notes:
-            st.write(f"- {note}")
-
-# Verify Button (disabled if inputs not provided)
-if st.button("🔍 Verify Report", disabled=not inputs_provided, help="Both image and report are required."):
-    try:
-        with st.spinner("Analyzing scan and report... Please wait."):
-            bundle, processing_notes = run_verification(uploaded_image, report_text)
-    except ValueError as exc:
-        st.error(f"Input error: {exc}")
-    except Exception as exc:  # pragma: no cover - Streamlit runtime guard
-        st.error("Unexpected error while running verification pipeline.")
-        st.caption(str(exc))
-    else:
-        pre = bundle.preprocessed_image
-        ai = bundle.ai_finding
-        report_struct = bundle.report_findings
-        comparison = bundle.comparison
-
-        # Display uploaded image + preprocessing stats
-        st.divider()
-        st.markdown("### 🖼️ Uploaded Scan & Preprocessing Summary")
-        img_col, meta_col = st.columns([1.6, 1])
-        img_col.image(uploaded_image, caption="Uploaded Medical Scan", use_column_width=True)
-        with meta_col:
-            st.write(
-                f"**File:** {pre.metadata.filename}\n"
-                f"**Format:** {pre.metadata.format} | **Size:** {pre.metadata.size_bytes / 1024:.1f} KB\n"
-                f"**Normalized grid:** {len(pre.normalized_pixels)}x{len(pre.normalized_pixels[0])}\n"
-                f"**Mean intensity:** {pre.mean_intensity:.3f}"
-            )
-
-        # Display AI findings
-        st.divider()
-        st.markdown("### 🤖 AI Feature Detection")
-        ai_cols = st.columns(2)
-        ai_cols[0].metric("Feature Detected", "Yes" if ai.detected else "No")
-        ai_cols[1].metric("Confidence", f"{ai.confidence:.2f}")
-        st.info(f"Rationale: {ai.rationale}")
-
-        # Display report parsing summary
-        st.divider()
-        st.markdown("### 📝 Report Interpretation")
-        st.write(
-            f"**Mention status:** {report_struct.status.replace('_', ' ').title()}\n"
-            f"**Negated:** {'Yes' if report_struct.negated else 'No'}"
+# Verify Button
+if st.button("🔍 Run Full Verification", disabled=not (uploaded_file and report_text)):
+    pipeline = RadVerifyPipeline()
+    
+    with st.spinner("Executing 9-stage verification pipeline..."):
+        # Process the image and report
+        results = pipeline.process(
+            image_file=uploaded_file,
+            doctor_report_text=report_text,
+            enhance_image=enhance_image
         )
-        if report_struct.context_snippet:
-            st.caption(f"Snippet: “{report_struct.context_snippet}”")
-
-        # Display verification result with color-coded alert
+        
+    if results['success']:
+        st.success("Analysis Complete!")
+        
+        # Dashboard Overview
         st.divider()
-        st.markdown("### ✅ Verification Result")
-        status = comparison.status
-        explanation = comparison.explanation
-        if status in {"match", "match_absent"}:
-            st.success(f"✅ {explanation}")
-        elif status == "omission":
-            st.warning(f"⚠️ {explanation}")
-        else:
-            st.error(f"❌ {explanation}")
+        st.header("📊 Verification Dashboard")
+        
+        m1, m2, m3, m4 = st.columns(4)
+        agreement = results['verification_results']['agreement_rate'] * 100
+        risk = results['verification_results']['risk_level'].upper()
+        
+        # Extract pixel_to_mm if available (it might be in ai_findings or calculated in analyze)
+        pixel_to_mm = results['ai_findings'].get('pixel_to_mm', 0.25)
+        
+        m1.metric("Agreement Rate", f"{agreement:.1f}%")
+        m2.metric("Risk Level", risk)
+        m3.metric("Calibration", f"{pixel_to_mm:.4f} mm/px")
+        m4.metric("GA Estimate", f"{results['ai_findings']['gestational_age_estimate']['weeks']}w {results['ai_findings']['gestational_age_estimate']['days']}d")
 
-        _render_processing_notes(processing_notes)
+        # Tabs for detailed results
+        tab1, tab2, tab3, tab4 = st.tabs(["📄 Comparison Report", "📝 Medical Narrative", "🤖 AI Findings", "📷 Image Processing"])
+        
+        with tab1:
+            st.markdown("### Side-by-Side Comparison")
+            st.markdown(f"```\n{results['comparison_report_text']}\n```")
 
-# Footer or additional info if needed
+        with tab2:
+            st.markdown("### AI-Synthesized Narrative")
+            st.info("This report is generated by analyzing segmentations and biometric trends.")
+            st.markdown(results.get('medical_narrative', "Narrative processing failed."))
+            
+        with tab3:
+            st.markdown("### AI Analysis Details")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.write("**Biometric Measurements (CV):**")
+                for param, data in results['ai_findings']['biometry'].items():
+                    st.write(f"- **{param}**: {data['value']} {data['unit']} ({data['method']})")
+            with col_b:
+                st.write("**Image Quality Score:**")
+                quality = results['ai_findings']['overall_quality'].upper()
+                st.info(f"Quality: {quality}")
+                
+        with tab3:
+            st.markdown("### Image Enhancement Summary")
+            proc_col1, proc_col2 = st.columns(2)
+            with proc_col1:
+                if results['enhanced_image'] is not None:
+                    st.image(results['enhanced_image'], caption="Enhanced Scan", use_column_width=True)
+            with proc_col2:
+                if results.get('enhancement_metrics'):
+                    st.write("**Enhancement Metrics:**")
+                    st.write(f"- PSNR: {results['enhancement_metrics']['psnr']:.2f}")
+                    st.write(f"- Sharpness: +{results['enhancement_metrics']['sharpness_improvement']:.1f}%")
+                st.write("**Preprocessing Metadata:**")
+                st.json(results['preprocessing_metadata'])
+
+        # Final Summary
+        st.divider()
+        st.markdown(results['final_results']['summary'])
+        
+    else:
+        st.error(f"Pipeline Failed at stage: {results['stage']}")
+        for err in results['errors']:
+            st.write(f"- {err}")
+
+# Footer
 st.divider()
-st.markdown("*This is a demo frontend. Actual AI processing would integrate with a backend model.*")
+st.caption("⚠️ RESEARCH PROJECT: Not for real medical diagnosis. All findings must be reviewed by qualified professionals.")

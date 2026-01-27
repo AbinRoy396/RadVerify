@@ -16,6 +16,32 @@ ai_model:
   model_name: "efficientnet-b0"
   confidence_threshold: 0.8
   batch_size: 1
+  weights: "imagenet"  # Use ImageNet pre-trained weights
+  input_size: [224, 224]  # EfficientNet-B0 input size
+  
+  # Structure detection settings
+  structure_detection:
+    enabled: true
+    min_confidence: 0.5
+    segmentation_enabled: true
+    gemini_api_key: "YOUR_API_KEY_HERE"
+    
+  # Biometry measurement settings (OpenCV-based)
+  biometry:
+    enabled: true
+    edge_detection:
+      method: "canny"
+      threshold1: 50
+      threshold2: 150
+      aperture_size: 3
+    contour_detection:
+      min_area: 100  # Minimum contour area in pixels
+      max_area: 50000  # Maximum contour area in pixels
+      approximation_epsilon: 0.02
+    measurement_confidence:
+      high_threshold: 0.8
+      medium_threshold: 0.6
+      low_threshold: 0.4
   
 # Fetal Structure Detection
 fetal_structures:

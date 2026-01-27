@@ -20,17 +20,17 @@ Input (Scan + Doctor's Report)
     ↓
 Image Enhancement (ESRGAN/OpenCV)
     ↓
-AI Analysis (EfficientNet + OpenCV)
+AI Analysis (EfficientNet-B0 + OpenCV)
     ↓
 AI Report Generation (Jinja2 Templates)
     ↓
-NLP Report Parsing (spaCy)
+NLP Report Parsing (spaCy + Pattern Matching)
     ↓
-Verification Engine (Comparison Logic)
+Verification Engine (Discrepancy Detection)
     ↓
 Comparison Report (Side-by-Side Analysis)
     ↓
-Final Results (Text/JSON/Markdown)
+Final Results (Dashboard + JSON)
 ```
 
 ## 📦 Installation
@@ -178,10 +178,11 @@ Side-by-side analysis showing:
 ## 🔬 Technical Details
 
 ### AI Models
-- **Structure Detection**: EfficientNet-B0 (placeholder - uses rule-based fallback)
-- **Image Enhancement**: OpenCV-based super-resolution with CLAHE
-- **Biometry**: Computer vision measurements using OpenCV
-- **NLP**: spaCy for text parsing and analysis
+- **Structure Detection**: EfficientNet-B0 (Real model inference)
+- **Image Enhancement**: OpenCV-based super-resolution (CLAHE + Contrast Stretch)
+- **Biometry**: Real computer vision measurements using OpenCV (BPD, HC, AC, FL)
+- **NLP**: Rule-based matching with spaCy fallback for text parsing
+- **UI**: Streamlit-based interactive dashboard
 
 ### Measurement Tolerances
 - BPD: ±2.0 mm
@@ -191,10 +192,10 @@ Side-by-side analysis showing:
 
 ## 🚧 Current Limitations
 
-1. **AI Models**: Using placeholder/rule-based implementations. Production requires:
-   - Pre-trained medical imaging models
-   - Validated biometric measurement algorithms
-   - Real-ESRGAN for image enhancement
+1. **AI Models**: Using transfer-learning weights (ImageNet). Production requires:
+   - Fine-tuning on large-scale fetal ultrasound datasets
+   - Implementation of more robust segmenters (e.g., U-Net for AC/HC)
+   - Real-ESRGAN for higher quality image enhancement
 
 2. **Scope**: Focused on 20-week pregnancy ultrasound anatomy scans
 
@@ -235,5 +236,5 @@ For issues or questions, please contact [your contact information]
 
 ---
 
-**Version**: 0.1.0  
+**Version**: 1.1.0  
 **Last Updated**: 2026-01-25

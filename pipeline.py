@@ -16,6 +16,7 @@ from modules.nlp_parser import NLPParser
 from modules.verification_engine import VerificationEngine
 from modules.comparison_report import ComparisonReport
 from modules.result_generator import ResultGenerator
+from modules.report_synthesizer import ReportSynthesizer
 
 
 class RadVerifyPipeline:
@@ -57,6 +58,7 @@ class RadVerifyPipeline:
         self.verification_engine = VerificationEngine(self.config)
         self.comparison_report = ComparisonReport()
         self.result_generator = ResultGenerator()
+        self.report_synthesizer = ReportSynthesizer(config_path)
     
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load configuration from YAML file."""
@@ -154,6 +156,10 @@ class RadVerifyPipeline:
                 verification_results
             )
             
+            # Stage 8.5: LLM Narrative Synthesis
+            results['stage'] = 'narrative_synthesis'
+            medical_narrative = self.report_synthesizer.synthesize(ai_findings)
+
             # Stage 9: Final results formatting
             results['stage'] = 'results_formatting'
             final_results = self.result_generator.format_results(
@@ -174,6 +180,7 @@ class RadVerifyPipeline:
                 'ai_findings': ai_findings,
                 'ai_report_text': ai_report_text,
                 'ai_report_structured': ai_report_structured,
+                'medical_narrative': medical_narrative,
                 'doctor_findings': doctor_findings,
                 'doctor_summary': doctor_summary,
                 'verification_results': verification_results,
