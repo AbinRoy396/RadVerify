@@ -513,3 +513,78 @@ class AIAnalyzer:
             'model_used': self.model_name,
             'confidence_threshold': self.confidence_threshold
         }
+    
+    def generate_visual_explanation(self, image: np.ndarray, masks: Dict[str, np.ndarray] = None) -> np.ndarray:
+        """
+        Generate a visual overlay showing AI detections on the original image.
+        
+        Args:
+            image: Original ultrasound image
+            masks: Dictionary of segmentation masks from segment_structures()
+            
+        Returns:
+            Image with colored overlays showing detected structures
+        """
+        # Convert to RGB if grayscale
+        if len(image.shape) == 2:
+            overlay = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        else:
+            overlay = image.copy()
+            
+        # If no masks provided, generate them
+        if masks is None:
+            masks = self.segment_structures(image)
+            
+        # Color map for different structures
+        colors = {
+            'head': (0, 255, 0),      # Green
+            'abdomen': (255, 0, 0),   # Blue
+            'femur': (0, 0, 255)      # Red
+        }
+        
+        # Blend masks with original image
+        for structure, mask in masks.items():
+            if structure in colors:
+                color = colors[structure]
+                # Create colored overlay
+                colored_mask = np.zeros_like(overlay)
+                colored_mask[mask > 0] = color
+                # Blend with alpha=0.3
+                overlay = cv2.addWeighted(overlay, 1.0, colored_mask, 0.3, 0)
+                
+                # Draw contour outline
+                contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                cv2.drawContours(overlay, contours, -1, color, 2)
+                
+        return overlay
+    
+    def load_dicom(self, dicom_path: str) -> np.ndarray:
+        """
+        Load and convert DICOM file to numpy array.
+        
+        Args:
+            dicom_path: Path to DICOM (.dcm) file
+            
+        Returns:
+            Numpy array of the image
+        """
+        try:
+            import pydicom
+            from pydicom.pixel_data_handlers.util import apply_voi_lut
+            
+            # Read DICOM file
+            dicom = pydicom.dcmread(dicom_path)
+            
+            # Extract pixel array
+            image = dicom.pixel_array
+            
+            # Apply VOI LUT (window/level) if present
+            image = apply_voi_lut(image, dicom)
+            
+            # Normalize to 0-255
+            image = ((image - image.min()) / (image.max() - image.min()) * 255).astype(np.uint8)
+            
+            return image
+        except Exception as e:
+            print(f"Error loading DICOM: {e}\")")
+            return None

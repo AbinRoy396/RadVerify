@@ -4,6 +4,7 @@ from PIL import Image
 import io
 import time
 from pipeline import RadVerifyPipeline
+from modules.database import CaseDatabase
 
 # Set page configuration for a professional medical look
 st.set_page_config(
@@ -48,10 +49,29 @@ st.markdown("""
 with st.sidebar:
     st.title("⚙️ Settings")
     enhance_image = st.toggle("Enhance Image Quality", value=True)
+    show_overlay = st.toggle("Show AI Segmentation Overlay", value=False)
     st.divider()
     st.markdown("### 🔬 Model Info")
     st.info("EfficientNet-B0 + U-Net Masking + LLM")
     st.caption("Version: 1.2.0-AdvancedAI")
+    
+    st.divider()
+    st.markdown("### 📊 Case History")
+    
+    # Initialize database
+    db = CaseDatabase()
+    recent_cases = db.get_recent_cases(limit=5)
+    
+    if recent_cases:
+        st.caption(f"Recent Cases ({len(recent_cases)})")
+        for case in recent_cases:
+            with st.expander(f"Case #{case['id']} - {case['patient_id']}"):
+                st.caption(f"Date: {case['scan_date']}")
+                if case['verification_results']:
+                    agreement = case['verification_results'].get('agreement_rate', 0) * 100
+                    st.metric("Agreement", f"{agreement:.1f}%")
+    else:
+        st.caption("No cases yet")
 
 # Header Section
 st.title("🩺 RadVerify")
@@ -131,7 +151,13 @@ if st.button("🔍 Run Full Verification", disabled=not (uploaded_file and repor
             st.markdown("### Image Enhancement Summary")
             proc_col1, proc_col2 = st.columns(2)
             with proc_col1:
-                if results['enhanced_image'] is not None:
+                if show_overlay and 'ai_findings' in results:
+                    # Generate visual overlay
+                    from modules.ai_analyzer import AIAnalyzer
+                    analyzer = AIAnalyzer()
+                    overlay = analyzer.generate_visual_explanation(results['original_image'])
+                    st.image(overlay, caption="AI Segmentation Overlay", use_container_width=True)
+                elif results['enhanced_image'] is not None:
                     st.image(results['enhanced_image'], caption="Enhanced Scan", use_column_width=True)
             with proc_col2:
                 if results.get('enhancement_metrics'):
@@ -140,6 +166,22 @@ if st.button("🔍 Run Full Verification", disabled=not (uploaded_file and repor
                     st.write(f"- Sharpness: +{results['enhancement_metrics']['sharpness_improvement']:.1f}%")
                 st.write("**Preprocessing Metadata:**")
                 st.json(results['preprocessing_metadata'])
+        
+        # Save case to database
+        try:
+            case_data = {
+                'patient_id': 'PATIENT_' + str(int(time.time())),
+                'ai_findings': results.get('ai_findings', {}),
+                'doctor_findings': results.get('doctor_findings', {}),
+                'verification_results': results.get('verification_results', {}),
+                'comparison_report': results.get('comparison_report_text', ''),
+                'medical_narrative': results.get('medical_narrative', ''),
+                'image_path': f"temp_{int(time.time())}.png"
+            }
+            case_id = db.save_case(case_data)
+            st.caption(f"✅ Case #{case_id} saved to history")
+        except Exception as e:
+            st.caption(f"⚠️ Could not save case: {e}")
 
         # Final Summary
         st.divider()
