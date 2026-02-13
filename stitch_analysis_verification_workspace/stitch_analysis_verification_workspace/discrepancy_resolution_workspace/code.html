@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Discrepancy Resolution Workspace | RAVEN AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#025a64",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                        "conflict": "#FF6B35",
+                        "panel": "#1b2627",
+                        "border-subtle": "#27383a"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scan-overlay {
+            border: 2px solid #FF6B35;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white font-display overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-subtle px-6 py-3 bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">RAVEN AI</h2>
+</div>
+<div class="h-6 w-[1px] bg-border-subtle"></div>
+<div class="flex items-center gap-6">
+<a class="text-[#9bb8bb] hover:text-white text-sm font-medium transition-colors" href="#">Worklist</a>
+<a class="text-[#9bb8bb] hover:text-white text-sm font-medium transition-colors" href="#">Archive</a>
+<a class="text-[#9bb8bb] hover:text-white text-sm font-medium transition-colors" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="p-2 text-[#9bb8bb] hover:text-white hover:bg-border-subtle rounded transition-all">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="p-2 text-[#9bb8bb] hover:text-white hover:bg-border-subtle rounded transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-[#9bb8bb] hover:text-white hover:bg-border-subtle rounded transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="h-6 w-[1px] bg-border-subtle"></div>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/40 rounded text-sm font-bold text-white">
+<span class="material-symbols-outlined !text-sm">account_circle</span>
+<span>Dr. Aris Thorne</span>
+</button>
+</div>
+</header>
+<!-- Sub-header / Breadcrumbs -->
+<div class="bg-[#111818] px-6 py-2 border-b border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-2 text-xs">
+<a class="text-[#9bb8bb]" href="#">Worklist</a>
+<span class="text-[#9bb8bb]">/</span>
+<a class="text-[#9bb8bb]" href="#">Case #88421</a>
+<span class="text-[#9bb8bb]">/</span>
+<span class="text-white font-semibold">Resolution Workspace</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[#9bb8bb] text-xs">Keyboard Shortcuts: <span class="bg-border-subtle px-1.5 py-0.5 rounded text-white">[A] Accept</span> <span class="bg-border-subtle px-1.5 py-0.5 rounded text-white">[D] Dismiss</span></span>
+</div>
+</div>
+<!-- Main Workspace Content -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Left Column: Diagnostic Viewer -->
+<section class="w-1/2 flex flex-col border-r border-border-subtle bg-black relative">
+<div class="p-4 flex items-center justify-between bg-black/40 absolute top-0 left-0 w-full z-10 backdrop-blur-sm">
+<div class="flex flex-col">
+<h3 class="text-sm font-bold text-white">Chest CT - Axial View</h3>
+<p class="text-[10px] text-[#9bb8bb]">Slice 142 of 312 | Window: Lung</p>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 bg-white/10 hover:bg-white/20 rounded"><span class="material-symbols-outlined !text-sm">zoom_in</span></button>
+<button class="p-1.5 bg-white/10 hover:bg-white/20 rounded"><span class="material-symbols-outlined !text-sm">pan_tool</span></button>
+<button class="p-1.5 bg-white/10 hover:bg-white/20 rounded text-conflict border border-conflict/30"><span class="material-symbols-outlined !text-sm">error</span></button>
+</div>
+</div>
+<div class="flex-1 flex items-center justify-center overflow-hidden bg-[#050505]">
+<div class="relative group cursor-crosshair">
+<img class="max-w-full max-h-[80vh] opacity-90 brightness-110" data-alt="High contrast black and white medical axial chest CT scan image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaSJZZUXXiFsQ6YtWcOWn_fGdBAWLMXZaM6cgjIDHapipvQ8CArAg6CjgmWKSBlLULkRUR_99r1LNREQcQnxLDxBHcO-xEA_BdcAd60DqqFsHezwx6Im5itgFS3OTWxf_Z0xfRWyQRHwW8rPm7biExZc7SSHrFqI5o5lFeDDIW3cegQTxxVGVpi0pfnbgkZ-pYdjFfwhzEkyJUfl6K18YQPObQw5IDdF8TsURUWpnQOetV4Al-q7q3aPxgx8waJCLXz2YR31ZwDVc"/>
+<!-- Conflict Area Highlight -->
+<div class="absolute top-[35%] left-[62%] w-20 h-20 scan-overlay rounded-sm">
+<div class="absolute -top-6 left-0 bg-conflict text-black text-[10px] font-black px-1 uppercase leading-tight">
+                            Conflict Area #1
+                        </div>
+</div>
+</div>
+</div>
+<div class="p-4 bg-black/60 flex items-center gap-4">
+<div class="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden relative">
+<div class="absolute left-0 top-0 h-full w-[45%] bg-primary"></div>
+</div>
+<span class="text-[10px] font-mono text-white">45.5%</span>
+</div>
+</section>
+<!-- Middle Column: Discrepancy Detail -->
+<section class="w-1/4 flex flex-col border-r border-border-subtle bg-[#111818] overflow-y-auto">
+<div class="p-6">
+<div class="mb-6">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-conflict/20 text-conflict border border-conflict/40 mb-2">
+                        HIGH CONFIDENCE CONFLICT
+                    </span>
+<h2 class="text-2xl font-black text-white leading-tight">Suspected Nodule</h2>
+<p class="text-sm text-[#9bb8bb] mt-1 italic">Location: Right Lower Lobe (Segment 8)</p>
+</div>
+<div class="space-y-6">
+<!-- AI Findings Card -->
+<div class="bg-panel p-4 border border-border-subtle rounded-sm">
+<div class="flex items-center justify-between mb-3">
+<h4 class="text-xs font-bold text-primary uppercase tracking-wider">AI Detection</h4>
+<span class="text-xs font-bold text-white bg-primary px-2 py-0.5 rounded">94% Confidence</span>
+</div>
+<div class="space-y-3">
+<div class="aspect-square w-full bg-black rounded-sm border border-border-subtle mb-3 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up medical scan detail showing a small white nodule on dark lung tissue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCppgezAMkNutfu0Hh39dh1qycdbE1zweQnaQXlvD14trH46ieue9giuivpRSxXCAFgKPT5FEMfPOAxGXPD7ai28Uasn4MsgZCrGBQGUlA88OSPyeH48bvuhSahMUSiVuHLnQDrCoT-0tpWPpVgT2MxKW6Lz3HYaerMxz0ILifSs-Hp3vNuSpawYLRGnp7oOrdtJ2JpKayjYUbKVkyK10P3k4Z_P8SjwI-vwLKjB2vlNL5ypjBI7ZRZ61Rspx7c2jEUMZ8yju-7Js"/>
+</div>
+<p class="text-sm text-white font-medium">Solid pulmonary nodule detected.</p>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-background-dark p-2 rounded border border-border-subtle">
+<p class="text-[10px] text-[#9bb8bb]">Diameter</p>
+<p class="text-xs font-bold text-white">12.4 mm</p>
+</div>
+<div class="bg-background-dark p-2 rounded border border-border-subtle">
+<p class="text-[10px] text-[#9bb8bb]">Type</p>
+<p class="text-xs font-bold text-white">Non-calcified</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Human Report Card -->
+<div class="bg-panel p-4 border border-border-subtle rounded-sm">
+<div class="flex items-center justify-between mb-3">
+<h4 class="text-xs font-bold text-[#9bb8bb] uppercase tracking-wider">Radiology Report</h4>
+<span class="text-[10px] font-medium text-[#9bb8bb]">Draft v1.2</span>
+</div>
+<div class="p-3 bg-red-900/10 border-l-2 border-conflict rounded-r">
+<p class="text-sm text-[#9bb8bb] leading-relaxed">
+                                "Lungs are clear of masses or suspicious nodules. Heart size is normal. No pleural effusion identified."
+                            </p>
+</div>
+<p class="mt-3 text-[10px] text-conflict font-bold uppercase">Missing Finding Discrepancy</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Resolution Panel -->
+<section class="w-1/4 flex flex-col bg-background-dark overflow-y-auto">
+<div class="p-6 flex flex-col h-full">
+<h3 class="text-xs font-bold text-[#9bb8bb] uppercase tracking-wider mb-6">Reconciliation Actions</h3>
+<div class="space-y-4 flex-1">
+<!-- Action 1: Accept -->
+<button class="w-full group bg-primary hover:bg-[#03707c] text-white p-4 rounded-sm flex flex-col items-start gap-1 transition-all">
+<div class="flex items-center justify-between w-full">
+<span class="text-sm font-bold">Accept AI Finding</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">check_circle</span>
+</div>
+<p class="text-[11px] text-white/70 text-left">The finding will be appended to the final radiology report.</p>
+</button>
+<!-- Action 2: Dismiss -->
+<div class="bg-panel border border-border-subtle p-4 rounded-sm">
+<button class="w-full text-white flex items-center justify-between mb-4">
+<span class="text-sm font-bold">Dismiss AI Finding</span>
+<span class="material-symbols-outlined text-conflict">cancel</span>
+</button>
+<div class="space-y-3">
+<label class="text-[10px] text-[#9bb8bb] uppercase font-bold">Reason for Dismissal</label>
+<select class="w-full bg-background-dark border-border-subtle text-xs text-white rounded-sm focus:ring-primary focus:border-primary">
+<option>Select a reason...</option>
+<option>Image Artifact</option>
+<option>Normal Anatomical Variant</option>
+<option>Prior Stable Finding</option>
+<option>False Positive (Model Error)</option>
+</select>
+</div>
+</div>
+<!-- Action 3: Modify -->
+<div class="bg-panel border border-border-subtle p-4 rounded-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="text-sm font-bold">Modify Parameters</span>
+<span class="material-symbols-outlined text-[#9bb8bb]">edit_square</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[10px] text-[#9bb8bb] uppercase font-bold mb-1 block">Adjusted Diam. (mm)</label>
+<input class="w-full bg-background-dark border-border-subtle text-xs text-white rounded-sm" type="number" value="12.4"/>
+</div>
+<div>
+<label class="text-[10px] text-[#9bb8bb] uppercase font-bold mb-1 block">Classification</label>
+<select class="w-full bg-background-dark border-border-subtle text-xs text-white rounded-sm">
+<option>Solid</option>
+<option>Sub-solid</option>
+<option>Calcified</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="mt-auto pt-6 border-t border-border-subtle">
+<div class="flex items-center gap-3 mb-6 p-3 bg-primary/5 border border-primary/20 rounded-sm">
+<input class="rounded-sm bg-background-dark border-border-subtle text-primary focus:ring-primary h-4 w-4" id="retrain" type="checkbox"/>
+<label class="text-xs text-[#9bb8bb] leading-snug cursor-pointer select-none" for="retrain">
+                            Flag this case for <strong>RAVEN Model Retraining</strong> (AI Team review)
+                        </label>
+</div>
+<button class="w-full py-3 bg-white text-black font-black text-sm rounded-sm hover:bg-gray-200 transition-colors uppercase tracking-widest">
+                        Submit Decision
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Status Bar -->
+<footer class="bg-panel border-t border-border-subtle px-4 py-1.5 flex items-center justify-between text-[10px] text-[#9bb8bb] font-medium">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span>System Online</span>
+</div>
+<div class="w-[1px] h-3 bg-border-subtle"></div>
+<span>Patient ID: 992834-A</span>
+<div class="w-[1px] h-3 bg-border-subtle"></div>
+<span>Accession: RAD-2023-88421</span>
+</div>
+<div class="flex items-center gap-4">
+<span>RAVEN Core v4.2.0-beta</span>
+<span>Latency: 24ms</span>
+</div>
+</footer>
+</body></html>

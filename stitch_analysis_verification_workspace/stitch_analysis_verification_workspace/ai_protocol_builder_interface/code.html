@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | Protocol Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007ab8",
+                        "background-light": "#ffffff",
+                        "background-dark": "#22262a",
+                        "medical-blue": "#0077B6",
+                        "medical-gray": "#F8FAFC",
+                        "success-green": "#2EBF6A"
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #0077B6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px #0077B6;
+        }
+        .custom-slider {
+            -webkit-appearance: none;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#101618] dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f0f3f5] dark:border-slate-700 px-6 py-3 bg-white dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4 text-[#101618] dark:text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em] uppercase">RAVEN <span class="font-light mx-2">|</span> Protocol Builder</h2>
+<div class="ml-4 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold rounded-sm uppercase tracking-wider">Draft Mode</div>
+</div>
+<div class="flex flex-1 justify-end gap-6">
+<nav class="flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium text-primary underline underline-offset-8 decoration-2" href="#">Protocols</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Reports</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex min-w-[120px] cursor-pointer items-center justify-center rounded h-9 px-4 bg-primary text-white text-xs font-bold leading-normal tracking-wide uppercase">
+                    Save Protocol
+                </button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDI3jaTj8Y5soSzPqf2ZralHX2Jq4XLNOVGCZj9xGAwAoGkebCw_t2uGJbt4Nf3MO4aN14q-SgyKgf6En6qRbo-DZgwab_EZarnVNjygSy5kIGkrO-ibmf709hNAHoE3iTxxyNIlhrQDuGCouW26pcG6oDivExpwtM1pIv9ZkVlVN_GQDJk4e2mKF1TDwye6aG1R6QlFRbrgNIfwrgjQOezzmjjLBRPfXlB07FyaFK3flURE7aObL8rEVbKZF9gN4ZJhGykPyZJ694");'></div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden h-[calc(100vh-60px)]">
+<!-- Sidebar: Step 1 Protocol Identity -->
+<aside class="w-80 border-r border-[#f0f3f5] dark:border-slate-700 bg-medical-gray dark:bg-slate-900/50 p-6 flex flex-col gap-8 overflow-y-auto">
+<div>
+<div class="flex items-center gap-2 mb-6">
+<span class="text-[10px] font-bold text-primary border border-primary px-1.5 py-0.5 rounded-sm">STEP 1</span>
+<h3 class="text-sm font-bold uppercase tracking-wider">Protocol Identity</h3>
+</div>
+<div class="flex flex-col gap-5">
+<label class="flex flex-col gap-1.5">
+<span class="text-xs font-bold text-slate-500 uppercase">Protocol Name</span>
+<input class="w-full border-[#dae2e7] dark:bg-slate-800 dark:border-slate-700 rounded-sm text-sm focus:ring-primary focus:border-primary px-3 py-2" placeholder="e.g., ER Rapid Triage" type="text" value="ER Chest X-Ray High Sensitivity"/>
+</label>
+<label class="flex flex-col gap-1.5">
+<span class="text-xs font-bold text-slate-500 uppercase">Description</span>
+<textarea class="w-full border-[#dae2e7] dark:bg-slate-800 dark:border-slate-700 rounded-sm text-sm focus:ring-primary focus:border-primary px-3 py-2 resize-none" rows="3">Automated screening for critical thoracic findings in emergency department workflow.</textarea>
+</label>
+<label class="flex flex-col gap-1.5">
+<span class="text-xs font-bold text-slate-500 uppercase">Target Department</span>
+<select class="w-full border-[#dae2e7] dark:bg-slate-800 dark:border-slate-700 rounded-sm text-sm focus:ring-primary focus:border-primary px-3 py-2">
+<option>Radiology - Emergency</option>
+<option>Radiology - General</option>
+<option>Cardiology</option>
+<option>Pulmonology</option>
+</select>
+</label>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
+<button class="w-full flex items-center justify-center gap-2 border border-primary text-primary text-xs font-bold py-3 rounded-sm hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-sm">science</span>
+                    TEST ON SAMPLE CASES
+                </button>
+</div>
+</aside>
+<!-- Main Panel: Step 2 Diagnostic Thresholds -->
+<section class="flex-1 bg-white dark:bg-background-dark overflow-y-auto p-8">
+<div class="max-w-3xl mx-auto">
+<div class="flex items-center gap-3 mb-2">
+<span class="text-[10px] font-bold text-primary border border-primary px-1.5 py-0.5 rounded-sm">STEP 2</span>
+<h1 class="text-2xl font-black tracking-tight">Diagnostic Thresholds</h1>
+</div>
+<p class="text-slate-500 text-sm mb-8">Configure AI sensitivity and confidence levels for specific clinical findings.</p>
+<div class="space-y-4">
+<!-- Finding Card: Pneumonia -->
+<div class="group border border-slate-200 dark:border-slate-700 rounded-lg p-5 hover:border-primary/40 transition-all bg-white dark:bg-slate-800/40">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-sm">
+<span class="material-symbols-outlined text-primary">pulmonology</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Pneumonia</h4>
+<span class="text-[10px] text-slate-400 uppercase font-medium">Standard Severity Pathogen</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary rounded-sm border-slate-300 focus:ring-primary" type="checkbox"/>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Priority Alert</span>
+</label>
+<span class="material-symbols-outlined text-slate-300 cursor-help text-lg">info</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Confidence Threshold</span>
+<span class="text-sm font-bold text-primary">85%</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="85"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>CONSERVATIVE</span>
+<span>AGGRESSIVE</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Sensitivity Level</span>
+<span class="text-sm font-bold text-primary">High</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="70"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>LOW RECALL</span>
+<span>MAX DISCOVERY</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Finding Card: Pneumothorax -->
+<div class="group border border-slate-200 dark:border-slate-700 rounded-lg p-5 hover:border-primary/40 transition-all bg-white dark:bg-slate-800/40">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-sm">
+<span class="material-symbols-outlined text-red-500">emergency</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Pneumothorax</h4>
+<span class="text-[10px] text-red-400 uppercase font-bold tracking-tight">Critical Finding</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary rounded-sm border-slate-300 focus:ring-primary" type="checkbox"/>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Priority Alert</span>
+</label>
+<span class="material-symbols-outlined text-slate-300 cursor-help text-lg">info</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Confidence Threshold</span>
+<span class="text-sm font-bold text-primary">92%</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="92"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>CONSERVATIVE</span>
+<span>AGGRESSIVE</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Sensitivity Level</span>
+<span class="text-sm font-bold text-primary">Ultra</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="95"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>LOW RECALL</span>
+<span>MAX DISCOVERY</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Finding Card: Bone Fracture -->
+<div class="group border border-slate-200 dark:border-slate-700 rounded-lg p-5 hover:border-primary/40 transition-all bg-white dark:bg-slate-800/40">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-sm">
+<span class="material-symbols-outlined text-primary">skeleton</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Fracture (Rib/Clavicle)</h4>
+<span class="text-[10px] text-slate-400 uppercase font-medium">Musculoskeletal</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="w-4 h-4 text-primary rounded-sm border-slate-300 focus:ring-primary" type="checkbox"/>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Priority Alert</span>
+</label>
+<span class="material-symbols-outlined text-slate-300 cursor-help text-lg">info</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Confidence Threshold</span>
+<span class="text-sm font-bold text-primary">65%</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="65"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>CONSERVATIVE</span>
+<span>AGGRESSIVE</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Sensitivity Level</span>
+<span class="text-sm font-bold text-primary">Balanced</span>
+</div>
+<input class="w-full custom-slider" max="100" min="0" type="range" value="50"/>
+<div class="flex justify-between text-[9px] text-slate-400 font-medium">
+<span>LOW RECALL</span>
+<span>MAX DISCOVERY</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Insights Panel: Projected Performance -->
+<aside class="w-96 border-l border-[#f0f3f5] dark:border-slate-700 bg-medical-gray dark:bg-slate-900/50 p-6 flex flex-col gap-6 overflow-y-auto">
+<div>
+<h3 class="text-sm font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">query_stats</span>
+                    Projected Performance
+                </h3>
+<div class="bg-white dark:bg-slate-800 p-4 border border-slate-200 dark:border-slate-700 rounded shadow-sm mb-6">
+<div class="flex justify-between mb-4">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Expected Precision</span>
+<span class="text-2xl font-black text-medical-blue">94.2%</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Recall Rate</span>
+<span class="text-2xl font-black text-success-green">89.1%</span>
+</div>
+</div>
+<!-- Simplified Visual Graph Placeholder -->
+<div class="h-40 w-full relative bg-slate-50 dark:bg-slate-900/50 rounded flex items-end overflow-hidden border border-slate-100 dark:border-slate-800">
+<!-- Simulated Chart -->
+<div class="absolute inset-0 p-2">
+<div class="h-full w-full flex items-end gap-1">
+<div class="bg-primary/20 w-full h-[60%] rounded-t-sm"></div>
+<div class="bg-primary/20 w-full h-[65%] rounded-t-sm"></div>
+<div class="bg-primary/30 w-full h-[72%] rounded-t-sm"></div>
+<div class="bg-primary/40 w-full h-[85%] rounded-t-sm"></div>
+<div class="bg-primary/50 w-full h-[78%] rounded-t-sm"></div>
+<div class="bg-primary w-full h-[94%] rounded-t-sm"></div>
+<div class="bg-primary/80 w-full h-[88%] rounded-t-sm"></div>
+<div class="bg-primary/60 w-full h-[70%] rounded-t-sm"></div>
+<div class="bg-primary/40 w-full h-[55%] rounded-t-sm"></div>
+<div class="bg-primary/20 w-full h-[40%] rounded-t-sm"></div>
+</div>
+</div>
+<div class="absolute bottom-2 left-2 text-[8px] font-bold text-slate-400 uppercase">Confidence Curve</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-white dark:bg-slate-800 border-l-4 border-primary rounded-sm shadow-sm">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold uppercase text-slate-500">False Positive Rate</span>
+<span class="text-xs font-bold text-primary">2.1%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full">
+<div class="bg-primary h-1.5 rounded-full" style="width: 2.1%"></div>
+</div>
+</div>
+<div class="p-4 bg-white dark:bg-slate-800 border-l-4 border-orange-400 rounded-sm shadow-sm">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold uppercase text-slate-500">Verification Delay</span>
+<span class="text-xs font-bold text-orange-500">+12s / case</span>
+</div>
+<p class="text-[10px] text-slate-400 leading-tight">Increased sensitivity may lead to manual overhead.</p>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">lightbulb</span>
+<h5 class="text-[10px] font-bold uppercase text-primary">Optimization Tip</h5>
+</div>
+<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                        Current settings for <b>Pneumothorax</b> are highly aggressive. Ensure your ER staff is prepared for a higher volume of notifications.
+                    </p>
+</div>
+</div>
+</aside>
+</main>
+<!-- Global Footer / Action Bar -->
+<footer class="h-14 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-background-dark flex items-center justify-between px-6 shrink-0">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors uppercase">
+<span class="material-symbols-outlined text-sm">undo</span>
+                Revert Changes
+            </button>
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors uppercase">
+<span class="material-symbols-outlined text-sm">file_download</span>
+                Export Template
+            </button>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[10px] font-medium text-slate-400 italic">Last auto-saved at 14:22:10</span>
+<div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center rounded h-9 px-6 bg-primary text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90">
+                Finalize &amp; Deploy
+            </button>
+</div>
+</footer>
+</body></html>

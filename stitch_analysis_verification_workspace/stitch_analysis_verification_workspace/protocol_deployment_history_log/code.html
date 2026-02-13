@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Protocol Deployment History Log | RAVEN AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#001fb8",
+                        "background-light": "#fcfcfd",
+                        "background-dark": "#17191c",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 20px; }
+        .status-active { background-color: #ecfdf5; color: #065f46; }
+        .status-rolledback { background-color: #fef2f2; color: #991b1b; }
+        .status-scheduled { background-color: #f3f4f6; color: #374151; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#101218] dark:text-[#f0f1f5] transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h2 class="text-lg font-black tracking-tight">RAVEN <span class="text-primary">AI</span></h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium hover:text-primary" href="#">Dashboard</a>
+<a class="text-sm font-medium hover:text-primary" href="#">Protocols</a>
+<a class="text-sm font-semibold text-primary border-b-2 border-primary py-4 -mb-4" href="#">Deployment History</a>
+<a class="text-sm font-medium hover:text-primary" href="#">Audits</a>
+<a class="text-sm font-medium hover:text-primary" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-gray-100 dark:bg-gray-800 border-none rounded text-sm w-64 focus:ring-1 focus:ring-primary" placeholder="Search logs..." type="text"/>
+</div>
+<button class="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-cover bg-center border border-gray-200" data-alt="User profile avatar circle" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_mjU4j1p5WOZogRAp3812y7I_0OLzMg8sdnZsPeF6S3uMO8PUbj4oieYX3rwSyJ7uab6c4DkYD86GRBKxtPBW7KanmbYXQ7FqktRzkndEgrqR2kF2AF34z8aw96T8eilXhrRL2yr0xoDxSg3-Ze-Vf-EJVvJZMjbA_CC_FpLmTd-vNvMl-AMzRkOs9ZNh85DVNYse59vVuNnSVuxHTm8pyLI3TSDPoDQMzMhJiUDUkdx8pa-fUhAiSBA_l7MGICQ47nNUsPiNruQ')"></div>
+</div>
+</header>
+<main class="flex-1 max-w-[1400px] mx-auto w-full px-6 py-8">
+<!-- Page Heading -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black tracking-tighter">Protocol Deployment History</h1>
+<p class="text-gray-500 dark:text-gray-400 mt-1">Audit log of clinical AI versioning and verification events.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined">download</span>
+                    Export Log (CSV)
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded font-bold text-sm hover:bg-opacity-90">
+<span class="material-symbols-outlined">add</span>
+                    New Deployment
+                </button>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex flex-wrap gap-2 mb-6 p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800 rounded-lg">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                Last 30 Days
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+<span class="material-symbols-outlined text-[18px]">corporate_fare</span>
+                All Departments
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+                Status: Active
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+<span class="material-symbols-outlined text-[18px]">person</span>
+                User: All
+                <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+<button class="ml-auto text-primary text-sm font-bold hover:underline">Clear Filters</button>
+</div>
+<!-- Deployment Table -->
+<div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-800/50 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Deployment Date</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Protocol &amp; Version</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Deployed By</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Department</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Reason for Change</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">Status</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Entry 1 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-5 text-sm font-medium text-gray-600 dark:text-gray-400">2023-10-24 09:15:22</td>
+<td class="px-6 py-5">
+<div class="text-sm font-bold text-gray-900 dark:text-white">Chest X-Ray Model</div>
+<div class="text-xs text-primary font-semibold">v2.5.0-stable</div>
+</td>
+<td class="px-6 py-5 text-sm text-gray-700 dark:text-gray-300">Dr. Aris Thorne</td>
+<td class="px-6 py-5">
+<span class="inline-flex px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-[11px] font-bold uppercase">Radiology</span>
+</td>
+<td class="px-6 py-5 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">Integration of v2.5 Chest X-Ray Model with improved lung nodule detection.</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold status-active">
+<span class="size-1.5 rounded-full bg-current"></span>
+                                    Active
+                                </span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-3 items-center">
+<a class="text-primary text-xs font-bold hover:underline flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">query_stats</span>
+                                        Metrics
+                                    </a>
+<button class="px-3 py-1 rounded border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50">Rollback</button>
+</div>
+</td>
+</tr>
+<!-- Entry 2 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-5 text-sm font-medium text-gray-600 dark:text-gray-400">2023-10-20 14:30:05</td>
+<td class="px-6 py-5">
+<div class="text-sm font-bold text-gray-900 dark:text-white">Neuro CT Scan</div>
+<div class="text-xs text-primary font-semibold">v1.4.2-patch</div>
+</td>
+<td class="px-6 py-5 text-sm text-gray-700 dark:text-gray-300">Admin Sarah J.</td>
+<td class="px-6 py-5">
+<span class="inline-flex px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-[11px] font-bold uppercase">Neurology</span>
+</td>
+<td class="px-6 py-5 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">Emergency patch to resolve stroke-detect false positive spike.</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold status-active">
+<span class="size-1.5 rounded-full bg-current"></span>
+                                    Active
+                                </span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-3 items-center">
+<a class="text-primary text-xs font-bold hover:underline flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">query_stats</span>
+                                        Metrics
+                                    </a>
+<button class="px-3 py-1 rounded border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50">Rollback</button>
+</div>
+</td>
+</tr>
+<!-- Entry 3 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-5 text-sm font-medium text-gray-600 dark:text-gray-400">2023-10-15 08:00:00</td>
+<td class="px-6 py-5">
+<div class="text-sm font-bold text-gray-900 dark:text-white">Bone Density Analysis</div>
+<div class="text-xs text-primary font-semibold">v3.0.1</div>
+</td>
+<td class="px-6 py-5 text-sm text-gray-700 dark:text-gray-300">Dr. Aris Thorne</td>
+<td class="px-6 py-5">
+<span class="inline-flex px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-[11px] font-bold uppercase">Orthopedics</span>
+</td>
+<td class="px-6 py-5 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">Scheduled system-wide maintenance and calibration update.</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold status-scheduled">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    Scheduled
+                                </span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-3 items-center">
+<a class="text-primary text-xs font-bold hover:underline flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">settings</span>
+                                        Manage
+                                    </a>
+</div>
+</td>
+</tr>
+<!-- Entry 4 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-5 text-sm font-medium text-gray-600 dark:text-gray-400">2023-10-10 11:20:44</td>
+<td class="px-6 py-5">
+<div class="text-sm font-bold text-gray-900 dark:text-white">Abdominal Ultrasound</div>
+<div class="text-xs text-primary font-semibold">v1.1.0-alpha</div>
+</td>
+<td class="px-6 py-5 text-sm text-gray-700 dark:text-gray-300">Tech Mike R.</td>
+<td class="px-6 py-5">
+<span class="inline-flex px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-[11px] font-bold uppercase">Radiology</span>
+</td>
+<td class="px-6 py-5 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">Experimental model deployment for false positive optimization.</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold status-rolledback">
+<span class="material-symbols-outlined text-[14px]">history</span>
+                                    Rolled Back
+                                </span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-3 items-center">
+<a class="text-primary text-xs font-bold hover:underline flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                                        Details
+                                    </a>
+</div>
+</td>
+</tr>
+<!-- Entry 5 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-5 text-sm font-medium text-gray-600 dark:text-gray-400">2023-10-05 16:45:12</td>
+<td class="px-6 py-5">
+<div class="text-sm font-bold text-gray-900 dark:text-white">Pediatric X-Ray</div>
+<div class="text-xs text-primary font-semibold">v2.0.0-final</div>
+</td>
+<td class="px-6 py-5 text-sm text-gray-700 dark:text-gray-300">Admin Sarah J.</td>
+<td class="px-6 py-5">
+<span class="inline-flex px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-[11px] font-bold uppercase">Pediatrics</span>
+</td>
+<td class="px-6 py-5 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">Major version upgrade for image clarity and diagnostic precision.</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold status-active">
+<span class="size-1.5 rounded-full bg-current"></span>
+                                    Active
+                                </span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-3 items-center">
+<a class="text-primary text-xs font-bold hover:underline flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[14px]">query_stats</span>
+                                        Metrics
+                                    </a>
+<button class="px-3 py-1 rounded border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50">Rollback</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+<p class="text-sm text-gray-500 dark:text-gray-400">Showing 1 to 5 of 48 deployments</p>
+<div class="flex items-center gap-1">
+<button class="p-2 text-gray-400 hover:text-primary transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-8 text-sm font-bold bg-primary text-white rounded">1</button>
+<button class="size-8 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded">2</button>
+<button class="size-8 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded">3</button>
+<span class="px-1 text-gray-400">...</span>
+<button class="size-8 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded">10</button>
+<button class="p-2 text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- System Stats Cards (Secondary Context) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+<div class="p-5 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800 rounded-lg">
+<div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Average Uptime</div>
+<div class="text-2xl font-black text-gray-900 dark:text-white">99.98%</div>
+<div class="mt-2 text-xs text-green-600 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                    +0.02% from last month
+                </div>
+</div>
+<div class="p-5 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800 rounded-lg">
+<div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Rollback Frequency</div>
+<div class="text-2xl font-black text-gray-900 dark:text-white">2.1%</div>
+<div class="mt-2 text-xs text-gray-500 font-medium">Lower than industry average (4.5%)</div>
+</div>
+<div class="p-5 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-800 rounded-lg">
+<div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Active Protocols</div>
+<div class="text-2xl font-black text-gray-900 dark:text-white">14</div>
+<div class="mt-2 text-xs text-primary font-bold flex items-center gap-1 hover:underline cursor-pointer">
+                    View protocol map
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Audit Footer -->
+<footer class="mt-12 py-8 px-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark">
+<div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-4">
+<div class="size-6 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-gray-500">verified_user</span>
+</div>
+<p class="text-xs text-gray-500 font-medium">Raven AI Version 4.8.2. All deployments are cryptographically signed and HIPAA compliant.</p>
+</div>
+<div class="flex gap-6 text-xs text-gray-400 font-medium">
+<a class="hover:text-primary" href="#">Terms of Service</a>
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+<a class="hover:text-primary" href="#">Compliance Docs</a>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

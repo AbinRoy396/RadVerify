@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | Achievements &amp; Badges Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1259a1",
+                        "background-light": "#fafafa",
+                        "background-dark": "#16181d",
+                        "card-dark": "#22262b",
+                        "gold-accent": "#D6B36B",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .earned-gradient {
+            background: linear-gradient(135deg, rgba(214, 179, 107, 0.15) 0%, rgba(18, 89, 161, 0.05) 100%);
+        }
+        .grayscale-badge {
+            filter: grayscale(1) opacity(0.5);
+        }
+        .progress-overlay {
+            background: rgba(18, 89, 161, 0.2);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #293038;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen overflow-x-hidden">
+<!-- Navigation -->
+<header class="flex items-center justify-between border-b border-solid border-slate-200 dark:border-slate-800 px-8 py-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">query_stats</span>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight">RAVEN<span class="text-primary">.AI</span></h1>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Dashboard</a>
+<a class="text-sm font-semibold text-primary" href="#">Achievements</a>
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Clinical Feed</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end mr-2 hidden sm:flex">
+<span class="text-xs font-bold uppercase tracking-widest text-gold-accent">Senior Resident</span>
+<span class="text-sm font-medium">Dr. Elena Volkov</span>
+</div>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20">
+<img alt="Doctor profile portrait" class="w-full h-full object-cover" data-alt="Portrait of a female medical professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDMnEj2SxUm5a4OezBbq5ekX3IQ9lbEnhrN2FKNaw9woTiUEAaXQvl1QKZavs5cKpPVWDXC0XHM8QZ4beij_qCSAEw8pjHu5UzEZIpLbbYcYtBcl2BCMZDqbF5wIfn3L1CPv73I_qmS9l3zqpKYeple-H02xKsvQit8ZZXAKs1qAUIwPzYYaKiVKj6KbHZKT4aWwHSOCmBHT8gYqyCyZ5LnVor4f8VLBhbYJYCaOc5OOb1AHMB7dE2twXWCbyOAyuORtF-b8rWU0I"/>
+</div>
+</div>
+</header>
+<main class="max-w-[1400px] mx-auto px-8 py-10 flex gap-8">
+<!-- Main Content -->
+<div class="flex-1">
+<div class="flex flex-col gap-2 mb-8">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-black tracking-tight">Badge Gallery</h2>
+<p class="text-slate-500 dark:text-slate-400 mt-2">Elevate your clinical diagnostic proficiency through AI collaboration.</p>
+</div>
+<div class="flex gap-2">
+<div class="bg-card-dark rounded-lg p-3 flex items-center gap-4 border border-slate-800">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-slate-500 tracking-tighter">Total Earned</span>
+<span class="text-xl font-black text-gold-accent tracking-tight">12/48</span>
+</div>
+<div class="h-8 w-[1px] bg-slate-700"></div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-slate-500 tracking-tighter">Global Rank</span>
+<span class="text-xl font-black text-primary tracking-tight">Top 5%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex items-center gap-4 mb-8 pb-4 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+<button class="px-5 py-2 rounded-full bg-primary text-white text-sm font-bold">All Badges</button>
+<button class="px-5 py-2 rounded-full bg-slate-100 dark:bg-card-dark text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Earned</button>
+<button class="px-5 py-2 rounded-full bg-slate-100 dark:bg-card-dark text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">In Progress</button>
+<button class="px-5 py-2 rounded-full bg-slate-100 dark:bg-card-dark text-slate-600 dark:text-slate-400 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Specialty Mastery</button>
+<div class="flex-1"></div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-card-dark border-none rounded-lg text-sm w-64 focus:ring-1 focus:ring-primary" placeholder="Search milestones..." type="text"/>
+</div>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Earned Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border-2 border-gold-accent/40 earned-gradient cursor-pointer hover:border-gold-accent transition-all hover:shadow-xl hover:shadow-gold-accent/5">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-gold-accent fill-1">workspace_premium</span>
+</div>
+<div class="size-16 bg-gold-accent/20 rounded-2xl flex items-center justify-center mb-6 ring-4 ring-gold-accent/10">
+<span class="material-symbols-outlined text-4xl text-gold-accent">visibility</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Eagle Eye</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Identified 5 rare pathologies with 98% confidence score.</p>
+<div class="mt-auto">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gold-accent/20 text-gold-accent uppercase tracking-wider">Mastered</span>
+</div>
+</div>
+<!-- In Progress Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-primary transition-all">
+<div class="size-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 progress-overlay">
+<span class="material-symbols-outlined text-4xl text-primary">handshake</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Perfect Match</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">50 consecutive cases with 100% AI agreement.</p>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-primary">
+<span>Progress</span>
+<span>90%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 90%"></div>
+</div>
+<p class="text-[10px] text-slate-400">45/50 cases completed</p>
+</div>
+</div>
+<!-- Earned Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border-2 border-gold-accent/40 earned-gradient cursor-pointer hover:border-gold-accent transition-all">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-gold-accent fill-1">workspace_premium</span>
+</div>
+<div class="size-16 bg-gold-accent/20 rounded-2xl flex items-center justify-center mb-6 ring-4 ring-gold-accent/10">
+<span class="material-symbols-outlined text-4xl text-gold-accent">psychology</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Neuro-Master</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Top decile accuracy in Neuroradiology verifications.</p>
+<div class="mt-auto">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gold-accent/20 text-gold-accent uppercase tracking-wider">Level 3</span>
+</div>
+</div>
+<!-- Locked Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 opacity-60 grayscale-badge">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-slate-500">lock</span>
+</div>
+<div class="size-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-slate-500">bolt</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Rapid Responder</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Average verification time under 45 seconds for 100 cases.</p>
+<div class="mt-auto">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Requirement Locked</span>
+</div>
+</div>
+<!-- In Progress Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-primary transition-all">
+<div class="size-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 progress-overlay">
+<span class="material-symbols-outlined text-4xl text-primary">pulmonology</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Thoracic Expert</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Maintain 95%+ precision in Thoracic pathology detection.</p>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-primary">
+<span>Progress</span>
+<span>45%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 45%"></div>
+</div>
+<p class="text-[10px] text-slate-400">92/200 precision benchmarks</p>
+</div>
+</div>
+<!-- Locked Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 opacity-60 grayscale-badge">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-slate-500">lock</span>
+</div>
+<div class="size-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-slate-500">calendar_today</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Consistency King</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Maintain a 30-day streak of active report reviews.</p>
+<div class="mt-auto">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Requirement Locked</span>
+</div>
+</div>
+<!-- In Progress Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 cursor-pointer hover:border-primary transition-all">
+<div class="size-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 progress-overlay">
+<span class="material-symbols-outlined text-4xl text-primary">skeleton</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Fracture Finder</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Identify occult fractures missed in initial triage.</p>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-primary">
+<span>Progress</span>
+<span>75%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 75%"></div>
+</div>
+<p class="text-[10px] text-slate-400">15/20 detections</p>
+</div>
+</div>
+<!-- Locked Badge -->
+<div class="group relative flex flex-col bg-slate-50 dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-slate-800 opacity-60 grayscale-badge">
+<div class="absolute top-4 right-4">
+<span class="material-symbols-outlined text-slate-500">lock</span>
+</div>
+<div class="size-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-slate-500">groups</span>
+</div>
+<h3 class="text-lg font-bold mb-1">Top Mentor</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">Assist 50 junior residents in verification workflows.</p>
+<div class="mt-auto">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Requirement Locked</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Detail Panel (Side Drawer Style) -->
+<aside class="w-96 bg-slate-50 dark:bg-card-dark border-l border-slate-200 dark:border-slate-800 flex flex-col h-[calc(100vh-100px)] sticky top-24 rounded-tl-2xl overflow-hidden shadow-2xl">
+<div class="p-8 border-b border-slate-200 dark:border-slate-800">
+<div class="flex justify-between items-start mb-6">
+<div class="size-20 bg-primary/10 rounded-3xl flex items-center justify-center ring-8 ring-primary/5">
+<span class="material-symbols-outlined text-5xl text-primary">handshake</span>
+</div>
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
+<span class="material-symbols-outlined text-slate-400">close</span>
+</button>
+</div>
+<h2 class="text-2xl font-black tracking-tight mb-2">Perfect Match</h2>
+<div class="flex items-center gap-2 mb-4">
+<span class="px-2 py-0.5 rounded bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">In Progress</span>
+<span class="text-xs text-slate-500">Tier: Elite</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                    This achievement recognizes radiologists who achieve perfect clinical alignment with RAVEN AI suggestions across 50 consecutive complex cases.
+                </p>
+<button class="w-full py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-sm">share</span>
+                    Share Progress to Profile
+                </button>
+</div>
+<div class="flex-1 overflow-y-auto p-8">
+<h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-6">Recent History</h3>
+<div class="space-y-6">
+<!-- History Item -->
+<div class="relative pl-6 before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-primary before:rounded-full before:z-10 after:absolute after:left-[3px] after:top-4 after:w-[1px] after:h-[calc(100%+24px)] after:bg-slate-200 dark:after:bg-slate-700">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold">Case #RV-48291</span>
+<span class="text-[10px] text-slate-500 uppercase">2 hours ago</span>
+</div>
+<p class="text-xs text-slate-500 mb-2">Detection of occult fracture in left fibula. 100% AI correlation confirmed.</p>
+<span class="text-[10px] font-black text-primary uppercase">+1 Match Count</span>
+</div>
+<!-- History Item -->
+<div class="relative pl-6 before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-primary before:rounded-full before:z-10 after:absolute after:left-[3px] after:top-4 after:w-[1px] after:h-[calc(100%+24px)] after:bg-slate-200 dark:after:bg-slate-700">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold">Case #RV-48102</span>
+<span class="text-[10px] text-slate-500 uppercase">Yesterday</span>
+</div>
+<p class="text-xs text-slate-500 mb-2">Chest CT verification: Stage 1 nodule identification matches AI bounding box.</p>
+<span class="text-[10px] font-black text-primary uppercase">+1 Match Count</span>
+</div>
+<!-- History Item -->
+<div class="relative pl-6 before:absolute before:left-0 before:top-1.5 before:w-2 before:h-2 before:bg-slate-300 dark:before:bg-slate-600 before:rounded-full before:z-10">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold">Milestone Started</span>
+<span class="text-[10px] text-slate-500 uppercase">Sep 12, 2023</span>
+</div>
+<p class="text-xs text-slate-500">Initiated Perfect Match tracking sequence.</p>
+</div>
+</div>
+</div>
+<div class="p-6 bg-slate-100 dark:bg-slate-800/50">
+<div class="flex items-center justify-between text-xs mb-3">
+<span class="font-bold text-slate-500 uppercase tracking-tighter">Current Level Reward</span>
+<span class="text-gold-accent font-bold">Premium Portfolio Theme</span>
+</div>
+<div class="flex gap-1">
+<div class="flex-1 h-1 bg-primary rounded-full"></div>
+<div class="flex-1 h-1 bg-primary rounded-full"></div>
+<div class="flex-1 h-1 bg-primary rounded-full"></div>
+<div class="flex-1 h-1 bg-primary/20 rounded-full"></div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Floating Action for Stats -->
+<div class="fixed bottom-8 left-8">
+<button class="flex items-center gap-3 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 rounded-full shadow-2xl font-bold hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">analytics</span>
+<span>View Full Stats</span>
+</button>
+</div>
+</body></html>

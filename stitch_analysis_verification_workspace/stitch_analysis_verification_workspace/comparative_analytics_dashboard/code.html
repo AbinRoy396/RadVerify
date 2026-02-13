@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | Comparative Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#178282",
+                        "background-light": "#f9fafa",
+                        "background-dark": "#22252a",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121717] dark:text-white antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Side Navigation Bar -->
+<aside class="w-72 flex-shrink-0 border-r border-[#dce5e5] dark:border-[#3a3f47] bg-white dark:bg-[#1a1c21] flex flex-col">
+<div class="p-6 flex flex-col h-full">
+<!-- Branding -->
+<div class="flex items-center gap-3 mb-10">
+<div class="bg-primary size-10 rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined">clinical_notes</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-[#121717] dark:text-white text-lg font-bold leading-none tracking-tight">RAVEN AI</h1>
+<p class="text-[#658686] dark:text-[#a0aeb0] text-xs font-medium">Radiology Verification</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1 grow">
+<div class="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg hover:bg-[#f0f4f4] dark:hover:bg-[#2d3139] transition-colors group">
+<span class="material-symbols-outlined text-[#658686] group-hover:text-primary">dashboard</span>
+<p class="text-sm font-semibold">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
+<span class="material-symbols-outlined">analytics</span>
+<p class="text-sm font-bold">Comparative Analytics</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg hover:bg-[#f0f4f4] dark:hover:bg-[#2d3139] transition-colors group">
+<span class="material-symbols-outlined text-[#658686] group-hover:text-primary">description</span>
+<p class="text-sm font-semibold">Patient Reports</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg hover:bg-[#f0f4f4] dark:hover:bg-[#2d3139] transition-colors group">
+<span class="material-symbols-outlined text-[#658686] group-hover:text-primary">groups</span>
+<p class="text-sm font-semibold">Team Performance</p>
+</div>
+<div class="mt-8 mb-2 px-3">
+<p class="text-[10px] uppercase tracking-widest font-bold text-[#658686]">Filters</p>
+</div>
+<!-- Sidebar Filters -->
+<div class="flex flex-col gap-4 px-3 py-2">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-bold text-[#121717] dark:text-[#dce5e5]">Department</label>
+<select class="form-select bg-[#f0f4f4] dark:bg-[#2d3139] border-none rounded-lg text-sm focus:ring-primary h-9">
+<option>All Departments</option>
+<option>Diagnostic Imaging</option>
+<option>Neuroradiology</option>
+<option>Pediatric Radiology</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-bold text-[#121717] dark:text-[#dce5e5]">Radiologist Group</label>
+<select class="form-select bg-[#f0f4f4] dark:bg-[#2d3139] border-none rounded-lg text-sm focus:ring-primary h-9">
+<option>All Groups</option>
+<option>Senior Residents</option>
+<option>External Consultants</option>
+<option>Attending Staff</option>
+</select>
+</div>
+</div>
+</nav>
+<!-- Sidebar Footer/Settings -->
+<div class="mt-auto pt-6 border-t border-[#dce5e5] dark:border-[#3a3f47]">
+<div class="flex items-center gap-3 px-3 py-2.5 cursor-pointer rounded-lg hover:bg-[#f0f4f4] dark:hover:bg-[#2d3139] transition-colors group">
+<span class="material-symbols-outlined text-[#658686] group-hover:text-primary">settings</span>
+<p class="text-sm font-semibold">Settings</p>
+</div>
+<div class="flex items-center gap-3 px-3 mt-4">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">JD</div>
+<div class="flex flex-col">
+<p class="text-sm font-bold leading-tight">Dr. Jane Doe</p>
+<p class="text-[10px] text-[#658686] font-medium">Head of Radiology</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-[#1a1c21]/80 backdrop-blur-md border-b border-[#f0f4f4] dark:border-[#3a3f47] px-8 py-4 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<h2 class="text-xl font-bold tracking-tight">Comparative Analytics</h2>
+<div class="h-6 w-[1px] bg-[#dce5e5] dark:bg-[#3a3f47]"></div>
+<div class="flex items-center gap-2 text-sm font-medium text-[#658686]">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Last 6 Months (Jan - Jun 2024)</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#658686] text-xl">search</span>
+<input class="pl-10 pr-4 py-2 bg-[#f0f4f4] dark:bg-[#2d3139] border-none rounded-lg text-sm w-64 focus:ring-primary focus:bg-white dark:focus:bg-[#323841] transition-all" placeholder="Search analytics..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-[#146e6e] transition-colors">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export Report</span>
+</button>
+<button class="size-10 flex items-center justify-center bg-[#f0f4f4] dark:bg-[#2d3139] rounded-lg hover:bg-[#e2eaea] dark:hover:bg-[#3a3f47] transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<div class="p-8 max-w-[1400px] w-full mx-auto">
+<!-- Summary Stats Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Stat Card 1 -->
+<div class="bg-white dark:bg-[#1a1c21] p-6 rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<p class="text-sm font-bold text-[#658686]">Total Scans Analyzed</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-1.5 rounded-lg">clinical_notes</span>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-extrabold tracking-tight">12,840</h3>
+<span class="text-sm font-bold text-[#078832] flex items-center">+12.4%</span>
+</div>
+<p class="text-xs text-[#658686] mt-2 font-medium">vs. previous 6-month period</p>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-white dark:bg-[#1a1c21] p-6 rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<p class="text-sm font-bold text-[#658686]">Avg. Discrepancy Rate</p>
+<span class="material-symbols-outlined text-[#e73108] bg-[#e73108]/10 p-1.5 rounded-lg">error_outline</span>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-extrabold tracking-tight">4.2%</h3>
+<span class="text-sm font-bold text-[#078832] flex items-center">-1.5%</span>
+</div>
+<p class="text-xs text-[#658686] mt-2 font-medium">Lower indicates higher report alignment</p>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-white dark:bg-[#1a1c21] p-6 rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<p class="text-sm font-bold text-[#658686]">Accuracy Improvement</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-1.5 rounded-lg">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<h3 class="text-3xl font-extrabold tracking-tight">+18.5%</h3>
+<span class="text-sm font-bold text-[#078832] flex items-center">+3.2%</span>
+</div>
+<p class="text-xs text-[#658686] mt-2 font-medium">Average across all modalities</p>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+<!-- Line Chart: AI vs Human -->
+<div class="bg-white dark:bg-[#1a1c21] p-8 rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm flex flex-col">
+<div class="flex items-start justify-between mb-8">
+<div>
+<h4 class="text-lg font-bold">AI vs. Human Consistency Trends</h4>
+<p class="text-sm text-[#658686] font-medium">Monthly performance alignment benchmark</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-1.5">
+<div class="size-2.5 rounded-full bg-primary"></div>
+<span class="text-xs font-bold">AI Verified</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="size-2.5 rounded-full bg-[#2E77B5]"></div>
+<span class="text-xs font-bold">Human Peer Review</span>
+</div>
+</div>
+</div>
+<div class="flex-1 min-h-[300px] flex flex-col justify-end gap-6 relative">
+<!-- SVG Chart Representation -->
+<div class="w-full h-full absolute inset-0 pt-4 px-2">
+<svg class="overflow-visible" height="100%" preserveaspectratio="none" viewbox="0 0 500 200" width="100%">
+<!-- Grid lines -->
+<line stroke="#f0f4f4" stroke-dasharray="4" stroke-width="1" x1="0" x2="500" y1="0" y2="0"></line>
+<line stroke="#f0f4f4" stroke-dasharray="4" stroke-width="1" x1="0" x2="500" y1="50" y2="50"></line>
+<line stroke="#f0f4f4" stroke-dasharray="4" stroke-width="1" x1="0" x2="500" y1="100" y2="100"></line>
+<line stroke="#f0f4f4" stroke-dasharray="4" stroke-width="1" x1="0" x2="500" y1="150" y2="150"></line>
+<!-- Data Path AI (Primary) -->
+<path d="M0,140 C50,130 100,100 150,85 C200,70 250,95 300,60 C350,25 400,30 450,15 L500,10" fill="none" stroke="#178282" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<!-- Data Path Human (Secondary) -->
+<path d="M0,160 C50,155 100,140 150,145 C200,150 250,130 300,135 C350,120 400,125 450,115 L500,110" fill="none" stroke="#2E77B5" stroke-dasharray="0" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<!-- Tooltip area sample -->
+<circle cx="300" cy="60" fill="#178282" r="6" stroke="white" stroke-width="2"></circle>
+</svg>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between px-2 pt-4 relative z-0">
+<p class="text-[11px] font-bold text-[#658686]">Jan</p>
+<p class="text-[11px] font-bold text-[#658686]">Feb</p>
+<p class="text-[11px] font-bold text-[#658686]">Mar</p>
+<p class="text-[11px] font-bold text-[#658686]">Apr</p>
+<p class="text-[11px] font-bold text-[#658686]">May</p>
+<p class="text-[11px] font-bold text-[#658686]">Jun</p>
+</div>
+</div>
+<div class="mt-6 p-4 bg-background-light dark:bg-[#2d3139] rounded-lg">
+<p class="text-xs text-[#121717] dark:text-white leading-relaxed font-medium">
+<span class="font-bold text-primary">Insight:</span> AI consistency has improved by 14.2% since integration, narrowing the gap with traditional peer review standards by nearly 40%.
+                            </p>
+</div>
+</div>
+<!-- Bar Chart: Discrepancy by Modality -->
+<div class="bg-white dark:bg-[#1a1c21] p-8 rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm flex flex-col">
+<div class="flex items-start justify-between mb-8">
+<div>
+<h4 class="text-lg font-bold">Discrepancy Rate by Modality</h4>
+<p class="text-sm text-[#658686] font-medium">Critical misalignment per imaging type</p>
+</div>
+<button class="size-8 flex items-center justify-center bg-[#f0f4f4] dark:bg-[#2d3139] rounded-lg">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+<div class="flex-1 flex flex-col gap-5">
+<!-- Custom Bar Layout -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>Chest X-ray (CXR)</span>
+<span class="text-primary">2.1%</span>
+</div>
+<div class="h-3 w-full bg-[#f0f4f4] dark:bg-[#2d3139] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>Computed Tomography (CT)</span>
+<span class="text-primary">5.8%</span>
+</div>
+<div class="h-3 w-full bg-[#f0f4f4] dark:bg-[#2d3139] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>Magnetic Resonance (MRI)</span>
+<span class="text-primary">4.2%</span>
+</div>
+<div class="h-3 w-full bg-[#f0f4f4] dark:bg-[#2d3139] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 48%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>Ultrasound (US)</span>
+<span class="text-primary">8.4%</span>
+</div>
+<div class="h-3 w-full bg-[#f0f4f4] dark:bg-[#2d3139] rounded-full overflow-hidden">
+<div class="h-full bg-[#e73108] rounded-full" style="width: 84%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-bold mb-1">
+<span>Mammography (MG)</span>
+<span class="text-primary">1.5%</span>
+</div>
+<div class="h-3 w-full bg-[#f0f4f4] dark:bg-[#2d3139] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 15%"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 border-t border-[#f0f4f4] dark:border-[#3a3f47] pt-6 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded bg-[#e73108]"></div>
+<span class="text-[11px] font-bold text-[#658686]">Critical Threshold (&gt;7%)</span>
+</div>
+<a class="text-xs font-bold text-primary hover:underline" href="#">View Detailed Modality Report</a>
+</div>
+</div>
+</div>
+<!-- Footer List Section -->
+<div class="mt-10 bg-white dark:bg-[#1a1c21] rounded-xl border border-[#dce5e5] dark:border-[#3a3f47] shadow-sm overflow-hidden">
+<div class="px-6 py-5 border-b border-[#f0f4f4] dark:border-[#3a3f47] flex justify-between items-center">
+<h4 class="font-bold">Recent High-Discrepancy Flags</h4>
+<button class="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all">Review All Flags</button>
+</div>
+<table class="w-full text-left">
+<thead>
+<tr class="bg-[#f9fafa] dark:bg-[#22252a] text-[10px] uppercase tracking-wider text-[#658686] font-bold">
+<th class="px-6 py-3">Patient ID</th>
+<th class="px-6 py-3">Modality</th>
+<th class="px-6 py-3">AI Finding</th>
+<th class="px-6 py-3">Human Draft</th>
+<th class="px-6 py-3">Status</th>
+<th class="px-6 py-3 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#f0f4f4] dark:divide-[#3a3f47]">
+<tr class="text-sm">
+<td class="px-6 py-4 font-bold">#PX-9920</td>
+<td class="px-6 py-4">CT Abdomen</td>
+<td class="px-6 py-4 text-[#e73108] font-semibold">Acute Appendicitis</td>
+<td class="px-6 py-4">Normal Appendix</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-[#e73108]/10 text-[#e73108] text-[10px] font-bold rounded">Urgent Review</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-[#658686] hover:text-primary">visibility</button>
+</td>
+</tr>
+<tr class="text-sm">
+<td class="px-6 py-4 font-bold">#PX-8841</td>
+<td class="px-6 py-4">Chest X-ray</td>
+<td class="px-6 py-4 text-[#e73108] font-semibold">Pleural Effusion</td>
+<td class="px-6 py-4">Pneumonia</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded">In Progress</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-[#658686] hover:text-primary">visibility</button>
+</td>
+</tr>
+<tr class="text-sm">
+<td class="px-6 py-4 font-bold">#PX-7712</td>
+<td class="px-6 py-4">MRI Brain</td>
+<td class="px-6 py-4 text-[#e73108] font-semibold">Glioblastoma</td>
+<td class="px-6 py-4">Pending Final</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-[#e73108]/10 text-[#e73108] text-[10px] font-bold rounded">Urgent Review</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-[#658686] hover:text-primary">visibility</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+</body></html>

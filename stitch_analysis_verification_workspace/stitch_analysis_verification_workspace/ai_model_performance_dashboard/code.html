@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | AI Model Performance Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007a8a",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0a0e10",
+                        "surface-dark": "#161b1e",
+                        "border-dark": "#27383a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .grid-bg {
+            background-image: radial-gradient(#27383a 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .matrix-cell:hover { background-color: rgba(0, 122, 138, 0.2); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex overflow-hidden">
+<!-- Left Navigation -->
+<aside class="w-64 border-r border-border-dark bg-background-light dark:bg-background-dark flex flex-col shrink-0">
+<div class="p-6 border-b border-border-dark">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<h1 class="text-sm font-bold tracking-tight text-white uppercase">Raven AI</h1>
+<p class="text-[10px] text-primary font-mono">v2.4.1-STABLE</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 p-4 flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Model Performance</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">biotech</span>
+<span class="text-sm font-medium">Model Training</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+<span class="text-sm font-medium">Validation Sets</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">show_chart</span>
+<span class="text-sm font-medium">Data Drift</span>
+</div>
+<div class="mt-8 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Diagnostic Tasks</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">pulmonology</span>
+<span class="text-sm font-medium">Chest X-Ray</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">neurology</span>
+<span class="text-sm font-medium">Head CT</span>
+</div>
+</nav>
+<div class="p-4 border-t border-border-dark">
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">System Settings</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-y-auto grid-bg">
+<!-- Header -->
+<header class="h-16 border-b border-border-dark bg-background-dark/80 backdrop-blur flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex items-center gap-6">
+<h2 class="text-sm font-semibold text-white">Model Performance Dashboard</h2>
+<div class="h-4 w-[1px] bg-border-dark"></div>
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+<span class="text-[11px] font-mono text-emerald-500">SYSTEM ONLINE</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-dark border border-border-dark rounded p-0.5">
+<button class="px-3 py-1 text-[11px] font-medium bg-primary text-white rounded-sm">24H</button>
+<button class="px-3 py-1 text-[11px] font-medium text-slate-400 hover:text-white">7D</button>
+<button class="px-3 py-1 text-[11px] font-medium text-slate-400 hover:text-white">30D</button>
+</div>
+<button class="flex items-center gap-2 bg-primary px-4 py-2 rounded text-xs font-bold text-white uppercase tracking-tight">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Export PDF Report
+                </button>
+<div class="size-8 rounded-full bg-slate-800 border border-border-dark" data-alt="User avatar icon for radiology specialist profile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDboptVNLosA6NK0pADkdNwyggl6aY3u7iCDDGD5DMGRy5znu-eARSS2aAZFtxOl3ZBLc_boZi-ZSWKAcOjlw7GHQmXBYTXB14Cqin-SfMq2ZzOm5JkkEjeV4ljCT04Tsand81gbjIFcQXjaan7paOQrorH0e9QO6O_emqGucG44iF_-RU7fgL35Uchct-cmnLdqy6FP7GoJkFS65_4RKG90CpVJeqvHF3kgGnKRJt1JGe4QPjWSKsxZPAN5r5U6LAjeyQXHeiI_58');"></div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 flex flex-col gap-6">
+<!-- Performance Highlights -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-dark border border-border-dark p-5 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">mAP (Overall)</span>
+<span class="text-emerald-500 text-[11px] font-mono">+2.1%</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white tracking-tighter">0.922</span>
+<span class="text-xs text-slate-500">mAP@.50</span>
+</div>
+<div class="w-full h-1 bg-slate-800 mt-2 overflow-hidden">
+<div class="h-full bg-primary w-[92.2%]"></div>
+</div>
+</div>
+<div class="bg-surface-dark border border-border-dark p-5 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sensitivity/Recall</span>
+<span class="text-rose-500 text-[11px] font-mono">-0.4%</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white tracking-tighter">94.2%</span>
+<span class="text-xs text-slate-500">TPR</span>
+</div>
+<div class="w-full h-1 bg-slate-800 mt-2 overflow-hidden">
+<div class="h-full bg-emerald-500 w-[94.2%]"></div>
+</div>
+</div>
+<div class="bg-surface-dark border border-border-dark p-5 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Specificity</span>
+<span class="text-emerald-500 text-[11px] font-mono">+1.2%</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-white tracking-tighter">89.1%</span>
+<span class="text-xs text-slate-500">TNR</span>
+</div>
+<div class="w-full h-1 bg-slate-800 mt-2 overflow-hidden">
+<div class="h-full bg-primary w-[89.1%]"></div>
+</div>
+</div>
+</div>
+<!-- Central Analysis Area -->
+<div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+<!-- Confusion Matrix Visualization -->
+<div class="xl:col-span-3 bg-surface-dark border border-border-dark overflow-hidden flex flex-col">
+<div class="p-4 border-b border-border-dark flex justify-between items-center">
+<h3 class="text-xs font-bold text-white uppercase tracking-wider">Confusion Matrix - CXR Core Finding</h3>
+<span class="material-symbols-outlined text-slate-500 cursor-pointer">help_outline</span>
+</div>
+<div class="p-8 flex items-center justify-center flex-1">
+<div class="grid grid-cols-3 grid-rows-3 gap-2 w-full max-w-lg aspect-square">
+<div class="flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase rotate-[-90deg]">Actual</div>
+<div class="bg-slate-800/30 flex flex-col items-center justify-center border border-border-dark">
+<span class="text-[10px] text-slate-500 font-bold uppercase mb-2">Pneumonia</span>
+<div class="w-full h-full p-2 grid grid-cols-2 grid-rows-2 gap-1 font-mono text-[10px]">
+<div class="bg-primary/40 border border-primary/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">842</span>
+<span class="text-[8px] opacity-70 uppercase">TP</span>
+</div>
+<div class="bg-rose-900/40 border border-rose-500/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">12</span>
+<span class="text-[8px] opacity-70 uppercase">FP</span>
+</div>
+<div class="bg-slate-700/40 border border-white/5 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">4</span>
+<span class="text-[8px] opacity-70 uppercase">FN</span>
+</div>
+<div class="bg-emerald-900/40 border border-emerald-500/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">1205</span>
+<span class="text-[8px] opacity-70 uppercase">TN</span>
+</div>
+</div>
+</div>
+<div class="bg-slate-800/30 flex flex-col items-center justify-center border border-border-dark">
+<span class="text-[10px] text-slate-500 font-bold uppercase mb-2">Pleural Effusion</span>
+<div class="w-full h-full p-2 grid grid-cols-2 grid-rows-2 gap-1 font-mono text-[10px]">
+<div class="bg-primary/40 border border-primary/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">412</span>
+<span class="text-[8px] opacity-70 uppercase">TP</span>
+</div>
+<div class="bg-rose-900/40 border border-rose-500/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">28</span>
+<span class="text-[8px] opacity-70 uppercase">FP</span>
+</div>
+<div class="bg-slate-700/40 border border-white/5 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">15</span>
+<span class="text-[8px] opacity-70 uppercase">FN</span>
+</div>
+<div class="bg-emerald-900/40 border border-emerald-500/50 flex flex-col items-center justify-center p-1 rounded-sm">
+<span class="text-white font-bold">1580</span>
+<span class="text-[8px] opacity-70 uppercase">TN</span>
+</div>
+</div>
+</div>
+<!-- Column Labels -->
+<div class=""></div>
+<div class="flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase pt-4">Pneumonia</div>
+<div class="flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase pt-4">Pleural Effusion</div>
+<div class=""></div>
+<div class="col-span-2 flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em] pt-4">Predicted</div>
+</div>
+</div>
+</div>
+<!-- Model Drift & Accuracy Tracking -->
+<div class="xl:col-span-2 bg-surface-dark border border-border-dark flex flex-col">
+<div class="p-4 border-b border-border-dark flex justify-between items-center">
+<h3 class="text-xs font-bold text-white uppercase tracking-wider">Model Drift Timeline</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-1.5">
+<span class="size-2 bg-primary"></span>
+<span class="text-[10px] text-slate-400">Accuracy</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="size-2 bg-amber-500"></span>
+<span class="text-[10px] text-slate-400">Drift Index</span>
+</div>
+</div>
+</div>
+<div class="p-6 flex-1 relative flex flex-col justify-end gap-1">
+<!-- Simulated Chart -->
+<div class="flex items-end gap-2 h-48 border-l border-b border-border-dark p-2">
+<div class="group relative flex-1 bg-primary/20 hover:bg-primary/40 transition-all cursor-pointer h-[80%]" title="v2.0">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono text-white opacity-0 group-hover:opacity-100">0.88</div>
+<div class="absolute bottom-0 left-0 w-full h-[15%] bg-amber-500/30"></div>
+</div>
+<div class="group relative flex-1 bg-primary/30 hover:bg-primary/40 transition-all cursor-pointer h-[85%]" title="v2.1">
+<div class="absolute bottom-0 left-0 w-full h-[10%] bg-amber-500/30"></div>
+</div>
+<div class="group relative flex-1 bg-primary/40 hover:bg-primary/40 transition-all cursor-pointer h-[82%]" title="v2.2">
+<div class="absolute bottom-0 left-0 w-full h-[25%] bg-amber-500/30"></div>
+</div>
+<div class="group relative flex-1 bg-primary/60 hover:bg-primary/40 transition-all cursor-pointer h-[90%]" title="v2.3">
+<div class="absolute bottom-0 left-0 w-full h-[12%] bg-amber-500/30"></div>
+</div>
+<div class="group relative flex-1 bg-primary/80 hover:bg-primary/40 transition-all cursor-pointer h-[92%]" title="v2.4">
+<div class="absolute bottom-0 left-0 w-full h-[8%] bg-amber-500/30"></div>
+</div>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-slate-500 pt-2 px-2">
+<span>v2.0</span>
+<span>v2.1</span>
+<span>v2.2</span>
+<span>v2.3</span>
+<span>v2.4 (CURRENT)</span>
+</div>
+</div>
+<div class="p-4 bg-black/20 border-t border-border-dark">
+<p class="text-[11px] text-slate-400 leading-relaxed italic">
+<span class="text-amber-500 font-bold">WARNING:</span> Potential covariate shift detected in lateral projections in v2.2, resolved in latest patch.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Top Misclassifications Section -->
+<div class="bg-surface-dark border border-border-dark overflow-hidden">
+<div class="p-4 border-b border-border-dark bg-white/5 flex justify-between items-center">
+<h3 class="text-xs font-bold text-white uppercase tracking-wider">Top Misclassifications (Last 500 cases)</h3>
+<span class="text-[10px] font-mono text-primary">SCANNING ERROR LOGS...</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 divide-x divide-border-dark">
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-white">Nodule vs. Vessel</span>
+<span class="text-[10px] font-mono bg-rose-500/20 text-rose-500 px-2 py-0.5 rounded-sm">ERROR RATE: 4.2%</span>
+</div>
+<div class="flex gap-3">
+<div class="size-20 bg-black rounded border border-border-dark overflow-hidden flex-shrink-0 relative group cursor-zoom-in">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-1 left-1 text-[8px] text-white/70">X-RAY SAMPLE</div>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">AI PREDICTED</span>
+<span class="text-xs text-white">Pulmonary Nodule (0.89)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">RADIOLOGIST GROUND TRUTH</span>
+<span class="text-xs text-emerald-500 font-semibold">Vascular structure</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-white">Consolidation vs. Atelectasis</span>
+<span class="text-[10px] font-mono bg-rose-500/20 text-rose-500 px-2 py-0.5 rounded-sm">ERROR RATE: 3.8%</span>
+</div>
+<div class="flex gap-3">
+<div class="size-20 bg-black rounded border border-border-dark overflow-hidden flex-shrink-0 relative group cursor-zoom-in">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-1 left-1 text-[8px] text-white/70">X-RAY SAMPLE</div>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">AI PREDICTED</span>
+<span class="text-xs text-white">Lobar Pneumonia (0.76)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">RADIOLOGIST GROUND TRUTH</span>
+<span class="text-xs text-emerald-500 font-semibold">Plate-like Atelectasis</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-white">Cardiomegaly Artifact</span>
+<span class="text-[10px] font-mono bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-sm">ERROR RATE: 1.5%</span>
+</div>
+<div class="flex gap-3">
+<div class="size-20 bg-black rounded border border-border-dark overflow-hidden flex-shrink-0 relative group cursor-zoom-in">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-1 left-1 text-[8px] text-white/70">X-RAY SAMPLE</div>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">AI PREDICTED</span>
+<span class="text-xs text-white">Enlarged Heart (0.91)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 uppercase font-bold">RADIOLOGIST GROUND TRUTH</span>
+<span class="text-xs text-emerald-500 font-semibold">Normal (Rotation bias)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Table: Per-Finding Breakdown -->
+<div class="bg-surface-dark border border-border-dark overflow-hidden">
+<div class="p-4 border-b border-border-dark bg-white/5">
+<h3 class="text-xs font-bold text-white uppercase tracking-wider">Detailed Findings Performance Table</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead>
+<tr class="bg-background-dark text-slate-500 font-mono uppercase text-[10px] border-b border-border-dark">
+<th class="px-6 py-4 font-bold">Finding Type</th>
+<th class="px-6 py-4 font-bold">True Positives</th>
+<th class="px-6 py-4 font-bold">False Positives</th>
+<th class="px-6 py-4 font-bold">True Negatives</th>
+<th class="px-6 py-4 font-bold">False Negatives</th>
+<th class="px-6 py-4 font-bold text-right">mAP Score</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-dark text-slate-300">
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-semibold text-white">Pneumonia</td>
+<td class="px-6 py-4 font-mono">842</td>
+<td class="px-6 py-4 font-mono">12</td>
+<td class="px-6 py-4 font-mono">1205</td>
+<td class="px-6 py-4 font-mono text-rose-400">4</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-block w-16 px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-sm text-center">0.94</span>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-semibold text-white">Pleural Effusion</td>
+<td class="px-6 py-4 font-mono">412</td>
+<td class="px-6 py-4 font-mono">28</td>
+<td class="px-6 py-4 font-mono">1580</td>
+<td class="px-6 py-4 font-mono text-rose-400">15</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-block w-16 px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-sm text-center">0.89</span>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 font-semibold text-white">Atelectasis</td>
+<td class="px-6 py-4 font-mono">654</td>
+<td class="px-6 py-4 font-mono">45</td>
+<td class="px-6 py-4 font-mono">1100</td>
+<td class="px-6 py-4 font-mono text-rose-400">22</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-block w-16 px-2 py-1 bg-primary text-white text-[10px] font-bold rounded-sm text-center">0.85</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Footer / Status Bar -->
+<footer class="mt-auto border-t border-border-dark bg-background-dark p-3 px-8 flex justify-between items-center text-[10px] font-mono text-slate-500">
+<div class="flex gap-6">
+<span>GPU UTIL: 64%</span>
+<span>LATENCY: 142ms</span>
+<span>MODEL HASH: 0x82f..9a1</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">history</span>
+<span>Last Updated: 2023-11-24 14:32:01 UTC</span>
+</div>
+</footer>
+</main>
+</body></html>

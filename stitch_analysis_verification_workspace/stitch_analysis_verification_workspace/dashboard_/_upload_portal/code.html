@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | AI Radiology Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1f66ad",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#121920",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>body {
+    font-family: "Lexend", sans-serif
+    }
+.dashed-border {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuASxzQyWvKw5nGpWo5AzFqtaMYt74IVPnIWufFWQL4rRV9jNqH9PhRpxM1HE3qRQxftgVMUNmrBZ_JaYf6hBmUuI0HUtXOKvg2-oNxACyBlM-cBRk5mA20c1PF13GyeqNVScuwJC8eSlqiz0QLQk1Nzu14ZYqx4aMfsYXhtPwxzkiNHSEwX1qHeoTex9eYwYSy6PfI8qGd9UBUL-Tcq_c34aTMYJXG6NZ1vqoKqDN6bCPTmhWF01DLcEVs8iz5Vyg1DH5eYG_XKjbw);
+    border-radius: 12px
+    }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121417] dark:text-white min-h-screen flex">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-[#dce0e5] dark:border-gray-800 bg-white dark:bg-background-dark h-screen sticky top-0 flex flex-col justify-between p-4 shrink-0">
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">clinical_notes</span>
+</div>
+<div>
+<h1 class="text-primary text-lg font-extrabold leading-none tracking-tight">RAVEN AI</h1>
+<p class="text-[#657586] text-[10px] font-medium uppercase tracking-widest">Radiology Verification</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary group" href="#">
+<span class="material-symbols-outlined text-[22px] fill-1">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#657586] hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">history</span>
+<span class="text-sm font-medium">Scan History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#657586] hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">analytics</span>
+<span class="text-sm font-medium">Insight Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#657586] hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-medium">System Settings</span>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
+<p class="text-xs font-bold text-primary mb-1">PRO PLAN</p>
+<p class="text-[11px] text-[#657586] mb-3 leading-relaxed">245/500 monthly verifications used.</p>
+<div class="w-full bg-[#dce0e5] h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[49%]"></div>
+</div>
+</div>
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="size-9 rounded-full bg-cover bg-center border-2 border-primary/20" data-alt="Headshot of a male medical professional" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6C9ykJN2QAvPY-TyZGXnONRdmaaCqUOAk5CCV-uAKqeP5hl_4_bA2qUzhiDluCRu-svQgjX5UM0re1zb-3Fp1_RqRbQ07KSp7mnNIh-rS7mthlB_H54_YEumZ_sv_T34p4Alz72nW0i3xLujCXrpV9199qgZg2ec-J2tFUAMIzsvjQ0JIP5q6KqUcl8Ex6FZUNj2I3WFFCzFJg3gLLemL5bstdDWzgqjUc3RJNgrVvoCMOcTrufIZXiHBOhDuYK318phn927Vqmo");'></div>
+<div class="overflow-hidden">
+<p class="text-sm font-bold truncate">Dr. Julian Vance</p>
+<p class="text-[11px] text-[#657586] truncate">Radiologist (MD)</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0">
+<!-- Top Bar -->
+<header class="h-16 flex items-center justify-between px-8 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#dce0e5] dark:border-gray-800 sticky top-0 z-10">
+<div class="flex flex-col">
+<h2 class="text-lg font-bold text-[#121417] dark:text-white">Upload Portal</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-lg bg-[#f0f2f4] dark:bg-gray-800 text-[#121417] dark:text-white relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+</button>
+<div class="h-8 w-[1px] bg-[#dce0e5] dark:bg-gray-800"></div>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+                    New Analysis
+                </button>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+<!-- Hero Heading -->
+<div class="max-w-2xl">
+<h3 class="text-3xl font-black tracking-tight text-[#121417] dark:text-white">Verify New Medical Scans</h3>
+<p class="text-[#657586] mt-2 text-base">Pair medical imagery with human-written reports for high-precision cross-validation.</p>
+</div>
+<!-- Upload Workspace -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+<!-- Left Column: Scan Upload -->
+<div class="flex flex-col gap-3">
+<p class="text-sm font-bold text-[#121417] dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">image</span>
+                        1. Upload Medical Scans
+                    </p>
+<div class="dashed-border bg-white dark:bg-gray-900/50 min-h-[300px] flex flex-col items-center justify-center p-8 text-center group cursor-pointer hover:bg-primary/[0.02] transition-colors">
+<div class="size-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">upload_file</span>
+</div>
+<h4 class="text-base font-bold text-[#121417] dark:text-white">Drag &amp; drop files here</h4>
+<p class="text-sm text-[#657586] mt-1 mb-6">Support for DICOM, JPEG, PNG, and PDF reports</p>
+<div class="flex flex-wrap justify-center gap-2">
+<span class="px-3 py-1 bg-[#f0f2f4] dark:bg-gray-800 rounded text-[10px] font-bold text-[#657586] border border-[#dce0e5] dark:border-gray-700">DICOM</span>
+<span class="px-3 py-1 bg-[#f0f2f4] dark:bg-gray-800 rounded text-[10px] font-bold text-[#657586] border border-[#dce0e5] dark:border-gray-700">JPEG</span>
+<span class="px-3 py-1 bg-[#f0f2f4] dark:bg-gray-800 rounded text-[10px] font-bold text-[#657586] border border-[#dce0e5] dark:border-gray-700">PNG</span>
+<span class="px-3 py-1 bg-[#f0f2f4] dark:bg-gray-800 rounded text-[10px] font-bold text-[#657586] border border-[#dce0e5] dark:border-gray-700">TIFF</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Text Report -->
+<div class="flex flex-col gap-3">
+<p class="text-sm font-bold text-[#121417] dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">subject</span>
+                        2. Human-Written Radiology Report
+                    </p>
+<div class="relative flex flex-col flex-1">
+<textarea class="w-full h-full min-h-[300px] rounded-xl border border-[#dce0e5] dark:border-gray-800 bg-white dark:bg-gray-900 p-5 text-sm font-normal leading-relaxed placeholder:text-[#657586] focus:ring-2 focus:ring-primary focus:border-transparent resize-none dark:text-white" placeholder="Paste the official radiology report text here. Be sure to include patient ID and clinical indications..."></textarea>
+<div class="absolute bottom-4 right-4 flex gap-2">
+<button class="bg-[#f0f2f4] dark:bg-gray-800 p-2 rounded-lg text-[#657586] hover:text-[#121417]">
+<span class="material-symbols-outlined text-xl">content_paste</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">info</span>
+<p class="text-sm font-medium text-[#1f66ad]">Ensure all patient identifiers are redacted if required by local policy.</p>
+</div>
+<button class="bg-primary hover:bg-[#1a5591] text-white px-10 py-3 rounded-lg text-base font-extrabold flex items-center gap-3 shadow-lg shadow-primary/20 transition-all active:scale-[0.98]">
+                    Start AI Analysis
+                    <span class="material-symbols-outlined">bolt</span>
+</button>
+</div>
+<!-- Recent Activity Table -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold">Recent Activity</h4>
+<button class="text-primary text-sm font-bold hover:underline underline-offset-4">View Full History</button>
+</div>
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-[#dce0e5] dark:border-gray-800 overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#fcfcfd] dark:bg-gray-800/50 border-b border-[#dce0e5] dark:border-gray-800">
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#657586]">Scan ID / Type</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#657586]">Patient Ref</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#657586]">Timestamp</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#657586]">Verification Status</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#657586]">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#dce0e5] dark:divide-gray-800">
+<!-- Row 1 -->
+<tr class="hover:bg-primary/[0.01] transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded bg-[#f0f2f4] dark:bg-gray-800 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">radiology</span>
+</div>
+<div>
+<p class="text-sm font-bold">#SCN-9021</p>
+<p class="text-[11px] text-[#657586]">Chest PA/Lateral X-Ray</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">PAT-7728-B</td>
+<td class="px-6 py-4 text-sm text-[#657586]">Oct 24, 10:45 AM</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold">
+<span class="size-1.5 rounded-full bg-green-500"></span>
+                                        Verified
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="text-primary hover:text-primary/70 font-bold text-sm">Open</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-primary/[0.01] transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded bg-[#f0f2f4] dark:bg-gray-800 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">radiology</span>
+</div>
+<div>
+<p class="text-sm font-bold">#SCN-8842</p>
+<p class="text-[11px] text-[#657586]">Abdominal Ultrasound</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">PAT-9102-X</td>
+<td class="px-6 py-4 text-sm text-[#657586]">Oct 24, 09:12 AM</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold">
+<span class="size-1.5 rounded-full bg-red-500"></span>
+                                        Discrepancy Found
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="text-primary hover:text-primary/70 font-bold text-sm">Review</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-primary/[0.01] transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded bg-[#f0f2f4] dark:bg-gray-800 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">radiology</span>
+</div>
+<div>
+<p class="text-sm font-bold">#SCN-8811</p>
+<p class="text-[11px] text-[#657586]">Lumbar Spine MRI</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">PAT-1142-D</td>
+<td class="px-6 py-4 text-sm text-[#657586]">Oct 23, 04:55 PM</td>
+<td class="px-6 py-4">
+<div class="w-24">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[9px] font-bold text-amber-600 uppercase">Processing</span>
+<span class="text-[9px] font-bold text-amber-600">65%</span>
+</div>
+<div class="w-full bg-[#f0f2f4] h-1 rounded-full overflow-hidden">
+<div class="bg-amber-500 h-full w-[65%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<button class="text-[#657586] font-bold text-sm cursor-not-allowed" disabled="">Waiting</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</body></html>

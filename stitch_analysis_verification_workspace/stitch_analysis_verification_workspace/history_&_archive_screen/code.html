@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>History &amp; Archive | RAVEN AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#266073",
+                        "background-light": "#ffffff",
+                        "background-dark": "#17191c",
+                        "status-high": "#CC2E2E",
+                        "status-medium": "#E68A00",
+                        "status-low": "#4D804D",
+                        "status-none": "#99A1A6",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        /* Custom scrollbar for data-rich tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dde2e3;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121516] dark:text-gray-100 transition-colors duration-200">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-background-light dark:bg-background-dark">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-3 mb-10">
+<div class="bg-primary size-10 rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">troubleshoot</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-primary dark:text-white text-lg font-black leading-none tracking-tight">RAVEN</h1>
+<p class="text-[#6a7b81] text-[10px] uppercase font-bold tracking-widest mt-1">Clinical Verification</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6a7b81] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary dark:text-white" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">history</span>
+<span class="text-sm font-bold">History &amp; Archive</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6a7b81] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm font-medium">Audit Reports</span>
+</a>
+<div class="my-4 border-t border-gray-100 dark:border-gray-800"></div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6a7b81] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6a7b81] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">help_center</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-3 px-2">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                            DR
+                        </div>
+<div class="flex flex-col">
+<span class="text-xs font-bold">Dr. Richardson</span>
+<span class="text-[10px] text-[#6a7b81]">Chief Auditor</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Top Header -->
+<header class="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 bg-background-light dark:bg-background-dark">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-500" placeholder="Search by Patient ID, Accession Number, or Reviewer..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<button class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export Archive
+                    </button>
+</div>
+</header>
+<!-- Content -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Page Title -->
+<div class="mb-8">
+<h2 class="text-3xl font-black tracking-tight text-[#121516] dark:text-white">History &amp; Archive</h2>
+<p class="text-[#6a7b81] mt-1">Comprehensive audit log of all AI-assisted radiology verifications.</p>
+</div>
+<!-- Filter Controls -->
+<div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4 rounded-xl mb-6 flex flex-wrap items-center gap-4">
+<div class="flex flex-col gap-1">
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Time Range</label>
+<button class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg text-sm">
+<span class="material-symbols-outlined text-lg text-gray-400">calendar_month</span>
+<span>Last 30 Days</span>
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Modality</label>
+<div class="flex gap-2">
+<button class="h-9 px-4 rounded-lg bg-primary text-white text-xs font-bold">All</button>
+<button class="h-9 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium hover:border-primary/50">X-Ray</button>
+<button class="h-9 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium hover:border-primary/50">Ultrasound</button>
+<button class="h-9 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium hover:border-primary/50">CT Scan</button>
+<button class="h-9 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-medium hover:border-primary/50">MRI</button>
+</div>
+</div>
+<div class="ml-auto flex items-center gap-2 self-end">
+<button class="p-2 text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="text-xs font-bold text-primary hover:underline">Clear All Filters</button>
+</div>
+</div>
+<!-- Tabs for Status -->
+<div class="flex border-b border-gray-200 dark:border-gray-800 mb-6 px-1">
+<button class="pb-3 px-4 text-sm font-bold border-b-2 border-primary text-primary">All Records (1,284)</button>
+<button class="pb-3 px-4 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">High Discrepancy (42)</button>
+<button class="pb-3 px-4 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">Medium (156)</button>
+<button class="pb-3 px-4 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700">Review Pending (12)</button>
+</div>
+<!-- Data Table -->
+<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-800/80 text-gray-500 text-[11px] uppercase font-bold tracking-wider">
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">Date &amp; Time</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">Patient ID</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">Modality</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">AI Status</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">Reviewer</th>
+<th class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Row 1 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Oct 24, 2023</span>
+<span class="text-xs text-gray-400">14:22 PM</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-gray-600 dark:text-gray-300">PX-9921-ARC</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary/60">radiology</span>
+<span class="text-sm">Chest X-Ray</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-900/20 text-status-high text-[10px] font-black uppercase">
+<span class="size-1.5 rounded-full bg-status-high"></span>
+                                            High Discrepancy
+                                        </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">SM</div>
+<span class="text-sm">Dr. Sarah Meyer</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:shadow-lg transition-all">Open Analysis</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Oct 24, 2023</span>
+<span class="text-xs text-gray-400">11:05 AM</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-gray-600 dark:text-gray-300">PX-4810-DTA</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary/60">emergency</span>
+<span class="text-sm">Abdominal US</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/20 text-status-medium text-[10px] font-black uppercase">
+<span class="size-1.5 rounded-full bg-status-medium"></span>
+                                            Medium
+                                        </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">JW</div>
+<span class="text-sm">Dr. John Wu</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:shadow-lg transition-all">Open Analysis</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Oct 23, 2023</span>
+<span class="text-xs text-gray-400">09:15 AM</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-gray-600 dark:text-gray-300">PX-1122-SYS</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary/60">neurology</span>
+<span class="text-sm">Head CT</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 text-status-none text-[10px] font-black uppercase">
+<span class="size-1.5 rounded-full bg-status-none"></span>
+                                            None
+                                        </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">AR</div>
+<span class="text-sm">AI Automated</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:shadow-lg transition-all">Open Analysis</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Oct 23, 2023</span>
+<span class="text-xs text-gray-400">16:45 PM</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-mono text-gray-600 dark:text-gray-300">PX-8839-MOR</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary/60">radiology</span>
+<span class="text-sm">Wrist X-Ray</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 dark:bg-green-900/20 text-status-low text-[10px] font-black uppercase">
+<span class="size-1.5 rounded-full bg-status-low"></span>
+                                            Low
+                                        </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">SM</div>
+<span class="text-sm">Dr. Sarah Meyer</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:shadow-lg transition-all">Open Analysis</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between border-t border-gray-100 dark:border-gray-800">
+<span class="text-xs text-gray-500">Showing 1 to 10 of 1,284 entries</span>
+<div class="flex items-center gap-1">
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors text-gray-400">
+<span class="material-symbols-outlined">first_page</span>
+</button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors text-gray-400">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded bg-primary text-white text-xs font-bold">1</button>
+<button class="size-8 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-medium">2</button>
+<button class="size-8 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-medium">3</button>
+<span class="px-1 text-gray-400 text-xs">...</span>
+<button class="size-8 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-medium">129</button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors text-gray-400">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors text-gray-400">
+<span class="material-symbols-outlined">last_page</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Summary Stats -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Audit Precision</p>
+<p class="text-2xl font-black text-primary mt-1">98.4%</p>
+<div class="mt-2 flex items-center gap-1 text-[10px] text-green-600">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+<span>+0.2% from last month</span>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Verifications</p>
+<p class="text-2xl font-black text-[#121516] dark:text-white mt-1">12,482</p>
+<div class="mt-2 text-[10px] text-gray-400">Total processed this year</div>
+</div>
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Correction Rate</p>
+<p class="text-2xl font-black text-status-medium mt-1">3.1%</p>
+<div class="mt-2 text-[10px] text-gray-400">AI override events</div>
+</div>
+<div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+<p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Avg. Review Time</p>
+<p class="text-2xl font-black text-[#121516] dark:text-white mt-1">4.2m</p>
+<div class="mt-2 text-[10px] text-gray-400">Per clinical audit session</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

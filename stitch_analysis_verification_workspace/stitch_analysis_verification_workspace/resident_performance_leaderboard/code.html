@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resident Performance Leaderboard - RAVEN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2a7e7a",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#141e1e",
+                        "gold": "#CFA63C",
+                        "silver": "#A5A5A5",
+                        "bronze": "#8D7A68"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121616] dark:text-white min-h-screen">
+<div class="flex flex-col min-h-screen w-full">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#dde3e3] dark:border-[#2d3a3a] px-10 py-3 bg-white dark:bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-6">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-black leading-tight tracking-tight">RAVEN</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold text-[#6a8180] hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-semibold text-[#6a8180] hover:text-primary transition-colors" href="#">Cases</a>
+<a class="text-sm font-bold text-primary border-b-2 border-primary pb-1" href="#">Leaderboard</a>
+<a class="text-sm font-semibold text-[#6a8180] hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-sm font-semibold text-[#6a8180] hover:text-primary transition-colors" href="#">Protocols</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<label class="hidden lg:flex items-center relative min-w-64">
+<span class="material-symbols-outlined absolute left-3 text-[#6a8180]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-lg border-none bg-[#f1f4f3] dark:bg-[#1e2a2a] text-sm focus:ring-2 focus:ring-primary/50" placeholder="Search residents..."/>
+</label>
+<button class="p-2 rounded-lg bg-[#f1f4f3] dark:bg-[#1e2a2a] text-[#121616] dark:text-white">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="size-10 rounded-full border-2 border-primary/20 bg-cover bg-center" data-alt="Profile picture of the current logged in radiologist" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDHnCyqkwxn6p2S_U39BSH1oxIenJjmHhFJ3tOheg7ASF5qIdyAnKAxeaUbxXDfFTmX460B8T-IwHlIg3cbvY1uzvYPB2c4E73wGEAR0nR1AuJWv7ymZ9jbprYvzh4JZX56IgSLmltwlQ4poayPDvXyDb9c0Fstogqx10a06cNolWqD8Z1sT4wYQhqlJI3msNWDEoY9q_rE3y6obzs4YS5ScuDrbbF6v4LbVo8Z66JOm3SCIYYZz32e-TZh4PNZNoQuc6--dVYxNSY');"></div>
+</div>
+</header>
+<main class="flex-1 max-w-[1440px] mx-auto w-full px-6 py-8">
+<!-- Page Heading -->
+<div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+<div class="max-w-2xl">
+<h1 class="text-3xl font-black tracking-tight mb-2">Resident Leaderboard</h1>
+<p class="text-[#6a8180] dark:text-[#a0b0af]">Benchmarking diagnostic accuracy through AI-Human agreement analysis. Top 3% qualify for the Senior Fellow Circle.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1e2a2a] border border-[#dde3e3] dark:border-[#2d3a3a] rounded-lg font-bold text-sm">
+<span class="material-symbols-outlined text-base">download</span>
+                        Export Metrics
+                    </button>
+<button class="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+                        View Full History
+                    </button>
+</div>
+</div>
+<!-- Timeframe Tabs -->
+<div class="flex border-b border-[#dde3e3] dark:border-[#2d3a3a] mb-8 gap-8 overflow-x-auto">
+<a class="border-b-2 border-primary text-primary pb-3 font-bold text-sm whitespace-nowrap" href="#">Current Month</a>
+<a class="border-b-2 border-transparent text-[#6a8180] pb-3 font-bold text-sm hover:text-primary whitespace-nowrap" href="#">Last Month</a>
+<a class="border-b-2 border-transparent text-[#6a8180] pb-3 font-bold text-sm hover:text-primary whitespace-nowrap" href="#">Q3 Academic Year</a>
+<a class="border-b-2 border-transparent text-[#6a8180] pb-3 font-bold text-sm hover:text-primary whitespace-nowrap" href="#">All Time</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+<!-- Main Content Area (Leaderboard) -->
+<div class="lg:col-span-3 space-y-8">
+<!-- Top Performers Podium -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- #2 Silver -->
+<div class="bg-white dark:bg-[#1e2a2a] p-6 rounded-xl border-t-4 border-silver shadow-sm flex flex-col items-center text-center">
+<div class="relative mb-4">
+<div class="size-20 rounded-full bg-cover bg-center border-4 border-silver" data-alt="Headshot of Dr. Marcus Thorne, second place resident" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCW7PDw0Ki1RD221gOs14w7kINEzIbCFMcxKIcqG3MMLfwj7sNTf-dy7zZtqyWU2rq2nA8TUn8DvRR6vXJGqaNqY3u1D7acJBmf2viehrBkal2adlzF7L9gyku5Zw63LjRNPgjZBfedQHOEoBQjhFjxItwhAFPfSXarDkgo-RzPKLfZqWWzijNAcRLH2W8R1QrsCDujShkr3C9yyeb2SV33fcQO0tFobMbAHyLY2lE9rswZb5-O6pxJ_oxpjLTFJ18IyEWjmay_b9c');"></div>
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-silver text-white text-xs font-black px-2 py-0.5 rounded-full">#2</div>
+</div>
+<h3 class="font-bold text-lg">Dr. Marcus Thorne</h3>
+<p class="text-xs text-[#6a8180] uppercase tracking-widest font-bold mb-3">PGY-4 Senior Resident</p>
+<div class="w-full grid grid-cols-2 gap-4 mt-2">
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Accuracy</p>
+<p class="text-xl font-black text-silver">98.8%</p>
+</div>
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Cases</p>
+<p class="text-xl font-black">385</p>
+</div>
+</div>
+</div>
+<!-- #1 Gold -->
+<div class="bg-white dark:bg-[#1e2a2a] p-8 rounded-xl border-t-4 border-gold shadow-xl flex flex-col items-center text-center transform lg:-translate-y-4">
+<div class="relative mb-6">
+<div class="size-28 rounded-full bg-cover bg-center border-4 border-gold shadow-lg" data-alt="Headshot of Dr. Elena Vance, top performing resident" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCeI_cqJH2IWZ1P_Izg7Iz99yZh7ivSW3pERlfUGAyO87pANvngWNQol_bO1gchT5xTRFXYvF8L2unh2o9dNAH_3Y81NlMYD9cWJUshKwAuvlVEw0wn1Lzk98BDvQshGD6PaWwoeoy1AICro0xRBjCw6W5Zf0ZuaM_-B_SuoRi3hUlgw-aWQQNi4CSu_QH7uwn0W9nvSBZ9Tmmf4rrZjrOWa8Nn0rL5pDvic_FUnbJ2UYh-Hyi2kJXM7-bv167s_WE8BAsI7Ctlmb4');"></div>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gold text-white text-sm font-black px-4 py-1 rounded-full shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-sm fill-icon">military_tech</span>
+                                    #1
+                                </div>
+</div>
+<h3 class="font-black text-2xl">Dr. Elena Vance</h3>
+<p class="text-xs text-primary uppercase tracking-widest font-black mb-4">PGY-3 Resident</p>
+<div class="w-full space-y-3">
+<div class="bg-primary/5 dark:bg-primary/10 p-4 rounded-xl border border-primary/20">
+<div class="flex justify-between items-end mb-1">
+<p class="text-xs text-primary font-bold uppercase">AI-Human Agreement</p>
+<p class="text-2xl font-black text-primary">99.4%</p>
+</div>
+<div class="w-full bg-[#dde3e3] dark:bg-[#2d3a3a] h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[99.4%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Volume</p>
+<p class="text-lg font-black">420 Cases</p>
+</div>
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Streak</p>
+<p class="text-lg font-black flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-orange-500 text-base fill-icon">local_fire_department</span>
+                                            42
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- #3 Bronze -->
+<div class="bg-white dark:bg-[#1e2a2a] p-6 rounded-xl border-t-4 border-bronze shadow-sm flex flex-col items-center text-center">
+<div class="relative mb-4">
+<div class="size-20 rounded-full bg-cover bg-center border-4 border-bronze" data-alt="Headshot of Dr. Sarah Chen, third place resident" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA6UeZ02N3ZoE-Kq_RFgfxTOnoiI1FE7e31WOvN8OuiHQCzB1ZVJIW9XwM2b4RtZWlF_U9QZ8SQdyR2mpjibOqHWPVj_Y_xvYmF03YbC63-1Aa_7_5XhTnGXGolN4T6bZsVzOP9DyUnY4IzB2PPpmv5_dD_E2EzcZzddiZCQt9obpFeFJoqXq1wL9px1Rve8aPZw3grFDKbwN_61Q3EKhg3K1CAtLf6faOagF-YCbHF_zhLi3YghKB_s9nEFFgDzMLGor1TwsgqFfA');"></div>
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-bronze text-white text-xs font-black px-2 py-0.5 rounded-full">#3</div>
+</div>
+<h3 class="font-bold text-lg">Dr. Sarah Chen</h3>
+<p class="text-xs text-[#6a8180] uppercase tracking-widest font-bold mb-3">PGY-2 Junior Resident</p>
+<div class="w-full grid grid-cols-2 gap-4 mt-2">
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Accuracy</p>
+<p class="text-xl font-black text-bronze">98.2%</p>
+</div>
+<div class="bg-background-light dark:bg-[#141e1e] p-2 rounded-lg">
+<p class="text-[10px] text-[#6a8180] uppercase font-bold">Cases</p>
+<p class="text-xl font-black">410</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Comprehensive Table -->
+<div class="bg-white dark:bg-[#1e2a2a] rounded-xl overflow-hidden border border-[#dde3e3] dark:border-[#2d3a3a]">
+<div class="p-4 border-b border-[#dde3e3] dark:border-[#2d3a3a] flex justify-between items-center bg-[#fcfcfc] dark:bg-[#1c2626]">
+<h4 class="font-bold text-sm">Clinical Performance Grid</h4>
+<div class="flex gap-2">
+<button class="text-xs font-bold px-3 py-1.5 rounded bg-white dark:bg-[#2d3a3a] border border-[#dde3e3] dark:border-[#3d4a4a]">All PGY Years</button>
+<button class="text-xs font-bold px-3 py-1.5 rounded bg-white dark:bg-[#2d3a3a] border border-[#dde3e3] dark:border-[#3d4a4a] flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">filter_list</span> Filter
+                                </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-background-light dark:bg-background-dark/50 text-[10px] uppercase tracking-wider font-black text-[#6a8180]">
+<th class="px-6 py-4">Rank</th>
+<th class="px-6 py-4">Resident Name</th>
+<th class="px-6 py-4 text-center">Year</th>
+<th class="px-6 py-4">Accuracy Score</th>
+<th class="px-6 py-4 text-center">Verified</th>
+<th class="px-6 py-4 text-right">Streaks</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#dde3e3] dark:divide-[#2d3a3a]">
+<tr class="hover:bg-[#f8fafa] dark:hover:bg-[#232f2f] transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-bold">4</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar of Dr. James Wilson" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGMeauYSMiM7fkaryxyrirX-KslcjGvAB0P2mwBJtYVYrQ1hBy03P2DGhVNbyZkjecq63W_wYDGpbXAMts76UXVJzjYaoIcmfcCh1JvZDl56-ZFeV6fhObRz_7IK26IWDkJSSZBvkU9geybv4juS5Qb4SqnNoMdFcw51ERlB3dkRJ2iZuN_E2ajOpP158OEiQZnUXtf5ZFsBzNf2biIvKRlqCk6UJqVQhsGYDLyxLBvF68yxbm7E7kRXtPkGf16HEfi9YeujcMhlw');"></div>
+<div>
+<p class="font-bold text-sm group-hover:text-primary">Dr. James Wilson</p>
+<p class="text-[10px] text-[#6a8180]">Chest Radiology</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-2 py-0.5 rounded bg-[#f1f4f3] dark:bg-[#2d3a3a] text-[10px] font-bold">PGY-4</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="font-black text-sm text-primary">97.5%</span>
+<div class="w-16 h-1 bg-[#dde3e3] dark:bg-[#2d3a3a] rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[97.5%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-medium">352</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1 text-orange-500 font-bold">
+<span>28</span>
+<span class="material-symbols-outlined text-sm fill-icon">local_fire_department</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-[#f8fafa] dark:hover:bg-[#232f2f] transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-bold">5</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar of Dr. Amara Okafor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA7eVXKgRn01vIeZPn1NtjA0yfK0clezc9aWUm5_kQAsJ6KLz3RGvxRfF32qQn2gKSY8hD07ZFKBNmhORRV2uPG6-DpP0Vk2c9YioWtHkzduNaI9dRCZkW_UyYhSa3eFWYUl2_0AUDgXmGbJWAWVXSlcDquecwEn5TYoECVBV4AwLNRm01XVy1HgmH_S5JaHtHHoED9bXAudunjnfYtxoFZaU2z4F5byBGII61Sl2Xe5zjw4iTuk56s0dmflak8h5yJFar_qnbw_es');"></div>
+<div>
+<p class="font-bold text-sm group-hover:text-primary">Dr. Amara Okafor</p>
+<p class="text-[10px] text-[#6a8180]">Neuroradiology</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-2 py-0.5 rounded bg-[#f1f4f3] dark:bg-[#2d3a3a] text-[10px] font-bold">PGY-3</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="font-black text-sm text-primary">97.1%</span>
+<div class="w-16 h-1 bg-[#dde3e3] dark:bg-[#2d3a3a] rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[97.1%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-medium">315</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1 text-orange-500 font-bold">
+<span>15</span>
+<span class="material-symbols-outlined text-sm fill-icon">local_fire_department</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-[#f8fafa] dark:hover:bg-[#232f2f] transition-colors cursor-pointer group">
+<td class="px-6 py-4 font-bold">6</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar of Dr. Leo Dupont" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBOqMi4rxO3pUXfFkKPoHDQ27xr3j-w4W3yB7q88Fcd7LmAhAjltgPwX_NlhkUBS1tqdUswGYG9UlFEQXMKDZgno0eqMVqQB4msm_-nbGa9RwdmsMDdoBjdmXNPVg2Afh4pnrVMBnlr1Qvrze89di5XxqDkh_eIGg6s2zYXHcQeZ1FDcz0bwwDXOetlZcU4ke78BN1JdPgBRSZ0ecf6JdMzVBeQfDz4yvgYmfa16UrYZxbuqIePB_jDjL5mjYNsI-E55lsKhGnvA48');"></div>
+<div>
+<p class="font-bold text-sm group-hover:text-primary">Dr. Leo Dupont</p>
+<p class="text-[10px] text-[#6a8180]">Musculoskeletal</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="px-2 py-0.5 rounded bg-[#f1f4f3] dark:bg-[#2d3a3a] text-[10px] font-bold">PGY-2</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="font-black text-sm text-primary">96.8%</span>
+<div class="w-16 h-1 bg-[#dde3e3] dark:bg-[#2d3a3a] rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[96.8%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-medium">289</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1 text-orange-500 font-bold">
+<span>12</span>
+<span class="material-symbols-outlined text-sm fill-icon">local_fire_department</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-background-light dark:bg-background-dark/30 flex justify-center">
+<button class="text-sm font-bold text-primary hover:underline">Show 42 More Residents</button>
+</div>
+</div>
+</div>
+<!-- Sidebar (Achievements & Stats) -->
+<div class="space-y-6">
+<!-- Personal Progress Card -->
+<div class="bg-primary text-white p-6 rounded-xl shadow-lg shadow-primary/20">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-bold">Your Standing</h3>
+<p class="text-xs text-white/70">Keep it up, Dr. Miller!</p>
+</div>
+<span class="text-2xl font-black">#12</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-[10px] font-bold uppercase mb-1">
+<span>To Top 10</span>
+<span>+1.2% needed</span>
+</div>
+<div class="w-full bg-white/20 h-1 rounded-full">
+<div class="bg-white h-full w-[85%]"></div>
+</div>
+</div>
+<button class="w-full py-2 bg-white text-primary rounded-lg text-xs font-black uppercase tracking-wider">Review Discrepancies</button>
+</div>
+</div>
+<!-- Badges & Achievements Section -->
+<div class="bg-white dark:bg-[#1e2a2a] p-5 rounded-xl border border-[#dde3e3] dark:border-[#2d3a3a]">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">military_tech</span>
+<h3 class="font-bold text-sm">Achievement Hall</h3>
+</div>
+<div class="space-y-5">
+<div class="flex gap-4">
+<div class="size-10 shrink-0 flex items-center justify-center rounded-lg bg-gold/10 text-gold">
+<span class="material-symbols-outlined fill-icon">stars</span>
+</div>
+<div>
+<h4 class="text-sm font-bold leading-none mb-1">Gold Standard</h4>
+<p class="text-[11px] text-[#6a8180]">100% agreement on 50+ critical cases.</p>
+<div class="mt-2 flex -space-x-2">
+<div class="size-5 rounded-full border-2 border-white dark:border-[#1e2a2a] bg-cover" data-alt="Avatar of award winner" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCM4C2yt7TcMNDon6NUDpghcLyGjWJFww04J8aL6owOlDj0ZcG7QW8gFGyX_f9F2Wk4OGoOdhAoVxU2KP0QiWA66eek0YzEYp9yznBwpdpV9ILkpcljwQ8AcpvyS9jLelaKWbPrLl_9L21BVox90bUz5J9lvzth3hYP0-sLjO4jv1ZKFJb1U4FENxGOrlnibxg5T3r0aHe3FltduSk-XLse_a9cWlsYLdkY4FDsES7_I5sqLsYZ6V_DeGtw_5k7eBrxeXbhywW9hpo');"></div>
+<div class="size-5 rounded-full border-2 border-white dark:border-[#1e2a2a] bg-cover" data-alt="Avatar of award winner" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCK4ZL4ABUfMk61uRG98J_G62cT3DvGPuwIQN0bwtmXOY8UHd1m2LyqpIwiJv-fpE7uOc9Mo7aB5D499VrIZwLvmoi4xp_v4FEEBgOpOxy1pxqGturtAr8aIEahJj1ISTmmXUfVUcjjSmuuj8ixYQPnNhc8spHWQNePlnWrBirbOJvlB7b_faVamm0t0S7sxJnUIge2e-IuSsMdCrxruo3x0z0SdMU3p47gOakoafrAMZmIqEMafcdmrQV-35gYU2IiPoR6evsA7VA');"></div>
+<div class="size-5 rounded-full border-2 border-white dark:border-[#1e2a2a] bg-gray-200 flex items-center justify-center text-[8px] font-bold">+5</div>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-10 shrink-0 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div>
+<h4 class="text-sm font-bold leading-none mb-1">Efficient Reviewer</h4>
+<p class="text-[11px] text-[#6a8180]">Avg verification time &lt; 4 minutes.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-10 shrink-0 flex items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+<span class="material-symbols-outlined">history_edu</span>
+</div>
+<div>
+<h4 class="text-sm font-bold leading-none mb-1">Clinical Streak</h4>
+<p class="text-[11px] text-[#6a8180]">30 days without a major discrepancy.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-10 shrink-0 flex items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<div>
+<h4 class="text-sm font-bold leading-none mb-1">Peer Mentor</h4>
+<p class="text-[11px] text-[#6a8180]">Top 10% in peer-review helpfulness.</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-dashed border-[#dde3e3] dark:border-[#2d3a3a] rounded-lg text-xs font-bold text-[#6a8180] hover:bg-background-light dark:hover:bg-background-dark/40 transition-colors">
+                            View All 24 Badges
+                        </button>
+</div>
+<!-- Department Insights -->
+<div class="bg-[#121616] text-white p-5 rounded-xl">
+<h3 class="text-xs font-black uppercase tracking-widest text-primary mb-4">Dept. Insights</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs text-white/70">Avg. Accuracy</span>
+<span class="text-sm font-bold">94.2%</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-white/70">Top Subspecialty</span>
+<span class="text-sm font-bold text-green-400">Neuro</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-white/70">Cases This Month</span>
+<span class="text-sm font-bold">4,128</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-auto px-10 py-6 border-t border-[#dde3e3] dark:border-[#2d3a3a] text-center text-[10px] text-[#6a8180] uppercase tracking-[0.2em] font-bold">
+            RAVEN Clinical Governance © 2024 • Excellence Through Analytics
+        </footer>
+</div>
+</body></html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resident Comparison Dashboard | RAVEN AI</title>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2c528c",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14181e",
+                        "res1": "#2c528c",
+                        "res2": "#4ca3af",
+                        "res3": "#e67e22",
+                        "res4": "#7f8c8d",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .heatmap-cell {
+            transition: all 0.2s ease;
+        }
+        .heatmap-cell:hover {
+            filter: brightness(0.9);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#121416] dark:text-white">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#dde0e3] dark:border-[#2d333b] bg-white dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary text-white flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-xl">clinical_notes</span>
+</div>
+<h2 class="text-xl font-extrabold leading-tight tracking-tight">RAVEN AI</h2>
+</div>
+<div class="h-8 w-[1px] bg-[#dde0e3] dark:bg-[#2d333b]"></div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-semibold text-[#6a7381] hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-bold text-primary border-b-2 border-primary pb-1" href="#">Residents</a>
+<a class="text-sm font-semibold text-[#6a7381] hover:text-primary transition-colors" href="#">Reports</a>
+<a class="text-sm font-semibold text-[#6a7381] hover:text-primary transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-[#1e3a63] transition-all">
+<span class="material-symbols-outlined mr-2 text-lg">download</span>
+<span>Export PDF</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#f1f2f4] dark:bg-[#1c2128] text-[#121416] dark:text-white hover:bg-[#e2e4e7]">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#f1f2f4] dark:bg-[#1c2128] text-[#121416] dark:text-white relative">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-[#1c2128]"></span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-[#dde0e3]" data-alt="User profile picture of an academic director" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCh7lhvFTBA2jVrDqgSd5CtnCBNpWAmDNCWOXsoy-dAEUI5VLXeLh0Ja9vpyW8oYchD49F_0mCRstVNAOcg2hJ84u-cUM9Xv4_8zT5wDDMfXN-DKyaGpYiVilMFwQl1SceuTqF91T5SIz8rYU_cyLxDIFCoRANf0OP-IeB86HOVZBAcMuh3Kh_w2Pa2VD3bvhIWL1NYXX7xtGSrsVaHD03gnmPBAfPZjAHyQ_9_1_WkwinBl-PkhNdc1ZcQI10WpdvHQVJm1cfepDs");'></div>
+</div>
+</header>
+<main class="flex-1 flex flex-col max-w-[1440px] mx-auto w-full px-6 py-8 gap-8">
+<!-- Page Heading & Selector -->
+<div class="flex flex-col gap-6">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div class="max-w-2xl">
+<p class="text-xs font-bold uppercase tracking-widest text-[#6a7381] mb-1">Academic Performance</p>
+<h1 class="text-4xl font-black tracking-tight text-[#121416] dark:text-white">Resident Comparison</h1>
+<p class="mt-2 text-[#6a7381] text-base leading-relaxed">Multi-student diagnostic performance benchmarking. Monitoring AI-Human agreement, diagnostic accuracy growth, and pathology proficiency.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1c2128] border border-[#dde0e3] dark:border-[#2d333b] rounded-lg text-sm font-bold shadow-sm">
+<span class="material-symbols-outlined text-lg">calendar_today</span>
+<span>Academic Year 2023-24</span>
+</button>
+</div>
+</div>
+<!-- Comparison Chips -->
+<div class="flex items-center flex-wrap gap-3 bg-white dark:bg-[#1c2128] p-3 rounded-xl border border-[#dde0e3] dark:border-[#2d333b] shadow-sm">
+<div class="flex items-center gap-2 text-[#6a7381] pr-2 mr-2 border-r border-[#dde0e3]">
+<span class="material-symbols-outlined text-xl">group_add</span>
+<span class="text-xs font-bold uppercase">Residents (4/4)</span>
+</div>
+<button class="flex h-9 items-center gap-x-2 rounded-lg bg-res1/10 border border-res1/30 px-3 text-res1">
+<div class="size-2 rounded-full bg-res1"></div>
+<p class="text-sm font-bold">Dr. Sarah Chen</p>
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+<button class="flex h-9 items-center gap-x-2 rounded-lg bg-res2/10 border border-res2/30 px-3 text-res2">
+<div class="size-2 rounded-full bg-res2"></div>
+<p class="text-sm font-bold">Dr. James Wilson</p>
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+<button class="flex h-9 items-center gap-x-2 rounded-lg bg-res3/10 border border-res3/30 px-3 text-res3">
+<div class="size-2 rounded-full bg-res3"></div>
+<p class="text-sm font-bold">Dr. Elena Rodriguez</p>
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+<button class="flex h-9 items-center gap-x-2 rounded-lg bg-res4/10 border border-res4/30 px-3 text-res4">
+<div class="size-2 rounded-full bg-res4"></div>
+<p class="text-sm font-bold">Dr. Marcus Thorne</p>
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+<button class="flex h-9 w-9 items-center justify-center rounded-lg border-2 border-dashed border-[#dde0e3] text-[#6a7381] hover:border-primary hover:text-primary transition-all">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Dashboard Charts Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Grouped Bar Chart: AI-Human Agreement -->
+<div class="bg-white dark:bg-[#1c2128] border border-[#dde0e3] dark:border-[#2d333b] rounded-xl p-6 shadow-sm flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold text-[#121416] dark:text-white">AI-Human Agreement Rate (%)</h3>
+<p class="text-sm text-[#6a7381]">Verification consistency against RAVEN baseline</p>
+</div>
+<span class="material-symbols-outlined text-[#6a7381] cursor-help">info</span>
+</div>
+<div class="flex-1 flex flex-col justify-end gap-10">
+<div class="grid grid-cols-4 gap-4 items-end h-64 px-4">
+<!-- S. Chen -->
+<div class="flex flex-col items-center gap-3 h-full justify-end group">
+<div class="relative w-full bg-res1 rounded-t-lg hover:brightness-110 transition-all cursor-pointer" style="height: 92%;">
+<span class="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-res1">92%</span>
+</div>
+<p class="text-xs font-bold text-[#6a7381]">S. Chen</p>
+</div>
+<!-- J. Wilson -->
+<div class="flex flex-col items-center gap-3 h-full justify-end">
+<div class="relative w-full bg-res2 rounded-t-lg hover:brightness-110 transition-all cursor-pointer" style="height: 78%;">
+<span class="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-res2">78%</span>
+</div>
+<p class="text-xs font-bold text-[#6a7381]">J. Wilson</p>
+</div>
+<!-- E. Rodriguez -->
+<div class="flex flex-col items-center gap-3 h-full justify-end">
+<div class="relative w-full bg-res3 rounded-t-lg hover:brightness-110 transition-all cursor-pointer" style="height: 85%;">
+<span class="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-res3">85%</span>
+</div>
+<p class="text-xs font-bold text-[#6a7381]">E. Rodriguez</p>
+</div>
+<!-- M. Thorne -->
+<div class="flex flex-col items-center gap-3 h-full justify-end">
+<div class="relative w-full bg-res4 rounded-t-lg hover:brightness-110 transition-all cursor-pointer" style="height: 95%;">
+<span class="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-bold text-res4">95%</span>
+</div>
+<p class="text-xs font-bold text-[#6a7381]">M. Thorne</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Line Chart: Accuracy Growth -->
+<div class="bg-white dark:bg-[#1c2128] border border-[#dde0e3] dark:border-[#2d333b] rounded-xl p-6 shadow-sm flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold text-[#121416] dark:text-white">Accuracy Growth Trend</h3>
+<p class="text-sm text-[#6a7381]">Monthly diagnostic precision improvement</p>
+</div>
+<div class="flex gap-2">
+<span class="text-[10px] font-black bg-green-100 text-green-700 px-2 py-1 rounded">+12% AVG</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col min-h-[260px] relative">
+<!-- Simulated SVG Line Chart -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 200">
+<!-- Grid lines -->
+<line stroke="#f1f2f4" stroke-width="1" x1="0" x2="400" y1="50" y2="50"></line>
+<line stroke="#f1f2f4" stroke-width="1" x1="0" x2="400" y1="100" y2="100"></line>
+<line stroke="#f1f2f4" stroke-width="1" x1="0" x2="400" y1="150" y2="150"></line>
+<!-- Resident 1 (Sarah) -->
+<path d="M0,180 Q50,160 100,140 T200,90 T300,50 T400,20" fill="none" stroke="#2c528c" stroke-linecap="round" stroke-width="3"></path>
+<!-- Resident 2 (James) -->
+<path d="M0,170 Q50,150 100,160 T200,140 T300,130 T400,110" fill="none" stroke="#4ca3af" stroke-dasharray="4" stroke-linecap="round" stroke-width="3"></path>
+<!-- Resident 3 (Elena) -->
+<path d="M0,190 Q50,170 100,130 T200,100 T300,80 T400,60" fill="none" stroke="#e67e22" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="flex justify-between mt-4">
+<p class="text-[#6a7381] text-[11px] font-bold">AUG</p>
+<p class="text-[#6a7381] text-[11px] font-bold">OCT</p>
+<p class="text-[#6a7381] text-[11px] font-bold">DEC</p>
+<p class="text-[#6a7381] text-[11px] font-bold">FEB</p>
+<p class="text-[#6a7381] text-[11px] font-bold">APR</p>
+<p class="text-[#6a7381] text-[11px] font-bold">JUN</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Heat Map Section -->
+<div class="bg-white dark:bg-[#1c2128] border border-[#dde0e3] dark:border-[#2d333b] rounded-xl overflow-hidden shadow-sm">
+<div class="px-6 py-5 border-b border-[#dde0e3] dark:border-[#2d333b] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h2 class="text-xl font-extrabold text-[#121416] dark:text-white">Diagnostic Strengths &amp; Pathologies</h2>
+<p class="text-sm text-[#6a7381]">Proficiency Heatmap: Error rate per modality vs pathology type</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] font-bold text-[#6a7381]">LOW ERROR</span>
+<div class="flex gap-1">
+<div class="size-4 rounded bg-primary"></div>
+<div class="size-4 rounded bg-primary/60"></div>
+<div class="size-4 rounded bg-primary/30"></div>
+<div class="size-4 rounded bg-red-100"></div>
+<div class="size-4 rounded bg-red-400"></div>
+</div>
+<span class="text-[10px] font-bold text-[#6a7381]">HIGH ERROR</span>
+</div>
+</div>
+</div>
+<div class="p-6 overflow-x-auto">
+<table class="w-full min-w-[800px] border-separate border-spacing-2">
+<thead>
+<tr>
+<th class="text-left text-xs font-black uppercase text-[#6a7381] pb-4 px-2">Pathology (Modal)</th>
+<th class="pb-4 px-2 text-center text-xs font-bold text-res1">Dr. S. Chen</th>
+<th class="pb-4 px-2 text-center text-xs font-bold text-res2">Dr. J. Wilson</th>
+<th class="pb-4 px-2 text-center text-xs font-bold text-res3">Dr. E. Rodriguez</th>
+<th class="pb-4 px-2 text-center text-xs font-bold text-res4">Dr. M. Thorne</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="px-2 py-3 bg-[#f8f9fb] dark:bg-[#14181e] rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">radiology</span>
+<span class="text-sm font-bold">Pneumothorax (X-Ray)</span>
+</div>
+</td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold shadow-inner">0.4%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-red-100 flex items-center justify-center text-red-800 text-xs font-bold">2.8%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary/60 flex items-center justify-center text-white text-xs font-bold">1.1%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.3%</div></td>
+</tr>
+<tr>
+<td class="px-2 py-3 bg-[#f8f9fb] dark:bg-[#14181e] rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">ear_sound</span>
+<span class="text-sm font-bold">Biliary Sludge (US)</span>
+</div>
+</td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary/30 flex items-center justify-center text-primary text-xs font-bold">1.5%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.6%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-red-400 flex items-center justify-center text-white text-xs font-bold">4.2%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary/60 flex items-center justify-center text-white text-xs font-bold">1.2%</div></td>
+</tr>
+<tr>
+<td class="px-2 py-3 bg-[#f8f9fb] dark:bg-[#14181e] rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">neurology</span>
+<span class="text-sm font-bold">ICH / Hemorrhage (CT)</span>
+</div>
+</td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.2%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary/60 flex items-center justify-center text-white text-xs font-bold">0.9%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.5%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.4%</div></td>
+</tr>
+<tr>
+<td class="px-2 py-3 bg-[#f8f9fb] dark:bg-[#14181e] rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">pulmonology</span>
+<span class="text-sm font-bold">Consolidation (X-Ray)</span>
+</div>
+</td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-red-100 flex items-center justify-center text-red-800 text-xs font-bold">2.1%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary/30 flex items-center justify-center text-primary text-xs font-bold">1.4%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.8%</div></td>
+<td><div class="heatmap-cell h-12 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">0.2%</div></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Performance Leaderboard Table -->
+<div class="bg-white dark:bg-[#1c2128] border border-[#dde0e3] dark:border-[#2d333b] rounded-xl overflow-hidden shadow-sm mb-12">
+<div class="px-6 py-5 border-b border-[#dde0e3] dark:border-[#2d333b]">
+<h2 class="text-xl font-extrabold text-[#121416] dark:text-white">Comparative Performance Index</h2>
+<p class="text-sm text-[#6a7381]">Final rankings based on case throughput and discrepancy resolution speed</p>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-[#f8f9fb] dark:bg-[#14181e] text-[#6a7381] text-xs font-black uppercase">
+<tr>
+<th class="px-6 py-4">Resident</th>
+<th class="px-6 py-4">Volume of Cases</th>
+<th class="px-6 py-4">Avg. Agreement</th>
+<th class="px-6 py-4">Resolution Speed</th>
+<th class="px-6 py-4">Overall Rank</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#dde0e3] dark:divide-[#2d333b]">
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-res4 flex items-center justify-center text-white font-bold text-xs">MT</div>
+<div>
+<p class="text-sm font-bold">Dr. Marcus Thorne</p>
+<p class="text-[10px] text-[#6a7381]">PGY-3 Senior</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-semibold">1,402 cases</td>
+<td class="px-6 py-4 text-sm font-bold text-green-600">95.2%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">4.2 min</span>
+<div class="w-12 h-1.5 bg-[#f1f2f4] rounded-full overflow-hidden">
+<div class="h-full bg-green-500" style="width: 90%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-primary text-white text-[10px] font-black rounded uppercase tracking-tighter">Gold</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline text-sm font-bold">Full Profile</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-res1 flex items-center justify-center text-white font-bold text-xs">SC</div>
+<div>
+<p class="text-sm font-bold">Dr. Sarah Chen</p>
+<p class="text-[10px] text-[#6a7381]">PGY-2 Junior</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-semibold">1,280 cases</td>
+<td class="px-6 py-4 text-sm font-bold text-green-600">92.4%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">6.8 min</span>
+<div class="w-12 h-1.5 bg-[#f1f2f4] rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 70%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-[#4ca3af] text-white text-[10px] font-black rounded uppercase tracking-tighter">Silver</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline text-sm font-bold">Full Profile</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-res3 flex items-center justify-center text-white font-bold text-xs">ER</div>
+<div>
+<p class="text-sm font-bold">Dr. Elena Rodriguez</p>
+<p class="text-[10px] text-[#6a7381]">PGY-2 Junior</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-semibold">945 cases</td>
+<td class="px-6 py-4 text-sm font-bold text-yellow-600">85.8%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">12.5 min</span>
+<div class="w-12 h-1.5 bg-[#f1f2f4] rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500" style="width: 45%;"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-[#e67e22] text-white text-[10px] font-black rounded uppercase tracking-tighter">Bronze</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline text-sm font-bold">Full Profile</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-auto bg-white dark:bg-[#14181e] border-t border-[#dde0e3] dark:border-[#2d333b] py-6 px-10 text-center">
+<p class="text-xs text-[#6a7381] font-medium">
+                © 2024 RAVEN AI Medical Systems. All data is anonymized and compliant with HIPAA regulations.
+            </p>
+</footer>
+</div>
+</body></html>
