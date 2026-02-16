@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Peer Review Oversight Queue - RAVEN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#167b9c",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111d21",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: #3d4d52 transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #3d4d52;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col font-display">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-solid border-slate-200 dark:border-[#293438] bg-white dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">RAVEN</h2>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-primary text-sm font-semibold border-b-2 border-primary pb-1" href="#">Oversight</a>
+<a class="text-slate-500 dark:text-[#9eb1b7] text-sm font-medium hover:text-primary transition-colors" href="#">Worklist</a>
+<a class="text-slate-500 dark:text-[#9eb1b7] text-sm font-medium hover:text-primary transition-colors" href="#">Archive</a>
+<a class="text-slate-500 dark:text-[#9eb1b7] text-sm font-medium hover:text-primary transition-colors" href="#">Residents</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<label class="relative hidden lg:block">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="w-64 bg-slate-100 dark:bg-[#293438] border-none rounded text-sm py-2 pl-10 focus:ring-1 focus:ring-primary placeholder:text-slate-400" placeholder="Search cases or residents..."/>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded size-9 bg-slate-100 dark:bg-[#293438] text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded size-9 bg-slate-100 dark:bg-[#293438] text-slate-600 dark:text-white hover:bg-slate-200 dark:hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 border border-slate-200 dark:border-[#3d4d52]" data-alt="Senior Radiologist profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDRQjCwTPXCMXd-sspbsXXqKUoMjNTMd27NJjBsRXcdVBGwCSoL2nLa2qbzkR4BZQHQDIi_eI6nmqV9iI-m7IIfnRwfxpfLPjomP5oeFsC7A7HwIN0lU6bb_tJYnU7OlNTUAvq9bnReqw0jRCgcQu-RM5BMV5SQvJQc_RYoTAn9So0vpz3iZyjKTKoEQE8fUVGoonex8lu9s0K2aT4YNNv8mJoMLDRYZJi7M-3s4BPmzrCW2ZocA8X0whQmJVDlhS9IxdwM32CmGW4");'></div>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<!-- Center Content: Worklist -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-6 py-6">
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between items-end gap-4 mb-8">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Peer Review Oversight Queue</h1>
+<p class="text-slate-500 dark:text-[#9eb1b7] text-sm">Shift Summary: Active monitoring for department oversight &amp; training</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 rounded h-9 px-4 bg-slate-100 dark:bg-[#293438] text-slate-700 dark:text-white text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined !text-lg">download</span>
+                        Export Report
+                    </button>
+<button class="flex items-center gap-2 rounded h-9 px-4 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined !text-lg">add</span>
+                        New Batch
+                    </button>
+</div>
+</div>
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="flex flex-col gap-2 rounded p-5 bg-white dark:bg-[#1c2426] border border-slate-200 dark:border-[#3d4d52] shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-[#9eb1b7] text-xs font-semibold uppercase tracking-wider">Total Pending</p>
+<span class="material-symbols-outlined text-primary">pending_actions</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white text-3xl font-bold">42</p>
+<p class="text-[#0bda57] text-xs font-medium">+12% vs last shift</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded p-5 bg-white dark:bg-[#1c2426] border border-slate-200 dark:border-[#3d4d52] shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-[#9eb1b7] text-xs font-semibold uppercase tracking-wider">Avg. Agreement</p>
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white text-3xl font-bold">94.2%</p>
+<p class="text-[#0bda57] text-xs font-medium">+0.5%</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded p-5 bg-white dark:bg-[#1c2426] border border-slate-200 dark:border-[#3d4d52] shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-[#9eb1b7] text-xs font-semibold uppercase tracking-wider">High Discrepancy</p>
+<span class="material-symbols-outlined text-orange-500">warning</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white text-3xl font-bold">5</p>
+<p class="text-orange-500 text-xs font-medium">Critical Attention</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded p-5 bg-white dark:bg-[#1c2426] border border-slate-200 dark:border-[#3d4d52] shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-[#9eb1b7] text-xs font-semibold uppercase tracking-wider">Turnaround (SLA)</p>
+<span class="material-symbols-outlined text-primary">schedule</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-slate-900 dark:text-white text-3xl font-bold">12m</p>
+<p class="text-[#fa5f38] text-xs font-medium">-4% efficiency</p>
+</div>
+</div>
+</div>
+<!-- Tabs and Table -->
+<div class="bg-white dark:bg-[#111d21] rounded-lg border border-slate-200 dark:border-[#3d4d52] shadow-lg overflow-hidden">
+<div class="flex border-b border-slate-200 dark:border-[#3d4d52] bg-slate-50 dark:bg-[#1c2426] px-4">
+<button class="px-4 py-4 border-b-2 border-primary text-primary text-xs font-bold uppercase tracking-wider">All Cases</button>
+<button class="px-4 py-4 text-slate-400 dark:text-[#9eb1b7] text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors">High Priority</button>
+<button class="px-4 py-4 text-slate-400 dark:text-[#9eb1b7] text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors">Discrepancies</button>
+<button class="px-4 py-4 text-slate-400 dark:text-[#9eb1b7] text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors">My Residents</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-[#1c2426] border-b border-slate-200 dark:border-[#3d4d52]">
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest">Student/Resident</th>
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest">Scan Type</th>
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest text-center">AI Discrepancies</th>
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest">Time in Queue</th>
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest">Priority</th>
+<th class="px-6 py-4 text-slate-500 dark:text-[#9eb1b7] text-[10px] font-bold uppercase tracking-widest text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-[#3d4d52]">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-200 dark:bg-[#293438] flex items-center justify-center text-xs font-bold">DA</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Dr. Aris</span>
+<span class="text-[10px] text-slate-400">R3 Resident</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#293438] rounded text-[11px] font-medium text-slate-600 dark:text-slate-300">Chest CT (PE Protocol)</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center size-6 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold ring-2 ring-white dark:ring-red-900/20">2</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium text-orange-500">14m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-red-500">
+<span class="material-symbols-outlined !text-[14px] fill-1">error</span>
+<span class="text-[11px] font-bold uppercase">Critical</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded transition-all transform group-hover:scale-105">Enter Review</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-200 dark:bg-[#293438] flex items-center justify-center text-xs font-bold">JC</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Dr. Chen</span>
+<span class="text-[10px] text-slate-400">R2 Resident</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#293438] rounded text-[11px] font-medium text-slate-600 dark:text-slate-300">Brain MRI (Stroke)</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center size-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-bold">0</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium text-slate-400">22m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-yellow-500">
+<span class="material-symbols-outlined !text-[14px]">bolt</span>
+<span class="text-[11px] font-bold uppercase">Medium</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded transition-all transform group-hover:scale-105">Enter Review</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-200 dark:bg-[#293438] flex items-center justify-center text-xs font-bold">BS</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Dr. Smith</span>
+<span class="text-[10px] text-slate-400">Intern</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#293438] rounded text-[11px] font-medium text-slate-600 dark:text-slate-300">Abdominal X-Ray</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center size-6 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-xs font-bold">1</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium text-slate-400">5m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-500">
+<span class="material-symbols-outlined !text-[14px]">low_priority</span>
+<span class="text-[11px] font-bold uppercase">Low</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded transition-all transform group-hover:scale-105">Enter Review</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group bg-red-500/[0.03]">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded bg-slate-200 dark:bg-[#293438] flex items-center justify-center text-xs font-bold">AL</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Dr. Lopez</span>
+<span class="text-[10px] text-slate-400">R1 Resident</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#293438] rounded text-[11px] font-medium text-slate-600 dark:text-slate-300">Neurovascular CT</span>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center size-6 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold ring-2 ring-red-500 animate-pulse">4</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm font-medium text-red-500">48m</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-red-500">
+<span class="material-symbols-outlined !text-[14px] fill-1">emergency</span>
+<span class="text-[11px] font-bold uppercase">Urgent</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="bg-primary hover:bg-primary/90 text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 rounded transition-all transform group-hover:scale-105">Enter Review</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-3 border-t border-slate-200 dark:border-[#3d4d52] bg-slate-50 dark:bg-[#1c2426] flex items-center justify-between text-xs text-slate-500">
+<p>Showing 4 of 42 pending reviews</p>
+<div class="flex gap-2">
+<button class="px-2 py-1 border border-slate-300 dark:border-[#3d4d52] rounded hover:bg-slate-100 dark:hover:bg-[#293438] disabled:opacity-50">Prev</button>
+<button class="px-2 py-1 border border-slate-300 dark:border-[#3d4d52] rounded hover:bg-slate-100 dark:hover:bg-[#293438]">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar: Resident Insights -->
+<aside class="w-80 border-l border-slate-200 dark:border-[#293438] bg-white dark:bg-background-dark overflow-y-auto custom-scrollbar p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-white">Resident Insights</h3>
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div class="space-y-6">
+<!-- Training Spotlight -->
+<div class="p-4 rounded border border-primary/30 bg-primary/5">
+<p class="text-[10px] font-bold text-primary uppercase mb-2">High Discrepancy Alert</p>
+<div class="flex items-center gap-3 mb-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-[#293438] border-2 border-primary overflow-hidden">
+<img alt="Resident Avatar" class="w-full h-full object-cover" data-alt="Portrait of Dr. Lopez R1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_arRqhYsp3iN2WzE177VDiaxqgRFc61-s0CYSFH6e_WKY1Qbq6ba0FGGw5bNC7382kaAHYgQqsqWDP2Ws_ctBdb1B8EEfRl8ZAH5s7006Y0h73ANVIOoD1i9FJ2Z_v1p0xGlO_hYy7ao9LPQqyrS-ZtEsqm0hya1lyVknwh0izoz5ldAIK3rzk_wGV5mtwiUex2gJMPz49VfIqRbXzpPqKEeWGb5fs2TGxoLlLqGbJtldgKNDdA-9dcJv3wHMyh0DRvGCIms5gGU"/>
+</div>
+<div>
+<p class="text-xs font-bold">Dr. Lopez (R1)</p>
+<p class="text-[10px] text-red-500 font-medium">18% Miss Rate this week</p>
+</div>
+</div>
+<div class="space-y-2">
+<p class="text-[11px] text-slate-500 dark:text-[#9eb1b7]">Consistently missing subtle vascular findings in neuro CTs.</p>
+<div class="flex flex-wrap gap-1">
+<span class="bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Training Recommended</span>
+<span class="bg-background-dark/50 text-slate-300 text-[9px] font-bold px-1.5 py-0.5 rounded">Neurovascular</span>
+</div>
+</div>
+</div>
+<!-- Trending Topics -->
+<div>
+<h4 class="text-[11px] font-bold uppercase text-slate-500 mb-4">Focus Areas for Dept</h4>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-xs">Lung Nodule Detection</span>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-green-500/10 text-green-500 rounded">98% Acc</span>
+</div>
+<div class="w-full h-1 bg-slate-100 dark:bg-[#293438] rounded-full overflow-hidden">
+<div class="h-full bg-green-500" style="width: 98%"></div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<span class="text-xs">Complex Fracture Ident.</span>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-yellow-500/10 text-yellow-500 rounded">82% Acc</span>
+</div>
+<div class="w-full h-1 bg-slate-100 dark:bg-[#293438] rounded-full overflow-hidden">
+<div class="h-full bg-yellow-500" style="width: 82%"></div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<span class="text-xs">Contrast Timing</span>
+<span class="text-[10px] font-bold px-2 py-0.5 bg-red-500/10 text-red-500 rounded">64% Acc</span>
+</div>
+<div class="w-full h-1 bg-slate-100 dark:bg-[#293438] rounded-full overflow-hidden">
+<div class="h-full bg-red-500" style="width: 64%"></div>
+</div>
+</div>
+</div>
+<!-- Recent Activity -->
+<div class="pt-4 border-t border-slate-200 dark:border-[#293438]">
+<h4 class="text-[11px] font-bold uppercase text-slate-500 mb-4">Department Feed</h4>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="mt-1 size-2 rounded-full bg-primary shrink-0"></div>
+<p class="text-[11px] leading-relaxed">
+<span class="font-bold">Dr. Aris</span> case #2948 validated with <span class="text-green-500">100% agreement</span>.
+                            </p>
+</div>
+<div class="flex gap-3">
+<div class="mt-1 size-2 rounded-full bg-orange-500 shrink-0"></div>
+<p class="text-[11px] leading-relaxed">
+<span class="font-bold">AI Flag</span>: Unusual volume of Chest X-Rays in queue (14 cases).
+                            </p>
+</div>
+<div class="flex gap-3">
+<div class="mt-1 size-2 rounded-full bg-slate-400 shrink-0"></div>
+<p class="text-[11px] leading-relaxed">
+                                Weekly Performance Report ready for download.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 bg-slate-100 dark:bg-[#293438] text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-white rounded hover:bg-primary/20 transition-colors">
+                View Full Analytics
+            </button>
+</aside>
+</main>
+</body></html>

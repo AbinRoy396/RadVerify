@@ -88,16 +88,53 @@ python -m nltk.downloader punkt stopwords
 ### Run the Dashboard
 
 ```bash
+# Start the Dashboard
 streamlit run app.py
+
+# Start the API Server
+uvicorn api_server:app --reload
 ```
 
-### Run Model Training (Optional)
+## 🐳 Docker Deployment
 
-If you want to fine-tune the model on your own dataset:
-1. Place data in `data/Data/train` (folders: benign, malignant, normal)
-2. Run training script:
+The entire system (Dashboard + API) can be deployed using Docker:
+
 ```bash
-python train_model.py
+# Build and start all services
+docker-compose up --build
+```
+- **Dashboard**: http://localhost:8501
+- **API Server**: http://localhost:8000
+
+## 📡 REST API Usage
+
+RadVerify provides a professional REST API for integration.
+
+**Auth Header**: `X-API-Key: radverify_secret_key`
+
+### 1. Verify Report
+`POST /verify`
+- **scan**: Image file (multipart/form-data)
+- **report**: Findings text (string)
+- **enhance**: Boolean (optional, default true)
+
+```bash
+curl -X POST "http://localhost:8000/verify" \
+     -H "X-API-Key: radverify_secret_key" \
+     -F "scan=@ultrasound.jpg" \
+     -F "report=BPD 47mm, HC 175mm"
+```
+
+### 2. View History
+`GET /history?limit=10`
+```bash
+curl -H "X-API-Key: radverify_secret_key" "http://localhost:8000/history"
+```
+
+### 3. Get Case Details
+`GET /case/{id}`
+```bash
+curl -H "X-API-Key: radverify_secret_key" "http://localhost:8000/case/1"
 ```
 
 ## 🔬 Technical Details
@@ -114,10 +151,10 @@ python train_model.py
 - AC: ±5.0 mm
 - FL: ±2.0 mm
 
-## 🔮 Future Roadmap
-- **Phase 7**: Production Deployment (Docker, REST API)
-- **Phase 8**: Clinical Validation (Uncertainty Quantification)
-- **Phase 9**: Advanced Analytics (Longitudinal Trends)
+## 🔮 Roadmap
+- [x] **Phase 7**: Production Deployment (Docker, REST API Ready)
+- [ ] **Phase 8**: Clinical Validation (Large-scale datasets)
+- [ ] **Phase 9**: Advanced Analytics (Longitudinal Trends)
 
 ## ⚖️ Medical Disclaimer
 

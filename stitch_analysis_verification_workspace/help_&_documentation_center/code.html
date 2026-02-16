@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | Help &amp; Documentation Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#24598f",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13191f",
+                        "success": "#26A060",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121417] dark:text-white transition-colors duration-200">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1c252e] px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary text-white rounded-lg">
+<span class="material-symbols-outlined text-2xl">neurology</span>
+</div>
+<h2 class="text-[#121417] dark:text-white text-xl font-bold leading-tight tracking-tight">RAVEN</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8 ml-4">
+<a class="text-[#121417] dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-[#121417] dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" href="#">Reports</a>
+<a class="text-[#121417] dark:text-slate-300 text-sm font-semibold hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-primary dark:text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Help Center</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 pl-3 pr-1 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+<span class="text-xs font-bold text-slate-500 hidden sm:block">Dr. Aris Thorne</span>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border-2 border-white dark:border-slate-600" data-alt="Profile picture of a male doctor in medical scrubs" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCyjsBgo501euHL_EZbWEubeA1GHc4jdCBfXGdPW3pvAplHLeJoyYdpAiAhLhwDe8y4QcbjDYOFILkhz6v9zn8Idiapd8IrMJFyj3FuYK_BHoxTfQ19PiRWKbDZzQTeYlmjMYuZc7az2gHea4Grs7DMuzMT-LAsLGDm6ZWGYj_DFAWnDvD_wV4fYlOLsfNbh02HoamGGvA3t6Y1vxRrSKWECd0GZI3UvRervKc2DLZyN49gzdU8hhmbfM63AR42SSfqabM8VW68wkk");'></div>
+</div>
+</div>
+</header>
+<main class="max-w-[1280px] mx-auto w-full px-6 py-8">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 mb-8 text-sm font-medium">
+<a class="text-slate-500 hover:text-primary" href="#">Support Home</a>
+<span class="text-slate-400 material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-100">Documentation Center</span>
+</nav>
+<!-- Hero Search Section -->
+<div class="text-center mb-12 py-10 rounded-2xl bg-gradient-to-br from-primary to-[#1a436e] text-white shadow-xl shadow-primary/10">
+<h1 class="tracking-tight text-3xl md:text-4xl font-bold mb-6">How can we help you today?</h1>
+<div class="max-w-2xl mx-auto px-6">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-900 border-none rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-4 focus:ring-primary/20 text-lg shadow-lg" placeholder="Search for topics, e.g., 'How to interpret AI heatmaps'..." type="text"/>
+<div class="absolute inset-y-2 right-2 flex items-center">
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-bold text-sm transition-all shadow-md">Search</button>
+</div>
+</div>
+<div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-medium text-blue-100">
+<span>Popular:</span>
+<a class="underline hover:text-white" href="#">DICOM Integration</a>,
+                        <a class="underline hover:text-white" href="#">Flagging Discrepancies</a>,
+                        <a class="underline hover:text-white" href="#">System Logs</a>
+</div>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- Main Content Area -->
+<div class="flex-1 space-y-12">
+<!-- Categories Grid -->
+<section>
+<div class="flex items-center justify-between mb-6 border-l-4 border-primary pl-4">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white">Knowledge Categories</h2>
+<a class="text-primary font-bold text-sm hover:underline" href="#">View All</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Category Card 1 -->
+<div class="group p-6 bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">rocket_launch</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Getting Started</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Quick start guide for new radiology departments and initial setup protocols.</p>
+</div>
+</div>
+</div>
+<!-- Category Card 2 -->
+<div class="group p-6 bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Understanding AI Findings</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Interpret heatmaps, confidence scores, and neural network flags.</p>
+</div>
+</div>
+</div>
+<!-- Category Card 3 -->
+<div class="group p-6 bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Admin &amp; User Management</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Role-based access controls, HIPAA compliance, and audit logs.</p>
+</div>
+</div>
+</div>
+<!-- Category Card 4 -->
+<div class="group p-6 bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-xl hover:border-primary/30 transition-all cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="p-3 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">build</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1">Troubleshooting</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Resolution guides for connectivity issues and common error codes.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Tutorials -->
+<section>
+<div class="flex items-center justify-between mb-6 border-l-4 border-primary pl-4">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white">Featured Tutorials</h2>
+<div class="flex gap-2">
+<button class="p-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="p-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Tutorial 1 -->
+<div class="group overflow-hidden bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl">
+<div class="relative aspect-video bg-slate-900 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:scale-105 transition-transform duration-500" data-alt="Radiology scan being uploaded into medical software" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDGQFlv4ULFi0k-48glqTVFpATMvUqVfzjj9D2LsFi9wSnTe4d2sgG46k_m2h4ogCQz75wpQ8ZmmV2c_Nyju0oa0Jd8faadVde_wrJNddmERUetQaR7jQOxat3yokmohFFEecl-tAnKYbqS7l0wLenllYi47vx_krg9AoP1IDBCPIwpM-P0xZk-GGG_hqIALe7hUy_ycm2FmhnAe6JNEmx1TA1mgHfXdVsOZPTOo__abmPvOtWaPWL09V1j_nmrXrwdK6jBnIKRzCg");'></div>
+<div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+<div class="size-14 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-white text-3xl fill-1">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded text-[10px] text-white font-bold">3:45 MIN</div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-slate-900 dark:text-white mb-1">Reviewing AI Discrepancies</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Master the workflow of verifying flagged areas in thoracic scans.</p>
+</div>
+</div>
+<!-- Tutorial 2 -->
+<div class="group overflow-hidden bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl">
+<div class="relative aspect-video bg-slate-900 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-80 group-hover:scale-105 transition-transform duration-500" data-alt="Hands using a keyboard in a hospital setting" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC8tVA0DwhyWH41iRky1U6IjwYgXJEm4QT_SfKlwBnZt0PPv82tc-6dJORcpxUgCZqXMpV9dCgYkTznFG80ByKRzoNG_8O2yS6tujOw3Oh1KiZ2A94K-ReqroFChtI7Xq3ZakeC56QJpmbx2Vl6fv8R67onnGF9UCjw8Ir2iftOgjv5rjjIirIcC75EzSEITM72EnUpWyFeIKPu0ap9-21AEMjNGZ6j9Ydwx0ZTRkcGA4PZtXa2F1b9zWUyTwS1czHNv44ZPfPROiw");'></div>
+<div class="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+<div class="size-14 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-white text-3xl fill-1">play_arrow</span>
+</div>
+</div>
+<div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded text-[10px] text-white font-bold">2:20 MIN</div>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-slate-900 dark:text-white mb-1">Uploading High-Resolution Scans</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Optimal settings for DICOM file ingestion and cloud sync.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar Area -->
+<aside class="w-full lg:w-80 space-y-6">
+<!-- System Status Card -->
+<div class="bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Live System Status</h3>
+<div class="flex items-center gap-3 p-3 bg-success/10 rounded-lg border border-success/20">
+<div class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-success"></span>
+</div>
+<span class="text-success font-bold text-sm">All Systems Operational</span>
+</div>
+<div class="mt-4 space-y-3">
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">API Gateway</span>
+<span class="text-success font-medium">99.9%</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-slate-500">ML Prediction Node</span>
+<span class="text-success font-medium">99.8%</span>
+</div>
+</div>
+</div>
+<!-- Quick Support Card -->
+<div class="bg-white dark:bg-[#1c252e] border border-slate-200 dark:border-slate-800 rounded-xl p-5">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Direct Support</h3>
+<div class="space-y-2">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90 transition-all shadow-md">
+<span class="material-symbols-outlined text-xl">support_agent</span>
+                                Contact IT Support
+                            </button>
+<button class="w-full flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-lg hover:bg-slate-100 transition-all">
+<span class="material-symbols-outlined text-xl">chat</span>
+                                Open Live Chat
+                            </button>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+<p class="text-[11px] font-bold text-slate-400 uppercase mb-3">Support Contacts</p>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-lg">call</span>
+<div class="text-xs">
+<p class="font-bold text-slate-700 dark:text-slate-200">1-800-RAVEN-AI</p>
+<p class="text-slate-400">24/7 Clinical Hotline</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-lg">mail</span>
+<div class="text-xs">
+<p class="font-bold text-slate-700 dark:text-slate-200">tech@raven-med.ai</p>
+<p class="text-slate-400">Standard Support</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Community/Resources -->
+<div class="p-6 rounded-xl bg-slate-900 text-white relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-bold mb-2">Radiology Exchange</h4>
+<p class="text-xs text-slate-400 mb-4">Join 5,000+ professionals sharing best practices.</p>
+<a class="inline-flex items-center text-xs font-bold text-primary-light hover:underline" href="#">
+                                Visit Forum <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
+</a>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-20">
+<span class="material-symbols-outlined text-8xl">groups</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-white dark:bg-[#1c252e] border-t border-slate-200 dark:border-slate-800 mt-12 py-10">
+<div class="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3 opacity-50">
+<span class="material-symbols-outlined text-primary">neurology</span>
+<span class="font-bold tracking-tight">RAVEN AI SYSTEMS</span>
+</div>
+<div class="flex gap-8 text-sm font-medium text-slate-500">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Compliance</a>
+<a class="hover:text-primary transition-colors" href="#">SLA</a>
+</div>
+<div class="text-xs text-slate-400">
+                    © 2024 Raven Medical Systems Inc. All rights reserved.
+                </div>
+</div>
+</footer>
+</div>
+</body></html>

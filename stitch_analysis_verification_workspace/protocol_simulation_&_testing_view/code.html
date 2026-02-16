@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Protocol Simulation &amp; Testing View | RAVEN</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#001fb8",
+                        "background-light": "#ffffff",
+                        "background-dark": "#1c1e22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#101218] dark:text-[#f0f1f5]">
+<!-- Main Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f0f1f5] dark:border-[#333] px-6 py-3 bg-background-light dark:bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-[#101218] dark:text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-tight uppercase">RAVEN</h2>
+</div>
+<div class="flex items-center gap-6 ml-4">
+<a class="text-[#5e668d] dark:text-[#a0a8c0] text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-[#5e668d] dark:text-[#a0a8c0] text-sm font-medium hover:text-primary transition-colors" href="#">Protocols</a>
+<a class="text-[#101218] dark:text-white text-sm font-bold border-b-2 border-primary pb-1" href="#">Simulation</a>
+<a class="text-[#5e668d] dark:text-[#a0a8c0] text-sm font-medium hover:text-primary transition-colors" href="#">Library</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-[#f0f1f5] dark:bg-[#2a2d34] rounded">
+<span class="material-symbols-outlined text-sm">database</span>
+<span class="text-xs font-semibold">DICOM NODE: ALPHA_01</span>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-primary/20" data-alt="User profile avatar portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBGiiGnLt9XK1iHCgrlXlvZ1O1UCHcUfqI72HqknH-GKaG24AdPksPLiIqQzIAFpKIaVP7gddvwubW6EWIgsKncA3lV7-Tz7QXrh--XLyIc8N6ndWBJ0lJQ-pDL4wd2_DDXi9A7vxi9ulnDhlsA9GUNMwWMFd6QpXkVdQ-QLL-qYDwuEHaTFWNM4rGLNiRXCkz0ynmTLefaVVnFeYrYZSmCYTP55Tziu-6lA7EW5DlziwMpSZyVX6w2sPxkoBsPr3SGSOZNip6nSGk");'></div>
+</div>
+</header>
+<main class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Sidebar: Test Set Selector -->
+<aside class="w-72 border-r border-[#f0f1f5] dark:border-[#333] flex flex-col bg-background-light dark:bg-background-dark">
+<div class="p-5 border-b border-[#f0f1f5] dark:border-[#333]">
+<h1 class="text-base font-bold uppercase tracking-wider text-[#5e668d]">Test Case Libraries</h1>
+<p class="text-xs text-[#5e668d] mt-1 font-medium">Historical Gold Standards</p>
+</div>
+<div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] cursor-pointer group transition-all">
+<span class="material-symbols-outlined text-[#5e668d] group-hover:text-primary transition-colors">radiology</span>
+<div class="flex flex-col">
+<p class="text-sm font-bold">Normal Chest X-ray</p>
+<p class="text-[10px] text-[#5e668d]">4,200 cases • 2023-Q4</p>
+</div>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 border border-primary/20 cursor-pointer">
+<span class="material-symbols-outlined text-primary">target</span>
+<div class="flex flex-col">
+<p class="text-sm font-bold text-primary">Lung Nodule Gold Standard</p>
+<p class="text-[10px] text-primary/70">1,200 cases • 2024-Q1</p>
+</div>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] cursor-pointer group transition-all">
+<span class="material-symbols-outlined text-[#5e668d] group-hover:text-primary">emergency</span>
+<div class="flex flex-col">
+<p class="text-sm font-bold">Pneumothorax Set</p>
+<p class="text-[10px] text-[#5e668d]">850 cases • 2023-Q3</p>
+</div>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] cursor-pointer group transition-all">
+<span class="material-symbols-outlined text-[#5e668d] group-hover:text-primary">verified_user</span>
+<div class="flex flex-col">
+<p class="text-sm font-bold">Healthy Controls</p>
+<p class="text-[10px] text-[#5e668d]">2,000 cases • 2024-V2</p>
+</div>
+</div>
+<div class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] cursor-pointer group transition-all">
+<span class="material-symbols-outlined text-[#5e668d] group-hover:text-primary">child_care</span>
+<div class="flex flex-col">
+<p class="text-sm font-bold">Pediatric Base</p>
+<p class="text-[10px] text-[#5e668d]">500 cases • Specialized</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-[#f8f9fb] dark:bg-[#25282c]">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold text-[#5e668d]">Batch Selection</span>
+<span class="text-[10px] bg-primary text-white px-1.5 rounded">NEW</span>
+</div>
+<button class="w-full bg-[#101218] dark:bg-white dark:text-[#101218] text-white py-2 text-xs font-bold uppercase tracking-widest rounded hover:opacity-90 transition-opacity">
+                    Load Custom Set
+                </button>
+</div>
+</aside>
+<!-- Center Section: Viewport and Progress -->
+<div class="flex-1 flex flex-col bg-[#f0f1f5] dark:bg-[#15171a]">
+<!-- Top Controls & Progress -->
+<div class="bg-background-light dark:bg-background-dark p-4 border-b border-[#dadce7] dark:border-[#333]">
+<div class="flex justify-between items-end mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<a class="text-[#5e668d] text-xs font-medium" href="#">Protocols</a>
+<span class="text-[#5e668d] text-xs">/</span>
+<span class="text-[#101218] dark:text-white text-xs font-bold">Simulation &amp; Testing</span>
+</div>
+<h2 class="text-2xl font-black tracking-tight leading-none">Simulation: Lung Nodule Protocol V2.1</h2>
+<p class="text-sm text-[#5e668d] mt-1 font-medium italic">Protocol Engine: RAVEN-Neural-6 (v4.0.2)</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 h-10 bg-[#f0f1f5] dark:bg-[#2a2d34] text-[#101218] dark:text-white text-xs font-bold rounded uppercase border border-[#dadce7] dark:border-[#444]">
+<span class="material-symbols-outlined text-sm">settings</span>
+                            Parameters
+                        </button>
+<button class="flex items-center gap-2 px-6 h-10 bg-primary text-white text-xs font-bold rounded uppercase shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+                            Run Batch Test
+                        </button>
+</div>
+</div>
+<div class="flex flex-col gap-2 p-3 bg-primary/5 rounded border border-primary/10">
+<div class="flex justify-between text-xs font-bold uppercase tracking-tight">
+<span class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary animate-pulse"></span>
+                            Simulating Active Batch
+                        </span>
+<span class="text-primary">452 / 1,200 Cases Processed (35%)</span>
+</div>
+<div class="h-1.5 w-full bg-primary/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary transition-all duration-500" style="width: 35.2%;"></div>
+</div>
+<div class="flex justify-between items-center">
+<p class="text-[10px] text-[#5e668d] font-medium">Processing Patient ID: RAV-9902-X</p>
+<p class="text-[10px] text-[#5e668d] font-bold">Est. 4m 12s remaining</p>
+</div>
+</div>
+</div>
+<!-- Side-by-Side Viewer -->
+<div class="flex-1 p-6 flex gap-4 overflow-hidden">
+<!-- Simulation Output -->
+<div class="flex-1 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold bg-[#101218] dark:bg-white dark:text-[#101218] text-white px-2 py-0.5 rounded-sm">SIMULATED OUTPUT</span>
+<span class="text-[10px] font-medium text-[#5e668d]">Overlay: High Sensitivity</span>
+</div>
+<div class="flex-1 bg-black rounded-lg relative border-4 border-primary/20 overflow-hidden shadow-2xl">
+<div class="absolute inset-0 bg-center bg-no-repeat bg-contain" data-alt="Medical chest X-ray with AI detection bounding boxes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC-YhZnDQ1TndPL37XA0EM2OTi8N-bsBc9l0YzmXZfEmYtDISr5ev48G8QvhYwgDoW_D_9C0294WzVx_CbxEC4YE7fdblAjcNx5Kl4GLB75IgWpwNDXEzBJtGl5A851OW_jmlPXk2ZdIZ35c9CmpWbBh76OjEyZL0rSWlI_13nCvUNaoPpnAfyoFbMVX12wdrEl_aCNTD2Un3NFSoc5nINb6JAqPiLxwuScXpqXjHWzukhCKlpQ6lKSfrYqnKEvyn7cbX5FfxN74Vc"); opacity: 0.9;'></div>
+<!-- UI Overlays for AI Detections -->
+<div class="absolute top-1/4 left-1/3 w-16 h-16 border-2 border-red-500 rounded flex items-start justify-end p-1">
+<span class="text-[8px] bg-red-500 text-white px-1 leading-tight">Nodule 0.94</span>
+</div>
+<div class="absolute top-[60%] right-1/4 w-20 h-20 border-2 border-primary rounded flex items-start justify-end p-1">
+<span class="text-[8px] bg-primary text-white px-1 leading-tight">Calcification 0.81</span>
+</div>
+</div>
+</div>
+<!-- Ground Truth -->
+<div class="flex-1 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold bg-green-600 text-white px-2 py-0.5 rounded-sm">GROUND TRUTH (GOLD)</span>
+<span class="text-[10px] font-medium text-[#5e668d]">Source: Senior Radiologist Consensus</span>
+</div>
+<div class="flex-1 bg-black rounded-lg relative border-4 border-green-600/20 overflow-hidden shadow-2xl">
+<div class="absolute inset-0 bg-center bg-no-repeat bg-contain" data-alt="Medical chest X-ray with original ground truth annotations" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuALYqxJEYGoV1pq0rvy9xrBu31TDXO_ShcGACH2Q6vuKRz3uLzk7uLXX82qm1vm68AqbjeGNapnIF_3wILfqhK16GRm26ZRHw2bRuBmH1yGR7pKmj0GNQkPYHjl1WpBdEaFLVDfL10luKdW8GN-UDH5XK04x-ctjZGD98ARP-yIWQie6wnlu9hhQIDf1T-YYQ5jRyR_VT5jD2hkF70T0ibwdn_cpoiv1y_Qp_SdDj45gezQ8WylTdBl4sKcKa_-I5SFJxrEPdPLRFw"); opacity: 0.9;'></div>
+<!-- UI Overlays for Ground Truth -->
+<div class="absolute top-1/4 left-1/3 w-16 h-16 border-2 border-green-500 rounded flex items-end justify-start p-1">
+<span class="text-[8px] bg-green-500 text-white px-1 leading-tight">Verified Nodule</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Viewer Toolbar -->
+<div class="h-12 border-t border-[#dadce7] dark:border-[#333] bg-background-light dark:bg-background-dark px-6 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">zoom_in</span>
+<span class="text-[10px] font-bold">100%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">contrast</span>
+<span class="text-[10px] font-bold">W:400 L:40</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-1 hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] rounded">chevron_left</button>
+<span class="text-xs font-bold">CASE 12 OF 1200</span>
+<button class="material-symbols-outlined p-1 hover:bg-[#f0f1f5] dark:hover:bg-[#2a2d34] rounded">chevron_right</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">layers</span>
+<span class="text-[10px] font-bold uppercase">Toggle Diff</span>
+</div>
+</div>
+</div>
+<!-- Right Panel: Simulation Results -->
+<aside class="w-80 border-l border-[#f0f1f5] dark:border-[#333] flex flex-col bg-background-light dark:bg-background-dark">
+<div class="p-5 border-b border-[#f0f1f5] dark:border-[#333]">
+<h3 class="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">analytics</span>
+                    Simulation Results
+                </h3>
+</div>
+<div class="flex-1 overflow-y-auto p-5 space-y-6">
+<!-- KPIs -->
+<div class="grid grid-cols-2 gap-3">
+<div class="p-3 bg-[#f8f9fb] dark:bg-[#2a2d34] rounded border-b-2 border-green-600">
+<p class="text-[10px] font-bold text-[#5e668d] uppercase">Accuracy</p>
+<p class="text-2xl font-black">94.2%</p>
+</div>
+<div class="p-3 bg-[#f8f9fb] dark:bg-[#2a2d34] rounded border-b-2 border-red-500">
+<p class="text-[10px] font-bold text-[#5e668d] uppercase">False Negs</p>
+<p class="text-2xl font-black">1.8%</p>
+</div>
+</div>
+<!-- Comparison List -->
+<div class="space-y-4">
+<h4 class="text-xs font-bold uppercase text-[#5e668d] flex justify-between">
+                        Performance Breakdown
+                        <span class="material-symbols-outlined text-xs">info</span>
+</h4>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 rounded bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+<span class="text-xs font-bold">Matches (TP)</span>
+</div>
+<span class="text-xs font-bold">1,130</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-red-600 text-sm">error</span>
+<span class="text-xs font-bold">Missed Finding</span>
+</div>
+<span class="text-xs font-bold">22</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">flag</span>
+<span class="text-xs font-bold">New Detections</span>
+</div>
+<span class="text-xs font-bold">48</span>
+</div>
+</div>
+</div>
+<!-- Recent Discrepancies -->
+<div class="space-y-3">
+<h4 class="text-xs font-bold uppercase text-[#5e668d]">Critical Discrepancies</h4>
+<div class="flex flex-col gap-2">
+<div class="p-2 border border-[#f0f1f5] dark:border-[#333] rounded hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<p class="text-[10px] font-bold">CASE-RX-772</p>
+<span class="text-[8px] bg-red-100 text-red-700 px-1 rounded uppercase">Miss</span>
+</div>
+<p class="text-[10px] text-[#5e668d] group-hover:text-[#101218] dark:group-hover:text-white transition-colors">Undetected nodule at lower right lobe apex.</p>
+</div>
+<div class="p-2 border border-[#f0f1f5] dark:border-[#333] rounded hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<p class="text-[10px] font-bold">CASE-RX-810</p>
+<span class="text-[8px] bg-blue-100 text-primary px-1 rounded uppercase">Better Detail</span>
+</div>
+<p class="text-[10px] text-[#5e668d] group-hover:text-[#101218] dark:group-hover:text-white transition-colors">Refined boundary for hilar lymphadenopathy.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-5 border-t border-[#f0f1f5] dark:border-[#333] space-y-3">
+<div class="flex items-center justify-between text-[10px]">
+<span class="text-[#5e668d] font-bold">V-CONCERN RATIO</span>
+<span class="text-primary font-bold">LOW (0.04)</span>
+</div>
+<button class="w-full h-10 border border-primary text-primary hover:bg-primary/5 text-xs font-bold rounded uppercase transition-colors">
+                    Export Detail Report
+                </button>
+<button class="w-full h-10 bg-[#101218] dark:bg-white dark:text-[#101218] text-white text-xs font-bold rounded uppercase">
+                    Save Protocol Changes
+                </button>
+</div>
+</aside>
+</main>
+</body></html>

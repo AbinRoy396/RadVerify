@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Individual Student Performance Report | RAVEN AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2c528c",
+                        "background-light": "#ffffff",
+                        "background-dark": "#1a1a1a",
+                        "academic-blue": "#2c528c",
+                        "success-green": "#4D994D",
+                        "warning-orange": "#CC8833",
+                        "danger-red": "#cc3333"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .radar-grid { stroke: #e5e7eb; stroke-width: 1; fill: none; }
+        .radar-axis { stroke: #9ca3af; stroke-width: 1; stroke-dasharray: 4; }
+        .radar-area-dept { fill: #2c528c; fill-opacity: 0.1; stroke: #2c528c; stroke-width: 1; stroke-dasharray: 2; }
+        .radar-area-student { fill: #2c528c; fill-opacity: 0.4; stroke: #2c528c; stroke-width: 3; }
+        .dark .radar-grid { stroke: #374151; }
+        .dark .radar-axis { stroke: #4b5563; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#121416] dark:text-gray-100 font-display">
+<!-- Top Navigation -->
+<header class="border-b border-solid border-[#f1f2f4] dark:border-gray-800 bg-white dark:bg-background-dark sticky top-0 z-50">
+<div class="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-3">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary text-white rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">clinical_notes</span>
+</div>
+<h2 class="text-xl font-extrabold tracking-tight">RAVEN<span class="font-light opacity-60 ml-1">AI</span></h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Dashboard</a>
+<a class="text-sm font-semibold text-primary border-b-2 border-primary pb-1" href="#">Residents</a>
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Analytics</a>
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Cases</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">search</button>
+<button class="material-symbols-outlined p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">notifications</button>
+<div class="size-9 rounded-full bg-cover bg-center border border-gray-200" data-alt="User avatar placeholder" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBq_GWrqZfODcnt5ujShK5htR8sY-0udusMmP55Qn5GrtjMQAf0CgBFsDG9JMeMhP_m2ZEZeO5GWdoM7TtUaV4VFnx2dc-fxQgBtr3EBckX6M7Dr7hxeQ3rTvgemEVjWUwOviN8cJE0KzZBGjdJGqyBqUVrIR_ezuo-ynfgcWfKnivJdPoMsEehLVOgYvhm5lxs-ambnIp_1KVUtxG0mbvazxzI3zY7vnkz9_d_wNs10P2fufpI5rf2f5tFOSQ4lIpIszeG6qz5BP0');">
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1200px] mx-auto px-6 py-8">
+<!-- Breadcrumbs & Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<nav class="flex items-center gap-2 text-sm">
+<a class="text-gray-500 hover:text-primary" href="#">Department Residents</a>
+<span class="material-symbols-outlined text-sm text-gray-400">chevron_right</span>
+<span class="font-semibold text-gray-900 dark:text-gray-100">Performance Report: Dr. Alex Chen</span>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-lg">mail</span>
+                    Message
+                </button>
+<button class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm hover:shadow-md transition-all">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                    Export Report
+                </button>
+</div>
+</div>
+<!-- Profile Snapshot -->
+<div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-8 mb-8 shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
+<div class="size-32 rounded-full border-4 border-gray-50 bg-cover bg-center shadow-inner shrink-0" data-alt="Dr Alex Chen profile portrait" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1wFRu3SYgGMqrVHWyJRKhURPPzRXpvhtBM93XDhzIwJI_u-HpCnlIzLesukhrPLYQ42y_W8MQlkWo6NvdVQQSxDGwFZt4yMgCammY81Bq5vM2HMkyNOcSXUeMYN7pzn8lSUhNb350-5nK6Cy19ficJ2I_vj8_2pSfzwjIJ8wizTlufTXjrwMC7Lgvo7LwnPpgVfHotLRXoDDUqSUivv6eZxmCBZvAq10gqcgciNg8HPaEmyneDcL5AeDXrs-xe_Wx26SY6PKIHqA');">
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-3xl font-bold tracking-tight">Dr. Alex Chen</h1>
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded uppercase">PGY-3 Resident</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 mb-6">Department of Diagnostic Radiology • Joined July 2022</p>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Cases Reviewed</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black">1,240</span>
+<span class="text-xs font-bold text-success-green flex items-center"><span class="material-symbols-outlined text-sm">arrow_upward</span>12%</span>
+</div>
+</div>
+<div class="flex flex-col border-l border-gray-100 dark:border-gray-800 pl-6">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Diagnostic Accuracy</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black">94.2%</span>
+<span class="text-xs font-bold text-success-green flex items-center"><span class="material-symbols-outlined text-sm">arrow_upward</span>0.5%</span>
+</div>
+</div>
+<div class="flex flex-col border-l border-gray-100 dark:border-gray-800 pl-6">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">AI Agreement Rate</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black">88.5%</span>
+<span class="text-xs font-bold text-danger-red flex items-center"><span class="material-symbols-outlined text-sm">arrow_downward</span>1.2%</span>
+</div>
+</div>
+<div class="flex flex-col border-l border-gray-100 dark:border-gray-800 pl-6">
+<span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Clinical Impact Score</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black">8.4/10</span>
+<span class="text-xs font-bold text-gray-400">Top 15%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Analytics Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Radar Chart -->
+<section class="lg:col-span-5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-6 shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-lg font-bold">Diagnostic Sensitivity</h3>
+<div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
+<div class="flex items-center gap-1.5"><span class="size-2 rounded-full border border-primary border-dashed"></span> Dept Avg</div>
+<div class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-primary/40 border border-primary"></span> Student</div>
+</div>
+</div>
+<!-- SVG Radar Chart Simulation -->
+<div class="relative aspect-square w-full max-w-[340px] mx-auto">
+<svg class="w-full h-full transform -rotate-18" viewbox="0 0 100 100">
+<!-- Grid lines -->
+<circle class="radar-grid" cx="50" cy="50" r="10"></circle>
+<circle class="radar-grid" cx="50" cy="50" r="20"></circle>
+<circle class="radar-grid" cx="50" cy="50" r="30"></circle>
+<circle class="radar-grid" cx="50" cy="50" r="40"></circle>
+<!-- Axis -->
+<line class="radar-axis" x1="50" x2="50" y1="50" y2="10"></line>
+<line class="radar-axis" x1="50" x2="88" y1="50" y2="37.5"></line>
+<line class="radar-axis" x1="50" x2="73.5" y1="50" y2="82.5"></line>
+<line class="radar-axis" x1="50" x2="26.5" y1="50" y2="82.5"></line>
+<line class="radar-axis" x1="50" x2="12" y1="50" y2="37.5"></line>
+<!-- Dept Data Area (Polygon) -->
+<polygon class="radar-area-dept" points="50,20 75,40 65,70 35,70 25,40"></polygon>
+<!-- Student Data Area (Polygon) -->
+<polygon class="radar-area-student" points="50,12 85,38 55,75 30,78 18,35"></polygon>
+</svg>
+<!-- Labels (Absolute Positioned) -->
+<span class="absolute top-[2%] left-1/2 -translate-x-1/2 text-[10px] font-bold text-gray-400">FRACTURES</span>
+<span class="absolute top-[35%] right-0 text-[10px] font-bold text-gray-400">NODULES</span>
+<span class="absolute bottom-[10%] right-[15%] text-[10px] font-bold text-gray-400">EFFUSIONS</span>
+<span class="absolute bottom-[10%] left-[15%] text-[10px] font-bold text-gray-400">PNEUMO.</span>
+<span class="absolute top-[35%] left-0 text-[10px] font-bold text-gray-400">CARDIOMEG.</span>
+</div>
+<div class="mt-8 space-y-3">
+<p class="text-xs text-gray-500 italic text-center leading-relaxed">
+                        Resident shows exceptional performance in <strong>Pneumothorax</strong> detection (+14% over avg), but shows systematic under-detection of <strong>Pleural Effusions</strong>.
+                    </p>
+</div>
+</section>
+<!-- Right Column: Discrepancy & Learning -->
+<div class="lg:col-span-7 flex flex-col gap-8">
+<!-- Discrepancy Breakdown Card -->
+<section class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-6 shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+<h3 class="text-lg font-bold mb-6">AI Discrepancy Breakdown</h3>
+<div class="flex h-10 w-full rounded-lg overflow-hidden mb-6">
+<div class="bg-academic-blue w-[88%] flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-tighter" title="Resident and AI agree">Agreement (88.5%)</div>
+<div class="bg-warning-orange w-[8%] flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-tighter" title="AI found finding student missed">AI Corrected (8.2%)</div>
+<div class="bg-success-green w-[4%] flex items-center justify-center text-[10px] font-bold text-white uppercase tracking-tighter" title="Student correctly overrode AI error">Res. Overrode (3.3%)</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+<span class="block text-xs font-bold text-gray-400 uppercase mb-1">Standard Agreements</span>
+<span class="text-xl font-bold">1,097</span>
+</div>
+<div class="p-3 bg-warning-orange/5 border border-warning-orange/10 rounded-lg">
+<span class="block text-xs font-bold text-warning-orange uppercase mb-1">AI Overreads (Misses)</span>
+<span class="text-xl font-bold text-warning-orange">102</span>
+</div>
+<div class="p-3 bg-success-green/5 border border-success-green/10 rounded-lg">
+<span class="block text-xs font-bold text-success-green uppercase mb-1">Resident Overrides</span>
+<span class="text-xl font-bold text-success-green">41</span>
+</div>
+</div>
+</section>
+<!-- Learning Opportunities Card -->
+<section class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-6 shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold">Priority Learning Opportunities</h3>
+<button class="text-xs text-primary font-bold hover:underline">View All Weaknesses</button>
+</div>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 p-4 border border-gray-50 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="size-10 bg-warning-orange/10 text-warning-orange rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">warning</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Small Pleural Effusions</h4>
+<p class="text-xs text-gray-500">15.2% false negative rate in last 30 days.</p>
+</div>
+<div class="text-right">
+<span class="block text-xs font-black text-danger-red">HIGH IMPACT</span>
+<button class="text-[10px] text-primary font-bold group-hover:underline">Review 12 Cases</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 p-4 border border-gray-50 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="size-10 bg-warning-orange/10 text-warning-orange rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">psychology</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Posterior Rib Fractures</h4>
+<p class="text-xs text-gray-500">Recurrent oversight in trauma panels.</p>
+</div>
+<div class="text-right">
+<span class="block text-xs font-black text-warning-orange">MODERATE</span>
+<button class="text-[10px] text-primary font-bold group-hover:underline">Review 8 Cases</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 p-4 border border-gray-50 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<div class="size-10 bg-success-green/10 text-success-green rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">verified</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold">Incidental Pulmonary Nodules</h4>
+<p class="text-xs text-gray-500">Improvement noted since previous review.</p>
+</div>
+<div class="text-right">
+<span class="block text-xs font-black text-success-green">IMPROVING</span>
+<button class="text-[10px] text-primary font-bold group-hover:underline">Details</button>
+</div>
+</div>
+</div>
+<div class="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/10 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
+<p class="text-xs text-primary/80 leading-relaxed font-medium">
+<strong>AI Recommendation:</strong> Suggest assigning Dr. Chen more blunt-force trauma series next shift to reinforce rib fracture detection workflows.
+                        </p>
+</div>
+</section>
+</div>
+</div>
+<!-- Recent Activity Table Section -->
+<section class="mt-8 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+<div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+<h3 class="text-lg font-bold">Recent Case Discrepancies</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs font-bold border border-gray-200 dark:border-gray-700 rounded-md">All Cases</button>
+<button class="px-3 py-1 text-xs font-bold bg-gray-100 dark:bg-gray-800 rounded-md">Only Mismatches</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-gray-50 dark:bg-gray-800/50 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4">Case ID</th>
+<th class="px-6 py-4">Study Type</th>
+<th class="px-6 py-4">Resident Finding</th>
+<th class="px-6 py-4">AI Finding</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="text-sm border-t border-gray-50 dark:border-gray-800">
+<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<td class="px-6 py-4 font-mono font-medium text-xs">#RX-82910</td>
+<td class="px-6 py-4">CXR - PA/Lateral</td>
+<td class="px-6 py-4">Negative for effusion</td>
+<td class="px-6 py-4 text-warning-orange font-semibold">Small R-Pleural Effusion</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-warning-orange/10 text-warning-orange text-[10px] font-bold rounded">AI OVERREAD</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-gray-400 hover:text-primary transition-colors">open_in_new</button>
+</td>
+</tr>
+<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<td class="px-6 py-4 font-mono font-medium text-xs">#RX-82905</td>
+<td class="px-6 py-4">Chest CT</td>
+<td class="px-6 py-4 font-semibold text-success-green">L-Upper Lobe Nodule</td>
+<td class="px-6 py-4 italic text-gray-400">Normal</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-success-green/10 text-success-green text-[10px] font-bold rounded">RES. OVERRIDE</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-gray-400 hover:text-primary transition-colors">open_in_new</button>
+</td>
+</tr>
+<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<td class="px-6 py-4 font-mono font-medium text-xs">#RX-82898</td>
+<td class="px-6 py-4">Hand X-Ray</td>
+<td class="px-6 py-4">Unremarkable</td>
+<td class="px-6 py-4 text-warning-orange font-semibold">Hairline Fracture (5th Meta.)</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-warning-orange/10 text-warning-orange text-[10px] font-bold rounded">AI OVERREAD</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-gray-400 hover:text-primary transition-colors">open_in_new</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 text-center">
+<button class="text-sm font-bold text-gray-500 hover:text-primary transition-colors">Load More Discrepancies</button>
+</div>
+</section>
+</main>
+<footer class="mt-12 py-10 border-t border-gray-100 dark:border-gray-800">
+<div class="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-3 grayscale opacity-50">
+<div class="size-6 bg-gray-400 text-white rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">clinical_notes</span>
+</div>
+<h2 class="text-sm font-extrabold tracking-tight">RAVEN AI</h2>
+</div>
+<p class="text-xs text-gray-400">© 2024 RAVEN Diagnostic Verification System. For institutional use only.</p>
+<div class="flex gap-6 text-xs font-bold text-gray-400">
+<a class="hover:text-primary" href="#">Support</a>
+<a class="hover:text-primary" href="#">Documentation</a>
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

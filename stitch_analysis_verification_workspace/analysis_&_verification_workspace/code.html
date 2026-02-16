@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analysis &amp; Verification Workspace | RAVEN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#148fb8",
+                        "background-light": "#f9fafa",
+                        "background-dark": "#17191c",
+                        "discrepancy": "#DF495A",
+                        "omission": "#f59e0b",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .diagnostic-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .ai-active-glow { box-shadow: 0 0 15px rgba(20, 143, 184, 0.3); border: 1px solid rgba(20, 143, 184, 0.5); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 py-2 bg-white dark:bg-[#1e2124] z-20">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1">hub</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold tracking-tight">RAVEN <span class="font-normal opacity-50 text-sm ml-1">Analysis Workspace</span></h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Patient List</a>
+<a class="text-primary text-sm font-semibold border-b-2 border-primary py-4 -mb-4" href="#">Verification</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-discrepancy/10 border border-discrepancy/30 px-3 py-1 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-discrepancy text-sm">warning</span>
+<span class="text-discrepancy text-xs font-bold uppercase tracking-wider">Discrepancy Detected</span>
+</div>
+<div class="h-6 w-px bg-slate-200 dark:border-slate-800"></div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 ml-2 border-2 border-slate-700" data-alt="Portrait of Dr. Raven Admin" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA1qyyXANuRVxa2_sa5vKXcP1AN9cLq6x5z-UeU95IBks6GTKUPKkv2YzHXEsROmPHWmuy6UjLvPifZpR0p7sFrHhA3OnGF97VIeEH6xm1VX9lVUu_wPJwxyqPlwta1ZwBrq7l_39jeGSGpB5V8ddir4AvuNQigz70n6eFIma5UGlnwS0_P54-9t-DcNnEPApoEZLcVFbRpPggVvRemz7WfXXsdupICTMQbj1FUeMysvLCxdXsbAISGZw_nE6QIV9rsXIXnbdeN2fE");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Minimal Side Nav -->
+<aside class="w-16 flex flex-col items-center py-6 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e2124]">
+<div class="flex flex-col gap-8">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">dashboard</span>
+</button>
+<button class="text-primary">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1">biotech</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">folder_open</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">analytics</span>
+</button>
+</div>
+<div class="mt-auto">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">help_outline</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Context Bar -->
+<div class="flex items-center justify-between px-6 py-3 bg-slate-50 dark:bg-background-dark/50 border-bottom border-slate-200 dark:border-slate-800">
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white font-bold text-lg">DOE, JOHN | 45Y | Chest X-Ray (PA View)</h1>
+<div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+<span>STUDY ID: 88291-XA</span>
+<span class="h-1 w-1 bg-slate-400 rounded-full"></span>
+<span>OCT 24, 2023 09:42 AM</span>
+<span class="h-1 w-1 bg-slate-400 rounded-full"></span>
+<span class="bg-primary/20 text-primary px-2 py-0.5 rounded">STAT</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-700">
+<span class="material-symbols-outlined text-sm">history</span>
+                        Compare Previous
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                        Verify Study
+                    </button>
+</div>
+</div>
+<!-- Workspace Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- 1. Diagnostic Image Viewer (Left) -->
+<div class="flex-[1.5] relative flex flex-col bg-black overflow-hidden border-r border-slate-800">
+<!-- Tool Overlay -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1 p-1 bg-slate-900/80 backdrop-blur rounded-xl border border-white/10 z-10">
+<button class="p-2 text-white hover:bg-white/10 rounded-lg"><span class="material-symbols-outlined">zoom_in</span></button>
+<button class="p-2 text-white hover:bg-white/10 rounded-lg"><span class="material-symbols-outlined">pan_tool</span></button>
+<button class="p-2 text-white hover:bg-white/10 rounded-lg"><span class="material-symbols-outlined">brightness_6</span></button>
+<button class="p-2 text-white hover:bg-white/10 rounded-lg"><span class="material-symbols-outlined">straighten</span></button>
+<button class="p-2 text-white hover:bg-white/10 rounded-lg border-l border-white/10 ml-1 pl-3"><span class="material-symbols-outlined">invert_colors</span></button>
+<button class="flex items-center gap-2 px-3 py-1 ml-2 bg-primary text-white rounded-lg text-xs font-bold">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                            AI OVERLAY
+                        </button>
+</div>
+<!-- Main Image Area -->
+<div class="flex-1 diagnostic-viewer relative flex items-center justify-center p-8">
+<div class="relative max-w-full max-h-full">
+<img class="max-w-full max-h-full opacity-80 mix-blend-screen shadow-2xl rounded" data-alt="Medical chest X-ray image in high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD57tZCNaKTyMhcARHi_e-_h-n7kbEwkDiu0bPOhG77MnZk9-Grvq1m0lT1ibcLZrbmk84D_B0As5R3nMwHzzNmBNqB40E0o9u_T49Cjw2KN9nPWd2dBribnY_2lgYQsbde1AKX4Y8NnbtkxyGjc997jLmqBRPTBz7TiVNZIuyjmnY2Le6GUrz5UVhDi_a-pN8lc9vGjkcEsJIONcykPB4qNQF1zdKqQ2UVYPH2WRgXlHtrx0lAe9o0sUJ3AcKDswdk7rd-07p_FxI"/>
+<!-- Simulated AI Bounding Box -->
+<div class="absolute top-[45%] left-[55%] w-[30%] h-[25%] border-2 border-dashed border-primary/60 bg-primary/5 rounded-lg">
+<span class="absolute -top-6 left-0 bg-primary text-white text-[10px] px-2 py-0.5 rounded-t font-bold uppercase">Cardiomegaly Area</span>
+</div>
+<!-- Heatmap Indicator -->
+<div class="absolute top-[20%] left-[15%] w-16 h-16 bg-discrepancy/30 rounded-full blur-2xl animate-pulse"></div>
+</div>
+</div>
+<!-- Image Info Bar -->
+<div class="px-4 py-2 bg-black/40 text-[10px] text-slate-400 flex justify-between border-t border-white/5 uppercase tracking-widest">
+<span>W: 2400 L: 1200</span>
+<span>Zoom: 145%</span>
+<span>Series: 1/1</span>
+</div>
+</div>
+<!-- 2. AI-Generated Findings (Center) -->
+<div class="w-80 flex flex-col bg-slate-50 dark:bg-[#1a1c1e] border-r border-slate-200 dark:border-slate-800">
+<div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">AI Findings</h3>
+<span class="text-[10px] bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-500">v2.4.1</span>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+<!-- Finding Card -->
+<div class="bg-white dark:bg-slate-800/40 p-3 rounded-lg border-l-4 border-primary ai-active-glow">
+<div class="flex justify-between items-start mb-2">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Cardiomegaly</span>
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">98% CONF.</span>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed">Transverse heart diameter exceeds 50% of thoracic diameter. Likely indicative of underlying CHF.</p>
+</div>
+<!-- Finding Card -->
+<div class="bg-white dark:bg-slate-800/40 p-3 rounded-lg border-l-4 border-slate-300 dark:border-slate-700">
+<div class="flex justify-between items-start mb-2">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Pleural Effusion</span>
+<span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">82% CONF.</span>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed">Blunting of the right costophrenic angle suggesting mild fluid accumulation.</p>
+</div>
+<!-- Finding Card -->
+<div class="bg-white dark:bg-slate-800/40 p-3 rounded-lg border-l-4 border-slate-300 dark:border-slate-700 opacity-60">
+<div class="flex justify-between items-start mb-2">
+<span class="text-sm font-bold text-slate-900 dark:text-white">Pulmonary Nodule</span>
+<span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">22% CONF.</span>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed">Shadow in upper left lobe; likely vessel end-on or artifact.</p>
+</div>
+</div>
+</div>
+<!-- 3. Human Report (Right) -->
+<div class="flex-1 flex flex-col bg-white dark:bg-[#1e2124]">
+<div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">Human Authored Report</h3>
+<div class="flex gap-1">
+<div class="size-2 rounded-full bg-discrepancy"></div>
+<div class="size-2 rounded-full bg-omission"></div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+<div class="prose prose-sm dark:prose-invert max-w-none">
+<p class="text-slate-400 text-xs mb-4 uppercase tracking-widest font-semibold">Narrative Description</p>
+<div class="text-lg leading-relaxed text-slate-700 dark:text-slate-300 space-y-6">
+<p>
+                                    Lungs are clear bilaterally without focal consolidation. 
+                                    <span class="bg-discrepancy/20 border-b-2 border-discrepancy px-1 text-slate-900 dark:text-white font-medium cursor-help" title="AI detected Cardiomegaly (98% confidence)">The cardiomediastinal silhouette is within normal limits.</span>
+                                    The pulmonary vasculature is not congested. 
+                                </p>
+<p>
+                                    No evidence of pneumothorax is seen. 
+                                    <span class="bg-omission/20 border-b-2 border-omission px-1 text-slate-900 dark:text-white font-medium cursor-help" title="Potential Omission: AI detected mild blunting of right costophrenic angle">Bony structures and soft tissues are unremarkable.</span>
+</p>
+<p class="text-slate-500 italic text-base">
+                                    IMPRESSION: No acute cardiopulmonary abnormality.
+                                </p>
+</div>
+</div>
+<!-- Discrepancy Detail Popover (Simulated) -->
+<div class="mt-12 p-4 bg-discrepancy/5 border border-discrepancy/20 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-4xl text-discrepancy">error</span>
+</div>
+<h4 class="text-discrepancy text-xs font-bold uppercase mb-2">Discrepancy Detail</h4>
+<p class="text-sm text-slate-700 dark:text-slate-400 mb-3">
+                                The human report indicates a "normal" heart size, but Raven Analysis detects a cardiothoracic ratio of 0.58, which constitutes cardiomegaly.
+                            </p>
+<div class="flex gap-2">
+<button class="bg-discrepancy text-white text-[10px] font-bold px-3 py-1 rounded">OVERRIDE AI</button>
+<button class="bg-primary text-white text-[10px] font-bold px-3 py-1 rounded">REVISE REPORT</button>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-background-dark/80 flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined">print</span>
+</button>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-lg text-sm">
+                                Flag for Review
+                            </button>
+<button class="px-8 py-2 bg-primary text-white font-bold rounded-lg text-sm shadow-xl shadow-primary/20">
+                                Sync &amp; Approve
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

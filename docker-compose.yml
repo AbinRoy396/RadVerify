@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Streamlit Dashboard
+  dashboard:
+    build: .
+    container_name: radverify-dashboard
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - radverify-data:/app/data
+    environment:
+      - ENV=production
+    restart: always
+
+  # FastAPI Server
+  api:
+    build: .
+    container_name: radverify-api
+    command: uvicorn api_server:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - radverify-data:/app/data
+    environment:
+      - API_KEY=radverify_secret_key
+    restart: always
+
+volumes:
+  radverify-data:

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN AI | Model Version Comparison</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007a8a",
+                        "background-light": "#fafafa",
+                        "background-dark": "#101818",
+                        "surface-dark": "#1b2628",
+                        "border-dark": "#395256",
+                        "success": "#0bda54",
+                        "danger": "#fa5c38",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .radar-grid { background-image: radial-gradient(circle, #395256 1px, transparent 1px); background-size: 20px 20px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #101818; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #395256; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen font-display">
+<!-- Top Navigation Bar -->
+<header class="border-b border-border-dark bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-white">clinical_notes</span>
+</div>
+<h1 class="text-xl font-black tracking-tighter uppercase">Raven AI</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium opacity-60 hover:opacity-100 transition-opacity" href="#">Dashboard</a>
+<a class="text-sm font-bold border-b-2 border-primary pb-1" href="#">Model Comparison</a>
+<a class="text-sm font-medium opacity-60 hover:opacity-100 transition-opacity" href="#">Validation Reports</a>
+<a class="text-sm font-medium opacity-60 hover:opacity-100 transition-opacity" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold uppercase tracking-widest px-4 py-2 rounded transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Export Comparison
+                </button>
+<div class="size-8 rounded-full bg-border-dark overflow-hidden border border-border-dark">
+<img alt="Radiologist user profile avatar" data-alt="Radiologist user profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd_jLRVHMHDgixedA52lnDt41HxGjJlTddNLFHf4Uvuiff4lwcbyKkJszGwNhrvO-6rwzf4DiNiTV6AAcPJo_JqbikeW0NOlEBl4EIiLrI6jPrWCQ5qJsIKTw2nLIRy-yCajh9Jy4bbf6mg_nCVPjlSYrtBZNMsav58ETCizlFBbc34U3dbd35ysxTx9IKeY34g_uO9p2alheDDT69YC3u0AmK3ZBvkEsArc5cLJjklHzqi0IJrSsmc785xd0x0wO2HaunAMFpf_g"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-6 py-8">
+<!-- Page Heading & Selectors -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+<div class="space-y-2">
+<h2 class="text-4xl font-black tracking-tight">Model Version Comparison</h2>
+<p class="text-slate-400 max-w-2xl">Benchmarking system performance between stable and experimental branches on NIH-Chest-Xray-14 (n=5,000).</p>
+</div>
+<div class="flex flex-wrap items-center gap-3 bg-surface-dark p-2 rounded-xl border border-border-dark">
+<div class="flex flex-col px-3">
+<span class="text-[10px] uppercase font-bold text-slate-500 mb-1">Source Version</span>
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold">v2.4.1 (Stable)</span>
+<span class="material-symbols-outlined text-sm opacity-50">expand_more</span>
+</div>
+</div>
+<div class="px-2">
+<span class="material-symbols-outlined text-primary">compare_arrows</span>
+</div>
+<div class="flex flex-col px-3 border-l border-border-dark">
+<span class="text-[10px] uppercase font-bold text-slate-500 mb-1">Target Version</span>
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-primary">v2.5.0-beta.2</span>
+<span class="material-symbols-outlined text-sm opacity-50">expand_more</span>
+</div>
+</div>
+<button class="ml-2 px-4 py-2 bg-border-dark hover:bg-slate-700 rounded text-xs font-bold uppercase">Update</button>
+</div>
+</div>
+<!-- High Level Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-dark border border-border-dark p-5 rounded-xl hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<p class="text-slate-400 text-sm font-medium">Global Precision</p>
+<span class="material-symbols-outlined text-slate-500 text-lg">target</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">0.924</p>
+<span class="text-success text-xs font-bold flex items-center">+2.1% <span class="material-symbols-outlined text-xs">arrow_upward</span></span>
+</div>
+</div>
+<div class="bg-surface-dark border border-border-dark p-5 rounded-xl hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<p class="text-slate-400 text-sm font-medium">Global Recall</p>
+<span class="material-symbols-outlined text-slate-500 text-lg">visibility</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">0.881</p>
+<span class="text-danger text-xs font-bold flex items-center">-0.4% <span class="material-symbols-outlined text-xs">arrow_downward</span></span>
+</div>
+</div>
+<div class="bg-surface-dark border border-border-dark p-5 rounded-xl hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<p class="text-slate-400 text-sm font-medium">F1 Score</p>
+<span class="material-symbols-outlined text-slate-500 text-lg">analytics</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">0.902</p>
+<span class="text-success text-xs font-bold flex items-center">+1.2% <span class="material-symbols-outlined text-xs">arrow_upward</span></span>
+</div>
+</div>
+<div class="bg-surface-dark border border-border-dark p-5 rounded-xl hover:border-primary/50 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<p class="text-slate-400 text-sm font-medium">Avg Latency</p>
+<span class="material-symbols-outlined text-slate-500 text-lg">timer</span>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">142ms</p>
+<span class="text-success text-xs font-bold flex items-center">-15% <span class="material-symbols-outlined text-xs">bolt</span></span>
+</div>
+</div>
+</div>
+<!-- Comparative Visualization Layer -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+<!-- Radar Comparison -->
+<div class="lg:col-span-8 bg-surface-dark border border-border-dark rounded-xl p-6 relative overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="font-bold text-lg">Model Performance Dimensions</h3>
+<p class="text-slate-500 text-xs">Balanced accuracy across clinical sub-groups</p>
+</div>
+<div class="flex gap-4 text-[10px] font-bold uppercase tracking-widest">
+<div class="flex items-center gap-1.5"><span class="size-2 bg-slate-500 rounded-full"></span> v2.4.1</div>
+<div class="flex items-center gap-1.5"><span class="size-2 bg-primary rounded-full"></span> v2.5.0</div>
+</div>
+</div>
+<div class="h-[300px] flex items-center justify-center relative">
+<!-- Simplified Visual Radar Mockup using SVGs -->
+<svg class="w-full h-full" viewbox="0 0 400 300">
+<!-- Grid Lines -->
+<circle cx="200" cy="150" fill="none" r="40" stroke="#395256" stroke-dasharray="2 2"></circle>
+<circle cx="200" cy="150" fill="none" r="80" stroke="#395256" stroke-dasharray="2 2"></circle>
+<circle cx="200" cy="150" fill="none" r="120" stroke="#395256" stroke-dasharray="2 2"></circle>
+<!-- Axis -->
+<line stroke="#395256" x1="200" x2="200" y1="30" y2="270"></line>
+<line stroke="#395256" x1="50" x2="350" y1="150" y2="150"></line>
+<!-- Data Area v2.4.1 -->
+<path d="M200 60 L280 120 L240 220 L120 180 L140 100 Z" fill="rgba(148, 163, 184, 0.2)" stroke="#94a3b8" stroke-width="2"></path>
+<!-- Data Area v2.5.0 -->
+<path d="M200 40 L310 130 L250 250 L100 200 L120 80 Z" fill="rgba(0, 122, 138, 0.3)" stroke="#007a8a" stroke-width="2"></path>
+</svg>
+<!-- Labels -->
+<span class="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500">PULMONARY EDEMA</span>
+<span class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500">PNEUMOTHORAX</span>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500">CARDIOMEGALY</span>
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500">PLEURAL EFFUSION</span>
+</div>
+</div>
+<!-- Latency Bar Comparison -->
+<div class="lg:col-span-4 bg-surface-dark border border-border-dark rounded-xl p-6">
+<div class="mb-8">
+<h3 class="font-bold text-lg">Inference Latency</h3>
+<p class="text-slate-500 text-xs">ms per 1024x1024 study</p>
+</div>
+<div class="space-y-8">
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold uppercase tracking-wider">
+<span>v2.4.1 Stable</span>
+<span class="text-slate-400">168ms</span>
+</div>
+<div class="h-12 bg-slate-900 border border-border-dark p-1">
+<div class="h-full bg-slate-600/50 w-[80%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold uppercase tracking-wider">
+<span class="text-primary">v2.5.0 Beta</span>
+<span class="text-primary">142ms</span>
+</div>
+<div class="h-12 bg-slate-900 border border-border-dark p-1">
+<div class="h-full bg-primary w-[65%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary">speed</span>
+<p class="text-xs leading-relaxed">Optimization v2.5.0 introduces <span class="text-white font-bold underline">TensorRT 8.6</span> kernels, reducing inference bottlenecks in convolutional layers by ~15%.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Deep Dive Table Layer -->
+<div class="bg-surface-dark border border-border-dark rounded-xl overflow-hidden">
+<div class="p-6 border-b border-border-dark flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h3 class="font-bold text-xl tracking-tight">Diagnostic Specificity Table</h3>
+<p class="text-slate-400 text-xs">Detailed performance breakdown by clinical finding label</p>
+</div>
+<div class="flex bg-background-dark p-1 rounded">
+<button class="px-3 py-1.5 text-[10px] font-bold uppercase bg-primary rounded shadow-sm">Macro-Avg</button>
+<button class="px-3 py-1.5 text-[10px] font-bold uppercase opacity-50 hover:opacity-100 transition-opacity">Micro-Avg</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-slate-900/50 border-b border-border-dark">
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Clinical Finding</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Version A (v2.4.1)</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Version B (v2.5.0)</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">AUC Change</th>
+<th class="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Confidence Level</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-dark/30">
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 font-bold text-sm">Pleural Effusion</td>
+<td class="px-6 py-4 text-center font-mono opacity-60">0.912</td>
+<td class="px-6 py-4 text-center font-mono font-bold text-primary">0.945</td>
+<td class="px-6 py-4 text-center">
+<span class="bg-success/10 text-success text-[10px] font-black px-2 py-1 rounded">+3.62%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<span class="material-symbols-outlined text-sm text-success" style="font-variation-settings: 'FILL' 1">verified</span>
+<span class="text-xs font-medium text-slate-400">High</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 font-bold text-sm">Cardiomegaly</td>
+<td class="px-6 py-4 text-center font-mono opacity-60">0.884</td>
+<td class="px-6 py-4 text-center font-mono font-bold text-primary">0.902</td>
+<td class="px-6 py-4 text-center">
+<span class="bg-success/10 text-success text-[10px] font-black px-2 py-1 rounded">+2.03%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<span class="material-symbols-outlined text-sm text-success" style="font-variation-settings: 'FILL' 1">verified</span>
+<span class="text-xs font-medium text-slate-400">High</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 font-bold text-sm">Pneumothorax</td>
+<td class="px-6 py-4 text-center font-mono opacity-60">0.825</td>
+<td class="px-6 py-4 text-center font-mono font-bold text-primary">0.811</td>
+<td class="px-6 py-4 text-center">
+<span class="bg-danger/10 text-danger text-[10px] font-black px-2 py-1 rounded">-1.69%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<span class="material-symbols-outlined text-sm text-slate-500">info</span>
+<span class="text-xs font-medium text-slate-400">Medium</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 font-bold text-sm">Lung Opacity</td>
+<td class="px-6 py-4 text-center font-mono opacity-60">0.762</td>
+<td class="px-6 py-4 text-center font-mono font-bold text-primary">0.798</td>
+<td class="px-6 py-4 text-center">
+<span class="bg-success/10 text-success text-[10px] font-black px-2 py-1 rounded">+4.72%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<span class="material-symbols-outlined text-sm text-slate-500">info</span>
+<span class="text-xs font-medium text-slate-400">Medium</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 font-bold text-sm">Hilar Enlargement</td>
+<td class="px-6 py-4 text-center font-mono opacity-60">0.710</td>
+<td class="px-6 py-4 text-center font-mono font-bold text-primary">0.715</td>
+<td class="px-6 py-4 text-center">
+<span class="bg-slate-500/10 text-slate-500 text-[10px] font-black px-2 py-1 rounded">+0.70%</span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-1">
+<span class="material-symbols-outlined text-sm text-danger">warning</span>
+<span class="text-xs font-medium text-slate-400">Low</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-900/30 border-t border-border-dark flex justify-between items-center">
+<p class="text-[10px] text-slate-500 uppercase font-bold">Showing 5 of 14 clinical finding labels</p>
+<div class="flex items-center gap-2">
+<button class="p-1 hover:bg-border-dark rounded"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<span class="text-[10px] font-bold">Page 1 of 3</span>
+<button class="p-1 hover:bg-border-dark rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Footer Metadata -->
+<footer class="mt-12 flex flex-col md:flex-row justify-between items-center gap-4 opacity-40">
+<div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
+<span>Dataset: NIH-Chest-Xray-14</span>
+<span class="size-1 bg-slate-500 rounded-full"></span>
+<span>Environment: NVIDIA A100-80GB</span>
+<span class="size-1 bg-slate-500 rounded-full"></span>
+<span>Last Run: Oct 12, 2023 14:32 UTC</span>
+</div>
+<div class="text-[10px] font-bold uppercase tracking-widest">
+                RAVEN-VCORE Version 8.4.12
+            </div>
+</footer>
+</main>
+</body></html>

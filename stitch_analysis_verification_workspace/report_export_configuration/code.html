@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Report Export Configuration - RAVEN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#196066",
+                        "background-light": "#f7f7f8",
+                        "background-dark": "#22262a",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #dde3e4; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f444a; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen font-display">
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-[#121617]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+<!-- Modal Container -->
+<div class="bg-white dark:bg-background-dark w-full max-w-[1100px] h-[85vh] rounded-xl shadow-2xl flex flex-col overflow-hidden border border-[#dde3e4] dark:border-[#3f444a]">
+<!-- Header -->
+<div class="flex items-center justify-between px-8 py-5 border-b border-[#f1f4f4] dark:border-[#3f444a]">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-xl">ios_share</span>
+</div>
+<h2 class="text-[#121617] dark:text-white text-2xl font-black leading-tight tracking-tight">Export Configuration</h2>
+</div>
+<button class="p-2 hover:bg-background-light dark:hover:bg-white/5 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[#678183]">close</span>
+</button>
+</div>
+<!-- Body Content (Dual Pane) -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left: Preview Panel -->
+<div class="flex-1 bg-background-light dark:bg-[#1a1e22] p-8 overflow-y-auto custom-scrollbar border-r border-[#dde3e4] dark:border-[#3f444a]">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-[#678183] text-sm font-bold uppercase tracking-widest">Document Preview</h3>
+<span class="text-xs text-primary bg-primary/10 px-2 py-1 rounded font-bold">LIVE DRAFT</span>
+</div>
+<!-- Paper Representation -->
+<div class="bg-white dark:bg-[#2a2f35] shadow-lg rounded-sm min-h-full p-10 border border-[#dde3e4] dark:border-[#3f444a] text-[#121617] dark:text-gray-200">
+<!-- Report Header -->
+<div class="flex justify-between items-start mb-8">
+<div>
+<h1 class="text-2xl font-bold mb-1">Radiology Report</h1>
+<p class="text-xs text-[#678183]">Patient ID: RAV-992-X | Case Ref: 44920</p>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-[#678183]">RAVEN AI INSIGHTS</p>
+<p class="text-xs">Generated: Oct 24, 2023</p>
+</div>
+</div>
+<!-- Scan Thumbnail with Heatmap -->
+<div class="mb-8 group relative cursor-crosshair">
+<div class="w-full h-64 bg-slate-900 rounded-lg overflow-hidden relative border border-[#dde3e4] dark:border-[#3f444a]">
+<div class="absolute inset-0 bg-center bg-cover opacity-60" data-alt="Chest X-ray medical scan imagery" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDROXsYPhx9d3UHk4WYCsMWfwGLAPL9p_QMTf9ocQIsUZLGrJdg9jkNLSNd1y0tkfEp9JX0QahDW3qPlix-Pb8ztQ8WJU95IfMrHjzr49mx9cLVXiaaZqmTIUik166glzsPeUaf1XvVhivv3mqUK1fWxJdN337vt8TQOejYXa5U3Vt8_3LN6NJQqU85MA9XXjKZMA-ro9fdK2s5PhkTIi2hO27cK1eMS6N3MmSMf1wWRiZQicbLJ-eFg2Jv99FnjmYwIgvECh7zFGM");'></div>
+<!-- Simulated Heatmap Overlay -->
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/40 to-transparent flex items-center justify-center">
+<div class="w-32 h-32 rounded-full border-2 border-primary bg-primary/20 animate-pulse flex items-center justify-center">
+<span class="text-[10px] font-bold text-white bg-primary px-1">94% PROB</span>
+</div>
+</div>
+</div>
+<p class="mt-2 text-[10px] italic text-[#678183]">Figure 1: Anterior-posterior chest view with AI heatmap indicating pulmonary density.</p>
+</div>
+<!-- Clinical Findings -->
+<div class="space-y-4">
+<h4 class="text-sm font-bold border-b border-[#f1f4f4] pb-2">Clinical Findings</h4>
+<p class="text-xs leading-relaxed">
+                                The heart size is within normal limits. There is a <span class="bg-primary/20 border-b-2 border-primary font-medium px-0.5">3.2cm focal opacity</span> in the right upper lobe, as highlighted by the AI diagnostic assistant. No pleural effusions or pneumothorax identified.
+                            </p>
+<p class="text-xs leading-relaxed text-[#678183]">
+<span class="font-bold text-primary italic">AI Discrepancy Note:</span> Human report omitted secondary vascular congestion notes identified in comparative scan from 2021.
+                            </p>
+</div>
+<!-- Mini Chart -->
+<div class="mt-8 pt-6 border-t border-dashed border-[#dde3e4]">
+<p class="text-[10px] font-bold text-[#678183] mb-4 uppercase">Comparative Metrics (30D)</p>
+<div class="h-24 w-full">
+<svg class="w-full h-full" viewbox="0 0 400 100">
+<path d="M0 80 Q 50 10, 100 70 T 200 30 T 300 60 T 400 20" fill="none" stroke="#196066" stroke-width="2"></path>
+<path d="M0 80 Q 50 10, 100 70 T 200 30 T 300 60 T 400 20 L 400 100 L 0 100 Z" fill="#19606622"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Configuration Panel -->
+<div class="w-[420px] p-8 overflow-y-auto custom-scrollbar">
+<div class="space-y-8">
+<!-- Section: Include Sections -->
+<div>
+<h3 class="text-[#121617] dark:text-white text-sm font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">fact_check</span>
+                                Report Sections
+                            </h3>
+<div class="space-y-3">
+<label class="flex items-center p-3 rounded-lg border border-[#f1f4f4] dark:border-[#3f444a] hover:bg-background-light dark:hover:bg-white/5 cursor-pointer transition-colors group">
+<input checked="" class="rounded border-[#dde3e4] text-primary focus:ring-primary size-4 mr-3" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#121617] dark:text-gray-200">Original Scan</span>
+<span class="text-xs text-[#678183]">Include raw DICOM-converted images</span>
+</div>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-[#f1f4f4] dark:border-[#3f444a] hover:bg-background-light dark:hover:bg-white/5 cursor-pointer transition-colors group">
+<input checked="" class="rounded border-[#dde3e4] text-primary focus:ring-primary size-4 mr-3" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#121617] dark:text-gray-200">AI Heatmaps</span>
+<span class="text-xs text-[#678183]">Visual probability distribution overlays</span>
+</div>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-[#f1f4f4] dark:border-[#3f444a] hover:bg-background-light dark:hover:bg-white/5 cursor-pointer transition-colors group">
+<input checked="" class="rounded border-[#dde3e4] text-primary focus:ring-primary size-4 mr-3" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#121617] dark:text-gray-200">Full Human Report</span>
+<span class="text-xs text-[#678183]">Verified diagnostic text with highlights</span>
+</div>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-[#f1f4f4] dark:border-[#3f444a] hover:bg-background-light dark:hover:bg-white/5 cursor-pointer transition-colors group">
+<input class="rounded border-[#dde3e4] text-primary focus:ring-primary size-4 mr-3" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#121617] dark:text-gray-200">Discrepancy Summary</span>
+<span class="text-xs text-[#678183]">List of variations between AI and human findings</span>
+</div>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-[#f1f4f4] dark:border-[#3f444a] hover:bg-background-light dark:hover:bg-white/5 cursor-pointer transition-colors group">
+<input class="rounded border-[#dde3e4] text-primary focus:ring-primary size-4 mr-3" type="checkbox"/>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-[#121617] dark:text-gray-200">Comparative Analytics</span>
+<span class="text-xs text-[#678183]">Historical health trends and metrics</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Section: Export Settings -->
+<div class="space-y-6">
+<h3 class="text-[#121617] dark:text-white text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">settings</span>
+                                Export Settings
+                            </h3>
+<!-- File Format -->
+<div class="space-y-2">
+<label class="text-xs font-bold text-[#678183] uppercase tracking-wider">File Format</label>
+<div class="relative">
+<select class="w-full bg-white dark:bg-[#1a1e22] border border-[#dde3e4] dark:border-[#3f444a] rounded-lg px-4 py-2.5 text-sm appearance-none focus:ring-primary focus:border-primary">
+<option>Portable Document Format (.pdf)</option>
+<option>Microsoft Word (.docx)</option>
+<option>Medical Imaging Format (.dicom)</option>
+</select>
+<div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#678183]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Anonymization Level -->
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold text-[#678183] uppercase tracking-wider">Anonymization Level</label>
+<span class="material-symbols-outlined text-sm text-[#678183] cursor-help">info</span>
+</div>
+<div class="relative">
+<select class="w-full bg-white dark:bg-[#1a1e22] border border-[#dde3e4] dark:border-[#3f444a] rounded-lg px-4 py-2.5 text-sm appearance-none focus:ring-primary focus:border-primary">
+<option>Full (All PHI Redacted)</option>
+<option>Partial (Keep Study ID)</option>
+<option>None (Hospital Records)</option>
+</select>
+<div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#678183]">expand_more</span>
+</div>
+</div>
+<div class="flex items-start gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-500 text-sm mt-0.5">lock</span>
+<p class="text-[10px] text-amber-800 dark:text-amber-200">Full anonymization removes name, DOB, and specific geolocation headers to comply with HIPAA.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="px-8 py-6 border-t border-[#f1f4f4] dark:border-[#3f444a] flex items-center justify-between bg-white dark:bg-background-dark">
+<button class="px-6 py-2.5 text-sm font-bold text-[#678183] hover:text-[#121617] dark:hover:text-white transition-colors">
+                    Cancel
+                </button>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 bg-primary text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:brightness-110 shadow-lg shadow-primary/20 transition-all">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Generate &amp; Download
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

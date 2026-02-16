@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | Diagnostic Protocol Preset Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#17bfcf",
+                        "background-light": "#f9fafa",
+                        "background-dark": "#16181d",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e2128",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3139",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #2d3139; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen font-display">
+<!-- Sidebar Navigation (Slim) -->
+<aside class="fixed left-0 top-0 h-full w-16 flex flex-col items-center py-6 bg-white dark:bg-card-dark border-r border-border-light dark:border-border-dark z-50">
+<div class="mb-10 text-primary">
+<span class="material-icons-outlined text-3xl">biotech</span>
+</div>
+<nav class="flex flex-col gap-8">
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">dashboard</span></a>
+<a class="text-primary" href="#"><span class="material-icons-outlined">layers</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">analytics</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">history</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">settings</span></a>
+</nav>
+<div class="mt-auto">
+<div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="Professional headshot of a doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB71UOjlE1YN1tqcsSWSnWDofx-Rr1wKZHNEvrspGZ91sQ16rHyJpDyDXAfVMWdY03Meoxw4ajfpwlb3vptCwq9W9n6EG49-mAnEw1pVXg2tCUyDCVBexaZHzFMxGBwV4ev2Toxww69CZmANdXtVtA80r2HD6-2yfcDb2EdxOiGyx1nS3QgspThyVIwrHJKZ1H9D90FE3RzyWOmQ0opByFQg0dFYvBuVcANbuXt0S06VkvB-OmCCD8iQrvRDICsSI5XckiUI8O7LkQ"/>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-16 p-8 max-w-[1600px] mx-auto">
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Diagnostic Protocol Library</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Configure and deploy clinical AI sensitivity thresholds across the network.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-white dark:bg-card-dark border border-border-light dark:border-border-dark px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<span class="material-icons-outlined text-lg">import_export</span>
+                    Export All
+                </button>
+<button class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:opacity-90 shadow-lg shadow-primary/20 transition-all">
+<span class="material-icons-outlined text-lg">add</span>
+                    Create New Protocol
+                </button>
+</div>
+</header>
+<!-- Filters & Search Bar -->
+<section class="bg-white dark:bg-card-dark p-4 rounded-xl border border-border-light dark:border-border-dark mb-8 flex flex-wrap items-center gap-4">
+<div class="relative flex-1 min-w-[300px]">
+<span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-background-light dark:bg-background-dark border-none rounded-lg focus:ring-2 focus:ring-primary text-sm transition-all" placeholder="Search protocols by clinical indication..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<select class="bg-background-light dark:bg-background-dark border-none rounded-lg text-sm py-2 px-4 focus:ring-2 focus:ring-primary cursor-pointer">
+<option>All Departments</option>
+<option>Radiology</option>
+<option>Emergency</option>
+<option>Pediatrics</option>
+<option>Oncology</option>
+</select>
+<select class="bg-background-light dark:bg-background-dark border-none rounded-lg text-sm py-2 px-4 focus:ring-2 focus:ring-primary cursor-pointer">
+<option>All Creators</option>
+<option>Dr. Aris (Lead)</option>
+<option>System Defaults</option>
+<option>Clinic Admin</option>
+</select>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons-outlined">filter_list</span>
+</button>
+</div>
+</section>
+<!-- Protocol Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+<!-- Card 1: Emergency Trauma -->
+<div class="group relative bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 transition-all shadow-sm hover:shadow-xl flex flex-col">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 rounded-lg">
+<span class="material-icons-outlined">personal_injury</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Urgent Care</span>
+</div>
+<h3 class="font-bold text-lg mb-1 group-hover:text-primary transition-colors">Emergency Trauma</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6">Optimized for rapid detection of acute fractures, dislocations, and internal hemorrhaging in ER settings.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Fracture Sensitivity</span>
+<span class="text-primary">98%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Soft Tissue Specificity</span>
+<span class="text-slate-600 dark:text-slate-300">72%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 72%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 pt-0 border-t border-border-light/50 dark:border-border-dark/50 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-7 h-7 rounded-full border-2 border-white dark:border-card-dark" data-alt="Doctor avatar thumbnail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCp_O-IIiyC6tQMRVRxkIKHvLqsLn2UPpEGly2zezQTRdm12XWrP5tGykGkRiEJd1emzDNh12_9yPb14M3iOm8lIzkVMH3I3OR0YKN7VD3QtnHtG8HIutdQDOQwWQcikX3YfbrpFKqWSbkBjnyrxgsc4HiYXZ37Rc4JkK4dyUnA6ZxutNHQhn5nu2f2w6CCXVfHEX1DXVkfqxfSl_h0VxbNgpAthCbxVDL06_L6nmLZ4EZqJWVjddmFys1mamOVtz2Uj5BjJdD1Zk"/>
+<div class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-card-dark flex items-center justify-center text-[10px] font-bold">+2</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors"><span class="material-icons-outlined text-lg">edit</span></button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-all">Quick Apply</button>
+</div>
+</div>
+</div>
+<!-- Card 2: Routine Screening -->
+<div class="group relative bg-white dark:bg-card-dark rounded-xl border border-primary dark:border-primary transition-all shadow-xl shadow-primary/5 flex flex-col ring-1 ring-primary ring-offset-2 dark:ring-offset-background-dark">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest shadow-lg">Active Preset</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary/10 text-primary rounded-lg">
+<span class="material-icons-outlined">assignment_turned_in</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-primary/10 px-2 py-1 rounded text-primary">Standard</span>
+</div>
+<h3 class="font-bold text-lg mb-1">Routine Screening</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6">Balanced sensitivity for early pathology detection. Focus on longitudinal comparison and noise reduction.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Pathology Detection</span>
+<span class="text-primary">85%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 85%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">False Positive Rate</span>
+<span class="text-slate-600 dark:text-slate-300">4%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 15%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 pt-0 border-t border-border-light/50 dark:border-border-dark/50 flex items-center justify-between bg-primary/5">
+<span class="text-xs font-medium text-primary flex items-center gap-1">
+<span class="material-icons-outlined text-sm">schedule</span>
+                        Updated 2h ago
+                    </span>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors"><span class="material-icons-outlined text-lg">edit</span></button>
+<button class="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-4 py-1.5 rounded-lg text-sm font-semibold cursor-default">In Use</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Pediatric Chest -->
+<div class="group relative bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 transition-all shadow-sm hover:shadow-xl flex flex-col">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
+<span class="material-icons-outlined">child_care</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Pediatric</span>
+</div>
+<h3 class="font-bold text-lg mb-1 group-hover:text-primary transition-colors">Pediatric Chest</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6">High specificity to reduce false positives in pediatric cases. Enhanced bone suppression for clearer lung views.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Specificity for Nodules</span>
+<span class="text-primary">94%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 94%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Noise Filtering</span>
+<span class="text-slate-600 dark:text-slate-300">High</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 90%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 pt-0 border-t border-border-light/50 dark:border-border-dark/50 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-icons-outlined text-sm">person</span>
+                        Dr. Aris
+                    </div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors"><span class="material-icons-outlined text-lg">edit</span></button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-all">Quick Apply</button>
+</div>
+</div>
+</div>
+<!-- Card 4: Oncology Follow-up -->
+<div class="group relative bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 transition-all shadow-sm hover:shadow-xl flex flex-col">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 rounded-lg">
+<span class="material-icons-outlined">biotech</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Advanced</span>
+</div>
+<h3 class="font-bold text-lg mb-1 group-hover:text-primary transition-colors">Oncology Follow-up</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6">Strict specificity for volumetric measurement and RECIST 1.1 compliance in tracking tumor growth.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">RECIST Accuracy</span>
+<span class="text-primary">99%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 99%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Volumetric Drift</span>
+<span class="text-slate-600 dark:text-slate-300">&lt;1.2%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-500" style="width: 20%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 pt-0 border-t border-border-light/50 dark:border-border-dark/50 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-icons-outlined text-sm">auto_awesome</span>
+                        AI Core v2.4
+                    </div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors"><span class="material-icons-outlined text-lg">edit</span></button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-all">Quick Apply</button>
+</div>
+</div>
+</div>
+<!-- Card 5: Cardiac CT -->
+<div class="group relative bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark hover:border-primary/50 dark:hover:border-primary/50 transition-all shadow-sm hover:shadow-xl flex flex-col">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 rounded-lg">
+<span class="material-icons-outlined">favorite</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Cardiovascular</span>
+</div>
+<h3 class="font-bold text-lg mb-1 group-hover:text-primary transition-colors">Cardiac CT</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6">Calcium scoring automation and motion artifact correction for coronary artery assessments.</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Calcium Scoring</span>
+<span class="text-primary">92%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span class="text-slate-400">Motion De-blur</span>
+<span class="text-slate-600 dark:text-slate-300">Enabled</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 85%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 pt-0 border-t border-border-light/50 dark:border-border-dark/50 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
+<div class="flex items-center gap-2 text-xs text-slate-400">
+<span class="material-icons-outlined text-sm">history_edu</span>
+                        Custom Logic
+                    </div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors"><span class="material-icons-outlined text-lg">edit</span></button>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-all">Quick Apply</button>
+</div>
+</div>
+</div>
+<!-- Empty / Add New Slot -->
+<div class="group relative bg-background-light dark:bg-background-dark/50 rounded-xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 transition-all flex flex-col items-center justify-center p-8 text-center cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-white dark:bg-card-dark shadow-sm flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:scale-110 transition-all mb-4">
+<span class="material-icons-outlined">add</span>
+</div>
+<h4 class="font-bold text-slate-700 dark:text-slate-300 mb-1">New Preset</h4>
+<p class="text-xs text-slate-400">Create a custom diagnostic protocol from scratch</p>
+</div>
+</div>
+<!-- System Status Bar -->
+<footer class="mt-12 flex items-center justify-between py-4 border-t border-border-light dark:border-border-dark text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+<div class="flex items-center gap-6">
+<span class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    AI Engine Online
+                </span>
+<span>Version 4.2.0-stable</span>
+</div>
+<div class="flex items-center gap-6">
+<span>Active Nodes: 12</span>
+<span>Latency: 45ms</span>
+<span class="text-primary hover:underline cursor-pointer">System Logs</span>
+</div>
+</footer>
+</main>
+<!-- Theme Toggle Floating Button -->
+<button class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-white dark:bg-card-dark border border-border-light dark:border-border-dark shadow-xl flex items-center justify-center text-slate-500 dark:text-primary z-50" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined">dark_mode</span>
+</button>
+</body></html>

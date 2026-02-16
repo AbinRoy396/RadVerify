@@ -99,41 +99,50 @@ class AIAnalyzer:
             
             print(f"Initializing {self.model_name} model...")
             
-            # Load pre-trained EfficientNet-B0 with ImageNet weights
-            base_model = EfficientNetB0(
-                weights='imagenet',
-                include_top=False,
-                input_shape=(224, 224, 3)
-            )
+            import os
             
-            # Add custom classification head for ultrasound features
-            x = base_model.output
-            x = GlobalAveragePooling2D()(x)
-            x = Dense(256, activation='relu')(x)
+            model_path = "models/best_model.h5"
             
-            # Output layer for structure presence classification
-            # We'll use this for feature extraction rather than direct classification
-            predictions = Dense(128, activation='relu')(x)
-            
-            # Create the model
-            self.model = Model(inputs=base_model.input, outputs=predictions)
-            
-            # For inference, we don't need to compile, but we'll set it to non-trainable
-            for layer in self.model.layers:
-                layer.trainable = False
-            
-            print(f"✓ Model loaded successfully: {self.model_name}")
-            print(f"  - Input shape: (224, 224, 3)")
-            print(f"  - Feature extraction mode enabled")
+            if os.path.exists(model_path):
+                print(f"Loading custom trained model from {model_path}...")
+                self.model = tf.keras.models.load_model(model_path)
+                print(f"✓ Custom model loaded successfully")
+                self.model_type = "custom_trained"
+            else:
+                print(f"Custom model not found at {model_path}")
+                print(f"Falling back to pre-trained EfficientNet-B0 (ImageNet)...")
+                
+                # Load pre-trained EfficientNet-B0 with ImageNet weights
+                base_model = EfficientNetB0(
+                    weights='imagenet',
+                    include_top=False,
+                    input_shape=(224, 224, 3)
+                )
+                
+                # Add custom classification head for ultrasound features
+                x = base_model.output
+                x = GlobalAveragePooling2D()(x)
+                x = Dense(256, activation='relu')(x)
+                
+                # Output layer for structure presence classification
+                predictions = Dense(3, activation='softmax')(x) # 3 classes: benign, malignant, normal
+                
+                # Create the model
+                self.model = Model(inputs=base_model.input, outputs=predictions)
+                self.model_type = "pretrained_imagenet"
+                
+                print(f"✓ Pre-trained model loaded successfully")
             
         except ImportError as e:
             print(f"⚠ TensorFlow not available: {e}")
             print("  Falling back to rule-based detection")
             self.model = "rule_based"
+            self.model_type = "rule_based"
         except Exception as e:
             print(f"⚠ Model initialization failed: {e}")
             print("  Falling back to rule-based detection")
             self.model = "rule_based"
+            self.model_type = "rule_based"
     
     def detect_structures(self, image: np.ndarray) -> Dict[str, Any]:
         """

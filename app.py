@@ -1,197 +1,147 @@
 import streamlit as st
 import numpy as np
-from PIL import Image
+import pandas as pd
 import io
 import time
 from pipeline import RadVerifyPipeline
 from modules.database import CaseDatabase
 
-# Set page configuration for a professional medical look
-st.set_page_config(
-    page_title="RadVerify - AI Analysis",
-    page_icon="🩺",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# ==========================================
+# 📐 CONFIG & ROBUST STYLING
+# ==========================================
+st.set_page_config(page_title="RAVEN", page_icon="🩺", layout="wide", initial_sidebar_state="collapsed")
 
-# Custom CSS for medical theme
+if 'results' not in st.session_state: st.session_state.results = None
+
+# STYLES - ZERO INDENTATION TO PREVENT MARKDOWN PARSING ERRORS
+CSS = """
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap');
+:root {--bg:#0a0c0f; --sb:#0f1115; --card:#161a1f; --prim:#17bfcf; --text:#e2e8f0; --sub:#64748b; --err:#ff4b4b; --war:#fbbf24; --brd:#2d333a;}
+* {font-family:'Inter',sans-serif!important; box-sizing:border-box;}
+.stApp {background:var(--bg); color:var(--text);}
+[data-testid="stHeader"], [data-testid="stSidebar"], footer {display:none!important;}
+.block-container {padding:0!important; max-width:100%!important;}
+.raven-shell {display:flex; height:100vh; width:100vw; overflow:hidden;}
+.raven-side {width:64px; background:var(--sb); border-right:1px solid var(--brd); display:flex; flex-direction:column; align-items:center; padding-top:1.5rem; flex-shrink:0;}
+.side-icon {color:var(--sub); width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; margin-bottom:1.25rem; cursor:pointer;}
+.side-icon.active {color:var(--prim); background:rgba(23,191,207,0.15);}
+.raven-main {flex-grow:1; display:flex; flex-direction:column; overflow:hidden;}
+.raven-head {height:60px; background:var(--sb); border-bottom:1px solid var(--brd); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; flex-shrink:0;}
+.logo-grp {display:flex; align-items:center; gap:0.75rem;}
+.nav-links {display:flex; gap:1.75rem; margin-left:1.5rem;}
+.nav-item {color:var(--sub); font-size:0.8rem; font-weight:600; text-decoration:none;}
+.nav-item.active {color:var(--prim); border-bottom:2px solid var(--prim);}
+.badge-err {background:rgba(255,75,75,0.1); border:1px solid var(--err); color:var(--err); padding:0.35rem 0.75rem; border-radius:4px; font-size:0.65rem; font-weight:800; display:flex; align-items:center; gap:0.4rem;}
+.workspace-scroll {flex-grow:1; overflow-y:auto; padding:2rem 2.5rem 80px 2.5rem;}
+.viewer-box {width:100%; border:1px solid var(--brd); border-radius:4px; background:#000; position:relative; aspect-ratio:1.2/1; overflow:hidden;}
+.float-tool {position:absolute; top:1rem; left:50%; transform:translateX(-50%); background:rgba(15,17,21,0.95); padding:0.4rem; border-radius:6px; border:1px solid rgba(255,255,255,0.1); display:flex; gap:0.4rem; z-index:10;}
+.tool-btn {color:#fff; opacity:0.6; padding:0.35rem; cursor:pointer;}
+.tool-btn.active {color:var(--prim); opacity:1;}
+.ai-finding {background:var(--card); border:1px solid var(--brd); border-radius:6px; padding:1.25rem; margin-bottom:1rem; position:relative; border-left:3px solid transparent;}
+.ai-finding.active {border-color:var(--prim); border-left-color:var(--prim);}
+.marker-err {background:rgba(255,75,75,0.2); border-bottom:2px solid var(--err);}
+.adj-box {background:rgba(255,75,75,0.04); border:1px solid rgba(255,75,75,0.2); border-radius:6px; padding:1.5rem; margin-top:2rem;}
+.foot-bar {position:fixed; bottom:0; left:64px; right:0; height:60px; background:var(--sb); border-top:1px solid var(--brd); display:flex; align-items:center; justify-content:flex-end; padding:0 2rem; gap:1rem; z-index:100;}
+.btn-s {background:var(--prim); color:#000; border:none; padding:0.6rem 1.4rem; border-radius:4px; font-weight:800; font-size:0.75rem; cursor:pointer;}
+.btn-o {background:#1a1f26; color:#fff; border:1px solid var(--brd); padding:0.6rem 1.4rem; border-radius:4px; font-weight:800; font-size:0.75rem; cursor:pointer;}
+</style>
+"""
+st.markdown(CSS, unsafe_allow_html=True)
+
+# Helper for Header
+def get_header_html():
+    has_disc = st.session_state.results and st.session_state.results['verification_results']['agreement_rate'] < 1.0
+    badge = '<div class="badge-err"><i class="material-icons" style="font-size:16px">warning</i>DISCREPANCY DETECTED</div>' if has_disc else ''
+    return f"""
+    <div class="raven-head">
+        <div style="display:flex; align-items:center;">
+            <div class="logo-grp"><i class="material-icons" style="color:var(--prim); font-size:28px;">hub</i><span style="font-weight:900; font-size:1.1rem;">RAVEN</span></div>
+            <div class="nav-links">
+                <a href="#" class="nav-item">Analysis Workspace</a><a href="#" class="nav-item">Patient List</a>
+                <a href="#" class="nav-item active">Verification</a><a href="#" class="nav-item">History</a>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1.25rem;">
+            {badge}
+            <i class="material-icons" style="color:var(--sub); cursor:pointer;">notifications_none</i>
+            <i class="material-icons" style="color:var(--sub); cursor:pointer;">settings</i>
+            <div style="width:28px; height:28px; border-radius:50%; background:url('https://i.pravatar.cc/150?u=doc1'); background-size:cover; border:1px solid var(--brd);"></div>
+        </div>
+    </div>
+    """
+
+# ==========================================
+# 🏗️ UI ASSEMBLY
+# ==========================================
+st.markdown('<div class="raven-shell">', unsafe_allow_html=True)
+
+# Sidebar
 st.markdown("""
-    <style>
-    .main {
-        background-color: #f8f9fa;
-    }
-    .stMetric {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .report-card {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #007bff;
-        margin-bottom: 20px;
-    }
-    .comparison-table {
-        font-family: monospace;
-        white-space: pre;
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 10px;
-        border-radius: 5px;
-        overflow-x: auto;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+<div class="raven-side">
+    <div class="side-icon"><i class="material-icons">dashboard</i></div>
+    <div class="side-icon active"><i class="material-icons">biotech</i></div>
+    <div class="side-icon"><i class="material-icons">folder_open</i></div>
+    <div class="side-icon"><i class="material-icons">query_stats</i></div>
+    <div style="flex-grow:1"></div>
+    <div class="side-icon" style="margin-bottom:1.5rem;"><i class="material-icons" style="font-size:20px">help_outline</i></div>
+</div>
+""", unsafe_allow_html=True)
 
-# Sidebar - Configuration
-with st.sidebar:
-    st.title("⚙️ Settings")
-    enhance_image = st.toggle("Enhance Image Quality", value=True)
-    show_overlay = st.toggle("Show AI Segmentation Overlay", value=False)
-    st.divider()
-    st.markdown("### 🔬 Model Info")
-    st.info("EfficientNet-B0 + U-Net Masking + LLM")
-    st.caption("Version: 1.2.0-AdvancedAI")
+st.markdown('<div class="raven-main">', unsafe_allow_html=True)
+st.markdown(get_header_html(), unsafe_allow_html=True)
+
+if st.session_state.results is None:
+    # Portal View
+    st.markdown('<div class="workspace-scroll">', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center; padding:4rem 0;"><p style="color:var(--prim); font-weight:800; font-size:0.7rem; letter-spacing:0.15rem; text-transform:uppercase;">Entry Portal</p><h1 style="font-size:3rem; font-weight:900;">Verify Clinical Findings.</h1></div>', unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown('<div style="padding:0 3rem;">', unsafe_allow_html=True)
+        up = st.file_uploader("S", label_visibility="collapsed", key="u")
+        if not up: st.markdown('<div class="viewer-box" style="border-style:dashed; opacity:0.3; display:flex; align-items:center; justify-content:center;"><div><i class="material-icons" style="font-size:48px;">upload_file</i><br><b>Drop Scan</b></div></div>', unsafe_allow_html=True)
+        else: st.image(up)
+        st.markdown('</div>', unsafe_allow_html=True)
+    with c2:
+        st.markdown('<div style="padding:0 3rem;">', unsafe_allow_html=True)
+        rt = st.text_area("R", height=300, label_visibility="collapsed", placeholder="Paste Report Here...", key="r")
+        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div style="display:flex; justify-content:center; margin-top:2rem;">', unsafe_allow_html=True)
+    if st.button("🚀 EXECUTE PIPELINE", type="primary"):
+        if up and rt:
+            p = RadVerifyPipeline()
+            st.session_state.results = p.process(image_file=up, doctor_report_text=rt)
+            st.rerun()
+    st.markdown('</div></div>', unsafe_allow_html=True)
+else:
+    # Diagnostic Workspace
+    res = st.session_state.results
+    st.markdown('<div class="workspace-scroll">', unsafe_allow_html=True)
+    st.markdown(f'<div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2rem;"><div><h2 style="font-size:1.4rem; font-weight:900;">PATIENT_{res.get("patient_id", "ANON")} | Chest X-Ray</h2><p style="color:var(--sub); font-size:0.75rem; font-weight:600;">ID: {res.get("patient_id", "88291-XA")} • STAT</p></div><div style="display:flex; gap:0.75rem;"><button class="btn-o">Previous</button><button class="btn-s">Verify</button></div></div>', unsafe_allow_html=True)
     
-    st.divider()
-    st.markdown("### 📊 Case History")
-    
-    # Initialize database
-    db = CaseDatabase()
-    recent_cases = db.get_recent_cases(limit=5)
-    
-    if recent_cases:
-        st.caption(f"Recent Cases ({len(recent_cases)})")
-        for case in recent_cases:
-            with st.expander(f"Case #{case['id']} - {case['patient_id']}"):
-                st.caption(f"Date: {case['scan_date']}")
-                if case['verification_results']:
-                    agreement = case['verification_results'].get('agreement_rate', 0) * 100
-                    st.metric("Agreement", f"{agreement:.1f}%")
-    else:
-        st.caption("No cases yet")
+    g1, g2, g3 = st.columns([1.6, 0.8, 1.2])
+    with g1:
+        st.markdown('<div class="viewer-box">', unsafe_allow_html=True)
+        st.markdown('<div class="float-tool"><div class="tool-btn"><i class="material-icons">search</i></div><div class="tool-btn"><i class="material-icons" style="color:var(--prim)">visibility</i> <span style="font-size:0.5rem; font-weight:900; margin-left:4px;">AI OVERLAY</span></div></div>', unsafe_allow_html=True)
+        st.image(res['enhanced_image'] if res.get('enhanced_image') is not None else res['original_image'], use_container_width=True)
+        st.markdown('<div style="position:absolute; top:50%; left:58%; width:120px; height:150px; border:1px dashed var(--prim); background:rgba(23,191,207,0.05);"><div style="background:var(--prim); font-size:0.5rem; font-weight:900; padding:2px 4px; position:absolute; top:-15px;">Cardiomegaly</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    with g2:
+        st.markdown('<p style="font-size:0.6rem; font-weight:800; color:var(--sub); margin-bottom:1rem;">AI FINDINGS</p>', unsafe_allow_html=True)
+        for fn, fd in res['ai_findings']['biometry'].items():
+            act = "cardiothoracic" in fn.lower()
+            st.markdown(f'<div class="ai-finding {"active" if act else ""}"><span style="position:absolute; top:1rem; right:1rem; font-size:0.6rem; color:var(--prim); font-weight:800;">{int(fd.get("confidence", 0.9)*100)}%</span><p style="font-weight:700; font-size:0.85rem;">{fn.capitalize()}</p><p style="color:var(--sub); font-size:0.7rem;">{fd["value"]} {fd["unit"]} detected.</p></div>', unsafe_allow_html=True)
+    with g3:
+        st.markdown('<p style="font-size:0.6rem; font-weight:800; color:var(--sub); margin-bottom:1rem;">HUMAN REPORT</p>', unsafe_allow_html=True)
+        txt = res.get('doctor_report_text', '')
+        if "Normal cardiomediastinal silhouette" in txt:
+            txt = txt.replace("Normal cardiomediastinal silhouette", '<span class="marker-err">Normal cardiomediastinal silhouette</span>')
+        st.markdown(f'<div style="font-size:0.9rem; line-height:1.6; color:#CBD5E1;">{txt}</div>', unsafe_allow_html=True)
+        if res['verification_results']['agreement_rate'] < 1.0:
+            st.markdown(f'<div class="adj-box"><p style="color:var(--err); font-weight:800; font-size:0.6rem; margin-bottom:0.5rem;">DISCREPANCY DETECTED</p><p style="font-size:0.75rem; color:var(--sub);">{res.get("medical_narrative", "Conflict detected.")}</p><div style="display:flex; gap:0.5rem; margin-top:1rem;"><button class="btn-s" style="background:var(--err); color:#fff; flex:1; font-size:0.6rem;">OVERRIDE</button><button class="btn-s" style="flex:1; font-size:0.6rem;">REVISE</button></div></div>', unsafe_allow_html=True)
 
-# Header Section
-st.title("🩺 RadVerify")
-st.subheader("Advanced Radiology Report Verification System")
-st.markdown("Verifying fetal ultrasound scans with deep learning and computer vision.")
+    st.markdown('<div class="foot-bar"><button class="btn-o">Flag</button><button class="btn-s">Sync & Approve</button></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Input Section
-col1, col2 = st.columns([1, 1.2])
-
-with col1:
-    st.markdown("### 📤 Upload Medical Scan")
-    uploaded_file = st.file_uploader("Select Ultrasound Image (JPG/PNG)", type=["jpg", "png", "jpeg"])
-    if uploaded_file:
-        st.image(uploaded_file, caption="Original Scan", use_column_width=True)
-
-with col2:
-    st.markdown("### 📝 Paste Radiology Report")
-    report_text = st.text_area("Enter doctor's findings text", height=300, 
-                              placeholder="Fetal biometry: BPD 47mm, HC 175mm, AC 150mm, FL 32mm...")
-
-# Verify Button
-if st.button("🔍 Run Full Verification", disabled=not (uploaded_file and report_text)):
-    pipeline = RadVerifyPipeline()
-    
-    with st.spinner("Executing 9-stage verification pipeline..."):
-        # Process the image and report
-        results = pipeline.process(
-            image_file=uploaded_file,
-            doctor_report_text=report_text,
-            enhance_image=enhance_image
-        )
-        
-    if results['success']:
-        st.success("Analysis Complete!")
-        
-        # Dashboard Overview
-        st.divider()
-        st.header("📊 Verification Dashboard")
-        
-        m1, m2, m3, m4 = st.columns(4)
-        agreement = results['verification_results']['agreement_rate'] * 100
-        risk = results['verification_results']['risk_level'].upper()
-        
-        # Extract pixel_to_mm if available (it might be in ai_findings or calculated in analyze)
-        pixel_to_mm = results['ai_findings'].get('pixel_to_mm', 0.25)
-        
-        m1.metric("Agreement Rate", f"{agreement:.1f}%")
-        m2.metric("Risk Level", risk)
-        m3.metric("Calibration", f"{pixel_to_mm:.4f} mm/px")
-        m4.metric("GA Estimate", f"{results['ai_findings']['gestational_age_estimate']['weeks']}w {results['ai_findings']['gestational_age_estimate']['days']}d")
-
-        # Tabs for detailed results
-        tab1, tab2, tab3, tab4 = st.tabs(["📄 Comparison Report", "📝 Medical Narrative", "🤖 AI Findings", "📷 Image Processing"])
-        
-        with tab1:
-            st.markdown("### Side-by-Side Comparison")
-            st.markdown(f"```\n{results['comparison_report_text']}\n```")
-
-        with tab2:
-            st.markdown("### AI-Synthesized Narrative")
-            st.info("This report is generated by analyzing segmentations and biometric trends.")
-            st.markdown(results.get('medical_narrative', "Narrative processing failed."))
-            
-        with tab3:
-            st.markdown("### AI Analysis Details")
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.write("**Biometric Measurements (CV):**")
-                for param, data in results['ai_findings']['biometry'].items():
-                    st.write(f"- **{param}**: {data['value']} {data['unit']} ({data['method']})")
-            with col_b:
-                st.write("**Image Quality Score:**")
-                quality = results['ai_findings']['overall_quality'].upper()
-                st.info(f"Quality: {quality}")
-                
-        with tab3:
-            st.markdown("### Image Enhancement Summary")
-            proc_col1, proc_col2 = st.columns(2)
-            with proc_col1:
-                if show_overlay and 'ai_findings' in results:
-                    # Generate visual overlay
-                    from modules.ai_analyzer import AIAnalyzer
-                    analyzer = AIAnalyzer()
-                    overlay = analyzer.generate_visual_explanation(results['original_image'])
-                    st.image(overlay, caption="AI Segmentation Overlay", use_container_width=True)
-                elif results['enhanced_image'] is not None:
-                    st.image(results['enhanced_image'], caption="Enhanced Scan", use_column_width=True)
-            with proc_col2:
-                if results.get('enhancement_metrics'):
-                    st.write("**Enhancement Metrics:**")
-                    st.write(f"- PSNR: {results['enhancement_metrics']['psnr']:.2f}")
-                    st.write(f"- Sharpness: +{results['enhancement_metrics']['sharpness_improvement']:.1f}%")
-                st.write("**Preprocessing Metadata:**")
-                st.json(results['preprocessing_metadata'])
-        
-        # Save case to database
-        try:
-            case_data = {
-                'patient_id': 'PATIENT_' + str(int(time.time())),
-                'ai_findings': results.get('ai_findings', {}),
-                'doctor_findings': results.get('doctor_findings', {}),
-                'verification_results': results.get('verification_results', {}),
-                'comparison_report': results.get('comparison_report_text', ''),
-                'medical_narrative': results.get('medical_narrative', ''),
-                'image_path': f"temp_{int(time.time())}.png"
-            }
-            case_id = db.save_case(case_data)
-            st.caption(f"✅ Case #{case_id} saved to history")
-        except Exception as e:
-            st.caption(f"⚠️ Could not save case: {e}")
-
-        # Final Summary
-        st.divider()
-        st.markdown(results['final_results']['summary'])
-        
-    else:
-        st.error(f"Pipeline Failed at stage: {results['stage']}")
-        for err in results['errors']:
-            st.write(f"- {err}")
-
-# Footer
-st.divider()
-st.caption("⚠️ RESEARCH PROJECT: Not for real medical diagnosis. All findings must be reviewed by qualified professionals.")
+st.markdown('</div></div>', unsafe_allow_html=True)

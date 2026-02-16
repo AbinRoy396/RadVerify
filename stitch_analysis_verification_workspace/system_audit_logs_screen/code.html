@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAVEN | System Audit Logs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007a8a",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2123",
+                        "border-muted": "#1e2e30",
+                        "surface-dark": "#16282a",
+                        "success": "#28A745",
+                        "error": "#DC3545",
+                        "warning": "#FFC107"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f2123;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e2e30;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #007a8a;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden h-screen flex">
+<!-- Fixed Left Sidebar -->
+<aside class="w-64 border-r border-border-muted flex flex-col bg-background-light dark:bg-background-dark shrink-0">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-3 mb-10">
+<div class="size-10 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl">visibility</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-lg font-black leading-tight tracking-tighter text-slate-900 dark:text-white">RAVEN AI</h1>
+<p class="text-primary text-[10px] font-bold uppercase tracking-widest">Clinical Audit</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">person_search</span>
+<span class="text-sm font-medium">Patient Records</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">fact_check</span>
+<span class="text-sm font-medium">Verification Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/20 text-primary rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] fill-[1]">security</span>
+<span class="text-sm font-bold">System Audit</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-border-muted">
+<div class="flex items-center gap-3 p-2 bg-surface-dark/50 rounded border border-border-muted">
+<div class="size-8 rounded bg-primary/30 flex items-center justify-center text-primary font-bold text-xs">SA</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-xs font-bold truncate">Admin User</span>
+<span class="text-[10px] text-slate-500 uppercase">Superadmin</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header Section -->
+<header class="p-6 border-b border-border-muted bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-md shrink-0">
+<div class="flex items-end justify-between gap-6">
+<div class="flex flex-col gap-1">
+<h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Audit Logs</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Real-time monitoring of security compliance and clinical activity.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 h-9 px-4 bg-surface-dark border border-border-muted hover:bg-surface-dark/80 text-white text-xs font-bold transition-all">
+<span class="material-symbols-outlined text-lg">download</span>
+                        EXPORT CSV
+                    </button>
+<button class="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-all">
+<span class="material-symbols-outlined text-lg">refresh</span>
+                        REFRESH
+                    </button>
+</div>
+</div>
+</header>
+<!-- Filter Bar -->
+<section class="px-6 py-3 border-b border-border-muted flex items-center justify-between gap-4 bg-surface-dark/30 shrink-0">
+<div class="flex-1 max-w-xl">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xl group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full h-10 pl-10 pr-4 bg-surface-dark border-border-muted focus:border-primary focus:ring-0 text-sm placeholder:text-slate-600 transition-all text-white" placeholder="Search by User, IP, or Event ID..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 h-9 px-3 bg-surface-dark border border-border-muted text-slate-300 text-[11px] font-bold uppercase tracking-wider">
+                    Date: Last 24h
+                    <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 h-9 px-3 bg-surface-dark border border-border-muted text-slate-300 text-[11px] font-bold uppercase tracking-wider">
+                    Action: All
+                    <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+<button class="flex items-center gap-2 h-9 px-3 bg-surface-dark border border-border-muted text-slate-300 text-[11px] font-bold uppercase tracking-wider">
+                    Status: All
+                    <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+</div>
+</section>
+<!-- Data Table Container -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Table Section -->
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead class="sticky top-0 z-10 bg-background-dark shadow-sm">
+<tr class="border-b border-border-muted">
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Timestamp</th>
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">User Identity</th>
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Action Performed</th>
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Source IP</th>
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] text-center">Status</th>
+<th class="px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] text-right">Details</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-muted/30">
+<!-- Row 1 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-xs text-slate-400 font-mono">2023-11-20 14:22:01.45</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-7 rounded-sm bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">AT</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white">Dr. Aris Thorne</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-tighter">Radiologist</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-slate-300">Modified Report <span class="text-slate-600 font-mono">#REP-8821</span></span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400">192.168.1.45</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success border border-success/20">SUCCESS</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white material-symbols-outlined text-lg">open_in_new</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-xs text-slate-400 font-mono">2023-11-20 14:15:02.12</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-7 rounded-sm bg-error/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-sm">no_accounts</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white tracking-tight italic">Unidentified Entity</span>
+<span class="text-[10px] text-error/60 uppercase tracking-tighter">Unauthorized</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-error underline decoration-error/30 underline-offset-4">Failed Login Attempt</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400">45.22.11.9</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-error/10 text-error border border-error/20">FAILURE</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white material-symbols-outlined text-lg">open_in_new</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-xs text-slate-400 font-mono">2023-11-20 13:58:22.90</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-7 rounded-sm bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">SA</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white">System Admin</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-tighter">Infrastructure</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-slate-300">Updated Global Scan Config</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400">10.0.0.12</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success border border-success/20">SUCCESS</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white material-symbols-outlined text-lg">open_in_new</button>
+</td>
+</tr>
+<!-- More rows to fill density -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-xs text-slate-400 font-mono">2023-11-20 13:45:11.33</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-7 rounded-sm bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">LR</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white">Dr. Lisa Ray</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-tighter">Radiologist</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-slate-300">Viewed Patient Scan <span class="text-slate-600 font-mono">#SC-1200</span></span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400">172.16.254.1</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success border border-success/20">SUCCESS</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white material-symbols-outlined text-lg">open_in_new</button>
+</td>
+</tr>
+<!-- High Export Activity Row -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 text-xs text-slate-400 font-mono">2023-11-20 13:12:45.01</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-7 rounded-sm bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">AT</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white">Dr. Aris Thorne</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-tighter">Radiologist</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium text-slate-300">Batch Exported Clinical Reports (50)</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400">192.168.1.45</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success border border-success/20">SUCCESS</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white material-symbols-outlined text-lg">open_in_new</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Security Alerts Panel -->
+<aside class="w-80 border-l border-border-muted flex flex-col shrink-0 bg-surface-dark/20 overflow-hidden">
+<div class="p-4 border-b border-border-muted bg-surface-dark/40 flex items-center justify-between">
+<h3 class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">emergency_home</span>
+                        Security Alerts
+                    </h3>
+<span class="size-5 rounded-full bg-error text-[10px] flex items-center justify-center font-bold text-white">3</span>
+</div>
+<div class="flex-1 overflow-auto p-4 space-y-4">
+<!-- Critical Alert -->
+<div class="p-3 border border-error/30 bg-error/5 rounded-lg flex flex-col gap-2 group cursor-pointer hover:bg-error/10 transition-colors">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.5 rounded bg-error text-[9px] font-black text-white uppercase tracking-tighter">Critical</span>
+<span class="text-[10px] text-slate-500 font-mono">14:15:02</span>
+</div>
+<p class="text-xs font-bold text-white leading-relaxed">Multiple failed logins detected from unusual IP address.</p>
+<p class="text-[10px] text-slate-500">Origin: <span class="text-error/70 font-mono">45.22.11.9</span> (External)</p>
+<div class="mt-1 flex gap-2">
+<button class="flex-1 py-1 px-2 bg-error text-white text-[9px] font-bold rounded">BLOCK IP</button>
+<button class="flex-1 py-1 px-2 border border-error/30 text-error text-[9px] font-bold rounded">IGNORE</button>
+</div>
+</div>
+<!-- Warning Alert -->
+<div class="p-3 border border-primary/30 bg-primary/5 rounded-lg flex flex-col gap-2 group cursor-pointer hover:bg-primary/10 transition-colors">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.5 rounded bg-primary text-[9px] font-black text-white uppercase tracking-tighter">Warning</span>
+<span class="text-[10px] text-slate-500 font-mono">13:12:45</span>
+</div>
+<p class="text-xs font-bold text-white leading-relaxed">Large batch data export performed by Dr. Aris Thorne.</p>
+<p class="text-[10px] text-slate-500">Volume: <span class="text-primary font-mono">50 Reports</span></p>
+<div class="mt-1">
+<button class="w-full py-1 px-2 bg-surface-dark border border-border-muted text-slate-300 text-[9px] font-bold rounded">REQUEST JUSTIFICATION</button>
+</div>
+</div>
+<!-- Info Alert -->
+<div class="p-3 border border-slate-700 bg-slate-800/20 rounded-lg flex flex-col gap-2 opacity-80 group cursor-pointer hover:opacity-100 transition-all">
+<div class="flex items-center justify-between">
+<span class="px-1.5 py-0.5 rounded bg-slate-600 text-[9px] font-black text-white uppercase tracking-tighter">Audit</span>
+<span class="text-[10px] text-slate-500 font-mono">12:00:00</span>
+</div>
+<p class="text-xs font-medium text-slate-400">Weekly compliance report generation scheduled.</p>
+<p class="text-[10px] text-slate-600 italic">No human intervention required.</p>
+</div>
+</div>
+<!-- Footer Stats -->
+<div class="p-4 border-t border-border-muted bg-background-dark">
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col">
+<span class="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Success Rate</span>
+<span class="text-xl font-black text-success">99.8%</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Active Alerts</span>
+<span class="text-xl font-black text-error">03</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Pagination Bar -->
+<footer class="h-12 border-t border-border-muted px-6 bg-surface-dark flex items-center justify-between shrink-0">
+<div class="flex items-center gap-4">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Showing 1-50 of 12,482 entries</span>
+<div class="h-4 w-px bg-border-muted"></div>
+<div class="flex items-center gap-1">
+<span class="text-[10px] font-bold text-slate-500 uppercase">Per page:</span>
+<select class="bg-transparent border-none text-[10px] font-bold text-white p-0 focus:ring-0 cursor-pointer">
+<option>50</option>
+<option>100</option>
+<option>250</option>
+</select>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="size-7 flex items-center justify-center border border-border-muted text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">first_page</span>
+</button>
+<button class="size-7 flex items-center justify-center border border-border-muted text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<div class="px-2 text-[10px] font-black text-white">PAGE 1 / 250</div>
+<button class="size-7 flex items-center justify-center border border-border-muted text-slate-300 hover:text-white transition-colors bg-primary/20 border-primary/50">
+<span class="material-symbols-outlined text-lg text-primary">chevron_right</span>
+</button>
+<button class="size-7 flex items-center justify-center border border-border-muted text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">last_page</span>
+</button>
+</div>
+</footer>
+</main>
+</body></html>
