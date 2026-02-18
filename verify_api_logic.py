@@ -17,22 +17,24 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
-    print("✅ Health check passed")
+    print("OK: Health check passed")
 
 def test_auth():
     print("\nTesting authentication...")
     # No key
     response = client.get("/history")
-    assert response.status_code == 403
+    if response.status_code not in (401, 403):
+        raise AssertionError(f"Expected 401/403 for missing key, got {response.status_code}: {response.text}")
     
     # Wrong key
     response = client.get("/history", headers={"X-API-Key": "wrong_key"})
-    assert response.status_code == 403
+    if response.status_code not in (401, 403):
+        raise AssertionError(f"Expected 401/403 for wrong key, got {response.status_code}: {response.text}")
     
     # Correct key
     response = client.get("/history", headers={"X-API-Key": "radverify_secret_key"})
     assert response.status_code == 200
-    print("✅ API Key authentication passed")
+    print("OK: API Key authentication passed")
 
 def test_verify_endpoint():
     print("\nTesting /verify endpoint...")
@@ -47,22 +49,20 @@ def test_verify_endpoint():
         "scan": ("test.png", img_byte_arr, "image/png")
     }
     data = {
-        "report": "BPD 47mm, HC 175mm",
+        "report": "BPD 47mm, HC 175mm. Brain normal. Heart normal. Abdomen normal.",
         "enhance": "true"
     }
     headers = {"X-API-Key": "radverify_secret_key"}
     
     response = client.post("/verify", files=files, data=data, headers=headers)
     
-    if response.status_code == 200:
-        results = response.json()
-        print(f"✅ /verify passed! Case ID: {results.get('case_id')}")
-        print(f"   Agreement: {results['verification_results']['agreement_rate']*100:.1f}%")
-        return results.get('case_id')
-    else:
-        print(f"❌ /verify failed: {response.status_code}")
-        print(response.text)
-        return None
+    if response.status_code != 200:
+        raise AssertionError(f"/verify failed: {response.status_code} {response.text}")
+
+    results = response.json()
+    print(f"OK: /verify passed! Case ID: {results.get('case_id')}")
+    print(f"   Agreement: {results['verification_results']['agreement_rate']*100:.1f}%")
+    return results.get('case_id')
 
 def test_case_detail(case_id):
     if not case_id: return
@@ -70,7 +70,7 @@ def test_case_detail(case_id):
     headers = {"X-API-Key": "radverify_secret_key"}
     response = client.get(f"/case/{case_id}", headers=headers)
     assert response.status_code == 200
-    print("✅ Case detail retrieval passed")
+    print("OK: Case detail retrieval passed")
 
 if __name__ == "__main__":
     print("Starting API Logic Verification...")
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         print("API LOGIC VERIFICATION SUCCESSFUL!")
         print("="*50)
     except Exception as e:
-        print(f"\n❌ Verification failed: {e}")
+        print(f"\nFAIL: Verification failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

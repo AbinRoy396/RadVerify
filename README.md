@@ -72,16 +72,29 @@ python -m venv .venv_ml
 source .venv_ml/bin/activate  # On Windows: .venv_ml\Scripts\activate
 ```
 
-3. **Install dependencies**:
+3. **Install core dependencies**:
 ```bash
-pip install -r requirements.txt
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-4. **Download NLP models**:
+4. **Install optional ML dependencies** (recommended for full capability):
 ```bash
-python -m spacy download en_core_web_sm
-python -m nltk.downloader punkt stopwords
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements-ml.txt
 ```
+
+5. **Download NLP models**:
+```bash
+.\.venv_ml\Scripts\python.exe -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+.\.venv_ml\Scripts\python.exe -m nltk.downloader punkt stopwords
+```
+
+### Optional: Real-ESRGAN Enhancement
+
+If you want AI super-resolution (instead of OpenCV fallback), install the ML extras:
+```bash
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements-ml.txt
+```
+This may take a while because it can pull large dependencies (e.g., PyTorch).
 
 ## 🚀 Usage
 
@@ -114,9 +127,9 @@ RadVerify provides a professional REST API for integration.
 
 ### 1. Verify Report
 `POST /verify`
-- **scan**: Image file (multipart/form-data)
+- **scan**: Image file (multipart/form-data). Supported: `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.dcm`
 - **report**: Findings text (string)
-- **enhance**: Boolean (optional, default true)
+- **enhance**: Boolean (optional, default true). If `true`, runs enhancement (slower, may improve quality).
 
 ```bash
 curl -X POST "http://localhost:8000/verify" \

@@ -25,9 +25,9 @@ try:
     from modules.comparison_report import ComparisonReport
     from modules.result_generator import ResultGenerator
     from pipeline import RadVerifyPipeline
-    print("✅ All modules imported successfully!")
+    print("OK: All modules imported successfully!")
 except Exception as e:
-    print(f"❌ Import failed: {e}")
+    print(f"FAIL: Import failed: {e}")
     exit(1)
 
 print()
@@ -48,7 +48,7 @@ img_byte_arr = io.BytesIO()
 pil_image.save(img_byte_arr, format='PNG')
 img_byte_arr.seek(0)
 img_byte_arr.name = 'test_ultrasound.png'
-print("✅ Mock image created (800x600 PNG)")
+print("OK: Mock image created (800x600 PNG)")
 
 print()
 print("3. Creating mock doctor's report...")
@@ -97,19 +97,19 @@ IMPRESSION:
 Fetal anatomy survey shows normal development consistent with stated gestational age.
 No obvious structural abnormalities detected.
 """
-print("✅ Mock report created")
+print("OK: Mock report created")
 
 print()
 print("4. Testing Input Handler...")
 try:
     input_handler = InputHandler()
     is_valid, error = input_handler.validate_image(img_byte_arr)
-    print(f"   Image validation: {'✅ Valid' if is_valid else f'❌ Invalid: {error}'}")
+    print(f"   Image validation: {'OK: Valid' if is_valid else f'FAIL: Invalid: {error}'}")
     
     is_valid, error = input_handler.validate_report(doctor_report)
-    print(f"   Report validation: {'✅ Valid' if is_valid else f'❌ Invalid: {error}'}")
+    print(f"   Report validation: {'OK: Valid' if is_valid else f'FAIL: Invalid: {error}'}")
 except Exception as e:
-    print(f"❌ Input Handler test failed: {e}")
+    print(f"FAIL: Input Handler test failed: {e}")
 
 print()
 print("5. Testing Image Enhancer...")
@@ -122,9 +122,9 @@ try:
     print(f"   Enhanced size: {result['enhanced'].shape}")
     print(f"   PSNR: {result['comparison_metrics']['psnr']:.2f}")
     print(f"   Sharpness improvement: {result['comparison_metrics']['sharpness_improvement']:.2f}%")
-    print("✅ Image enhancement successful")
+    print("OK: Image enhancement successful")
 except Exception as e:
-    print(f"❌ Image Enhancer test failed: {e}")
+    print(f"FAIL: Image Enhancer test failed: {e}")
 
 print()
 print("6. Testing Image Processor...")
@@ -133,9 +133,9 @@ try:
     processed, metadata = processor.preprocess(img_array, denoise=True)
     print(f"   Processed shape: {processed.shape}")
     print(f"   Preprocessing steps: {metadata['preprocessing_steps']}")
-    print("✅ Image preprocessing successful")
+    print("OK: Image preprocessing successful")
 except Exception as e:
-    print(f"❌ Image Processor test failed: {e}")
+    print(f"FAIL: Image Processor test failed: {e}")
 
 print()
 print("7. Testing AI Analyzer...")
@@ -146,9 +146,9 @@ try:
     print(f"   Biometry measurements: {len(analysis['biometry'])} parameters")
     print(f"   Image quality: {analysis['overall_quality']}")
     print(f"   Gestational age: {analysis['gestational_age_estimate']['weeks']} weeks {analysis['gestational_age_estimate']['days']} days")
-    print("✅ AI analysis successful")
+    print("OK: AI analysis successful")
 except Exception as e:
-    print(f"❌ AI Analyzer test failed: {e}")
+    print(f"FAIL: AI Analyzer test failed: {e}")
 
 print()
 print("8. Testing Report Generator...")
@@ -158,9 +158,9 @@ try:
     print(f"   Report length: {len(ai_report)} characters")
     print(f"   Report preview (first 200 chars):")
     print(f"   {ai_report[:200]}...")
-    print("✅ Report generation successful")
+    print("OK: Report generation successful")
 except Exception as e:
-    print(f"❌ Report Generator test failed: {e}")
+    print(f"FAIL: Report Generator test failed: {e}")
 
 print()
 print("9. Testing NLP Parser...")
@@ -171,9 +171,9 @@ try:
     print(f"   Measurements mentioned: {summary['total_measurements_mentioned']}")
     print(f"   Structures mentioned: {summary['total_structures_mentioned']}")
     print(f"   Total sentences: {parsed['total_sentences']}")
-    print("✅ NLP parsing successful")
+    print("OK: NLP parsing successful")
 except Exception as e:
-    print(f"❌ NLP Parser test failed: {e}")
+    print(f"FAIL: NLP Parser test failed: {e}")
 
 print()
 print("10. Testing Verification Engine...")
@@ -185,9 +185,9 @@ try:
     print(f"   Matches: {verification['discrepancy_counts']['matches']}")
     print(f"   Omissions: {verification['discrepancy_counts']['omissions']}")
     print(f"   Mismatches: {verification['discrepancy_counts']['mismatches']}")
-    print("✅ Verification successful")
+    print("OK: Verification successful")
 except Exception as e:
-    print(f"❌ Verification Engine test failed: {e}")
+    print(f"FAIL: Verification Engine test failed: {e}")
 
 print()
 print("11. Testing Comparison Report...")
@@ -199,9 +199,9 @@ try:
     print(f"   Comparison report length: {len(comparison_text)} characters")
     print(f"   Report preview (first 300 chars):")
     print(f"   {comparison_text[:300]}...")
-    print("✅ Comparison report generation successful")
+    print("OK: Comparison report generation successful")
 except Exception as e:
-    print(f"❌ Comparison Report test failed: {e}")
+    print(f"FAIL: Comparison Report test failed: {e}")
 
 print()
 print("12. Testing Result Generator...")
@@ -212,9 +212,9 @@ try:
     )
     print(f"   Summary length: {len(final_results['summary'])} characters")
     print(f"   Results package keys: {list(final_results.keys())}")
-    print("✅ Result generation successful")
+    print("OK: Result generation successful")
 except Exception as e:
-    print(f"❌ Result Generator test failed: {e}")
+    print(f"FAIL: Result Generator test failed: {e}")
 
 print()
 print("=" * 60)
@@ -232,7 +232,7 @@ try:
     )
     
     if results['success']:
-        print("\n✅ PIPELINE EXECUTION SUCCESSFUL!")
+        print("\nOK: PIPELINE EXECUTION SUCCESSFUL!")
         print(f"\nStage completed: {results['stage']}")
         print(f"\nVerification Results:")
         print(f"  - Agreement Rate: {results['verification_results']['agreement_rate'] * 100:.1f}%")
@@ -257,11 +257,11 @@ try:
         print("\n... (truncated)")
         
     else:
-        print(f"\n❌ PIPELINE FAILED!")
+        print(f"\nFAIL: PIPELINE FAILED!")
         print(f"Errors: {results['errors']}")
         
 except Exception as e:
-    print(f"\n❌ PIPELINE TEST FAILED: {e}")
+    print(f"\nFAIL: PIPELINE TEST FAILED: {e}")
     import traceback
     traceback.print_exc()
 
@@ -271,12 +271,13 @@ print("ALL TESTS COMPLETED!")
 print("=" * 60)
 print()
 print("Summary:")
-print("✅ All 9 modules tested individually")
-print("✅ Complete pipeline tested end-to-end")
-print("✅ Backend is fully functional!")
+print("OK: All 9 modules tested individually")
+print("OK: Complete pipeline tested end-to-end")
+print("OK: Backend is fully functional!")
 print()
 print("Next steps:")
-print("1. Install dependencies: pip install -r requirements.txt")
-print("2. Download NLP models: python -m spacy download en_core_web_sm")
-print("3. Frontend can now integrate with the pipeline")
+print("1. Install dependencies: .\\.venv_ml\\Scripts\\python.exe -m pip install -r requirements.txt")
+print("2. Install ML dependencies (optional for full capability): .\\.venv_ml\\Scripts\\python.exe -m pip install -r requirements-ml.txt")
+print("3. Download NLP models: .\\.venv_ml\\Scripts\\python.exe -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl")
+print("4. Frontend can now integrate with the pipeline")
 print()

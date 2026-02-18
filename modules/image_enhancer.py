@@ -178,13 +178,16 @@ class ImageEnhancer:
         original_sharpness = cv2.Laplacian(original_gray, cv2.CV_64F).var()
         enhanced_sharpness = cv2.Laplacian(enhanced_gray, cv2.CV_64F).var()
         
+        if original_sharpness > 0:
+            sharpness_improvement = ((enhanced_sharpness - original_sharpness) / original_sharpness) * 100
+        else:
+            sharpness_improvement = 0.0
+
         return {
             'psnr': round(psnr, 2),
             'original_sharpness': round(original_sharpness, 2),
             'enhanced_sharpness': round(enhanced_sharpness, 2),
-            'sharpness_improvement': round(
-                ((enhanced_sharpness - original_sharpness) / original_sharpness) * 100, 2
-            )
+            'sharpness_improvement': round(sharpness_improvement, 2)
         }
     
     def process(self, image: np.ndarray) -> Dict[str, Any]:

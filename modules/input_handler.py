@@ -50,19 +50,35 @@ class InputHandler:
             
             # Try to load image
             try:
-                img = Image.open(image_file)
-                img.verify()  # Verify it's a valid image
-                image_file.seek(0)  # Reset after verify
-                
-                # Reload for size check
-                img = Image.open(image_file)
-                width, height = img.size
-                
-                if width < self.MIN_IMAGE_SIZE[0] or height < self.MIN_IMAGE_SIZE[1]:
-                    return False, f"Image too small. Minimum size: {self.MIN_IMAGE_SIZE}"
-                
-                image_file.seek(0)  # Reset for future use
-                
+                if file_ext == '.dcm':
+                    image_file.seek(0)
+                    import pydicom
+
+                    dicom = pydicom.dcmread(image_file)
+                    image = dicom.pixel_array
+                    if image is None or image.size == 0:
+                        return False, "Invalid DICOM file: empty pixel data"
+
+                    if image.ndim >= 2:
+                        height, width = image.shape[:2]
+                        if width < self.MIN_IMAGE_SIZE[0] or height < self.MIN_IMAGE_SIZE[1]:
+                            return False, f"Image too small. Minimum size: {self.MIN_IMAGE_SIZE}"
+
+                    image_file.seek(0)
+                else:
+                    img = Image.open(image_file)
+                    img.verify()  # Verify it's a valid image
+                    image_file.seek(0)  # Reset after verify
+
+                    # Reload for size check
+                    img = Image.open(image_file)
+                    width, height = img.size
+
+                    if width < self.MIN_IMAGE_SIZE[0] or height < self.MIN_IMAGE_SIZE[1]:
+                        return False, f"Image too small. Minimum size: {self.MIN_IMAGE_SIZE}"
+
+                    image_file.seek(0)  # Reset for future use
+
             except Exception as e:
                 return False, f"Invalid or corrupted image file: {str(e)}"
             
@@ -108,25 +124,50 @@ class InputHandler:
             if not is_valid:
                 raise ValueError(error)
             
-            # Load image
-            img = Image.open(image_file)
-            
-            # Convert to RGB if necessary
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            
-            # Convert to numpy array
-            img_array = np.array(img)
+            file_ext = Path(image_file.name).suffix.lower()
+            if file_ext == '.dcm':
+                image_file.seek(0)
+                try:
+                    import pydicom
+                    from pydicom.pixel_data_handlers.util import apply_voi_lut
+                except Exception as e:
+                    raise RuntimeError(f"pydicom is required for DICOM files: {e}")
+
+                dicom = pydicom.dcmread(image_file)
+                image = dicom.pixel_array
+                image = apply_voi_lut(image, dicom)
+
+                denom = float(image.max() - image.min())
+                if denom > 0:
+                    image = ((image - image.min()) / denom * 255).astype(np.uint8)
+                else:
+                    image = np.zeros_like(image, dtype=np.uint8)
+
+                # Convert grayscale DICOM to RGB
+                if image.ndim == 2:
+                    img_array = np.stack([image] * 3, axis=-1)
+                else:
+                    img_array = image
+            else:
+                # Load image with PIL
+                img = Image.open(image_file)
+
+                # Convert to RGB if necessary
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+
+                # Convert to numpy array
+                img_array = np.array(img)
             
             # Extract metadata
             metadata = {
                 'filename': image_file.name,
-                'format': img.format,
-                'mode': img.mode,
-                'size': img.size,
-                'width': img.size[0],
-                'height': img.size[1],
-                'channels': len(img.getbands())
+                'format': 'DICOM' if file_ext == '.dcm' else img.format,
+                'mode': 'RGB' if file_ext == '.dcm' else img.mode,
+                'size': (img_array.shape[1], img_array.shape[0]),
+                'width': img_array.shape[1],
+                'height': img_array.shape[0],
+                'channels': img_array.shape[2] if img_array.ndim == 3 else 1
             }
             
             return img_array, metadata

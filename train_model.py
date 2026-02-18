@@ -4,6 +4,7 @@ Fine-tunes EfficientNet-B0 on fetal ultrasound datasets.
 """
 
 import os
+import json
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetB0
@@ -13,6 +14,16 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import yaml
+
+try:
+    from modules.ai_analyzer import AIAnalyzer
+    STRUCTURE_LABELS = [
+        f"{category}/{structure}"
+        for category, structures in AIAnalyzer.FETAL_STRUCTURES.items()
+        for structure in structures
+    ]
+except Exception:
+    STRUCTURE_LABELS = []
 
 class FetalUltrasoundTrainer:
     """Trainer for fine-tuning on medical ultrasound data."""
@@ -69,7 +80,7 @@ class FetalUltrasoundTrainer:
             metrics=['accuracy', 'top_k_categorical_accuracy']
         )
         
-        print(f"✓ Model built with {num_classes} output classes")
+        print(f"OK: Model built with {num_classes} output classes")
         return self.model
     
     def prepare_data_generators(self, train_dir, val_dir, batch_size=32):
@@ -112,7 +123,7 @@ class FetalUltrasoundTrainer:
         
         return train_generator, val_generator
     
-    def train(self, train_generator, val_generator, epochs=50, output_dir="models"):
+    def train(self, train_generator, val_generator, epochs=50, output_dir="models", labels=None):
         """
         Train the model.
         
@@ -159,10 +170,16 @@ class FetalUltrasoundTrainer:
             verbose=1
         )
         
+        if labels:
+            labels_path = os.path.join(output_dir, "labels.json")
+            with open(labels_path, "w", encoding="utf-8") as f:
+                json.dump(labels, f, indent=2)
+            print(f"Saved labels to {labels_path}")
+
         # Save final model
         final_path = os.path.join(output_dir, 'final_model.h5')
         self.model.save(final_path)
-        print(f"\n✓ Training complete! Model saved to {final_path}")
+        print(f"\nOK: Training complete! Model saved to {final_path}")
         
         return self.history
     
@@ -210,16 +227,19 @@ def main():
     VAL_DIR = os.path.join(DATASET_PATH, "validation")
     TEST_DIR = os.path.join(DATASET_PATH, "test")
     
+    labels = []
     # Check if we need to auto-detect classes
     if os.path.exists(TRAIN_DIR):
         classes = [d for d in os.listdir(TRAIN_DIR) if os.path.isdir(os.path.join(TRAIN_DIR, d))]
         NUM_CLASSES = len(classes)
-        print(f"Detected {NUM_CLASSES} classes: {classes}")
+        labels = sorted(classes)
+        print(f"Detected {NUM_CLASSES} classes: {labels}")
     else:
-        NUM_CLASSES = 2 # Fallback
+        NUM_CLASSES = len(STRUCTURE_LABELS) if STRUCTURE_LABELS else 2
+        labels = STRUCTURE_LABELS
         
-    EPOCHS = 20
-    BATCH_SIZE = 16
+    EPOCHS = int(os.getenv("RADVERIFY_EPOCHS", "20"))
+    BATCH_SIZE = int(os.getenv("RADVERIFY_BATCH_SIZE", "16"))
 
     # Initialize trainer
     trainer = FetalUltrasoundTrainer()
@@ -260,7 +280,7 @@ def main():
     )
     
     # Train
-    trainer.train(train_gen, val_gen, epochs=EPOCHS)
+    trainer.train(train_gen, val_gen, epochs=EPOCHS, labels=labels)
     
     print("\n" + "="*50)
     print("NEXT STEPS:")

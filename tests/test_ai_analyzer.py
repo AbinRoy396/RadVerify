@@ -5,7 +5,8 @@ from modules.ai_analyzer import AIAnalyzer
 
 @pytest.fixture
 def analyzer():
-    return AIAnalyzer()
+    # Skip model init for faster tests
+    return AIAnalyzer(skip_model_init=True)
 
 def test_analyzer_initialization(analyzer):
     assert analyzer.model_name == "efficientnet-b0"

@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 from typing import Dict, Any, List, Tuple
 import warnings
+import os
+import json
 
 warnings.filterwarnings('ignore')
 
@@ -70,7 +72,8 @@ class AIAnalyzer:
         'maternal': ['placenta', 'amniotic_fluid', 'umbilical_cord']
     }
     
-    def __init__(self, model_name: str = "efficientnet-b0", confidence_threshold: float = 0.8):
+    def __init__(self, model_name: str = "efficientnet-b0", confidence_threshold: float = 0.8,
+                 skip_model_init: bool = False):
         """
         Initialize AIAnalyzer.
         
@@ -83,11 +86,27 @@ class AIAnalyzer:
         self.model = None
         
         # Initialize model (placeholder)
-        self._init_model()
+        if skip_model_init:
+            self.model = "rule_based"
+            self.model_type = "rule_based"
+        else:
+            self._init_model()
         
         # Initialize sub-modules
         self.calibration_detector = CalibrationDetector()
         self.pixel_to_mm = 0.25 # Current active calibration
+        self.labels = self._load_labels()
+
+    def _load_labels(self) -> List[str]:
+        labels_path = os.path.join("models", "labels.json")
+        if not os.path.exists(labels_path):
+            return []
+        try:
+            with open(labels_path, "r", encoding="utf-8") as f:
+                labels = json.load(f)
+            return labels if isinstance(labels, list) else []
+        except Exception:
+            return []
     
     def _init_model(self):
         """Initialize the AI model."""
@@ -106,7 +125,7 @@ class AIAnalyzer:
             if os.path.exists(model_path):
                 print(f"Loading custom trained model from {model_path}...")
                 self.model = tf.keras.models.load_model(model_path)
-                print(f"✓ Custom model loaded successfully")
+                print("OK: Custom model loaded successfully")
                 self.model_type = "custom_trained"
             else:
                 print(f"Custom model not found at {model_path}")
@@ -131,15 +150,15 @@ class AIAnalyzer:
                 self.model = Model(inputs=base_model.input, outputs=predictions)
                 self.model_type = "pretrained_imagenet"
                 
-                print(f"✓ Pre-trained model loaded successfully")
+                print("OK: Pre-trained model loaded successfully")
             
         except ImportError as e:
-            print(f"⚠ TensorFlow not available: {e}")
+            print(f"WARN: TensorFlow not available: {e}")
             print("  Falling back to rule-based detection")
             self.model = "rule_based"
             self.model_type = "rule_based"
         except Exception as e:
-            print(f"⚠ Model initialization failed: {e}")
+            print(f"WARN: Model initialization failed: {e}")
             print("  Falling back to rule-based detection")
             self.model = "rule_based"
             self.model_type = "rule_based"
@@ -178,19 +197,44 @@ class AIAnalyzer:
             # Here we map feature values to our structure dictionary for demonstration
             structures_detected = {}
             feature_idx = 0
-            
-            for category, structures in self.FETAL_STRUCTURES.items():
-                category_detections = {}
-                for structure in structures:
-                    # Map feature index to confidence (simulated mapping for placeholder weights)
-                    # Real weights would have a dedicated output layer for these
-                    conf = float(tf.nn.sigmoid(features[0, feature_idx % 128]).numpy())
+            feature_len = features.shape[1] if features.ndim > 1 else 0
+            if feature_len <= 0:
+                raise ValueError("Model output has no feature dimensions")
+            if self.labels and len(self.labels) == feature_len:
+                for label in self.labels:
+                    conf = float(tf.nn.sigmoid(features[0, feature_idx]).numpy())
+                    if "/" in label:
+                        category, structure = label.split("/", 1)
+                    elif ":" in label:
+                        category, structure = label.split(":", 1)
+                    else:
+                        category, structure = "unknown", label
+                    category_detections = structures_detected.setdefault(category, {})
                     category_detections[structure] = {
                         'present': conf > self.confidence_threshold,
                         'confidence': round(conf, 3)
                     }
                     feature_idx += 1
-                structures_detected[category] = category_detections
+            else:
+                total_structures = sum(len(v) for v in self.FETAL_STRUCTURES.values())
+                if feature_len < total_structures:
+                    print(
+                        f"WARN: Model output has {feature_len} features for "
+                        f"{total_structures} structures; reusing outputs with modulo."
+                    )
+
+                for category, structures in self.FETAL_STRUCTURES.items():
+                    category_detections = {}
+                    for structure in structures:
+                        # Map feature index to confidence (simulated mapping for placeholder weights)
+                        # Real weights would have a dedicated output layer for these
+                        conf = float(tf.nn.sigmoid(features[0, feature_idx % feature_len]).numpy())
+                        category_detections[structure] = {
+                            'present': conf > self.confidence_threshold,
+                            'confidence': round(conf, 3)
+                        }
+                        feature_idx += 1
+                    structures_detected[category] = category_detections
                 
             return structures_detected
             
@@ -210,7 +254,10 @@ class AIAnalyzer:
         """
         # Convert to grayscale if needed
         if len(image.shape) == 3:
-            gray = cv2.cvtColor((image * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+            if image.shape[2] == 1:
+                gray = image[:, :, 0]
+            else:
+                gray = cv2.cvtColor((image * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
         else:
             gray = (image * 255).astype(np.uint8) if image.dtype != np.uint8 else image
             
@@ -223,7 +270,8 @@ class AIAnalyzer:
         # Morphological operations to clean up masks
         kernel = np.ones((3, 3), np.uint8)
         opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-        sure_bg = cv2.dilation(opening, kernel, iterations=3)
+        # OpenCV uses dilate (not dilation)
+        sure_bg = cv2.dilate(opening, kernel, iterations=3)
         
         # Find contours to isolate specific organs for masking
         contours, _ = cv2.findContours(sure_bg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -280,7 +328,10 @@ class AIAnalyzer:
             gray = image
             
         if len(gray.shape) == 3:
-            gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
+            if gray.shape[2] == 1:
+                gray = gray[:, :, 0]
+            else:
+                gray = cv2.cvtColor(gray, cv2.COLOR_RGB2GRAY)
             
         # 0. Automatic Scale Calibration
         self.pixel_to_mm = self.calibration_detector.detect(gray)
@@ -407,11 +458,14 @@ class AIAnalyzer:
         """
         # Convert to grayscale if needed
         if len(image.shape) == 3:
-            # Check if it's already grayscale but in 3 channels
-            if np.all(image[:,:,0] == image[:,:,1]) and np.all(image[:,:,0] == image[:,:,2]):
-                gray = image[:,:,0]
+            if image.shape[2] == 1:
+                gray = image[:, :, 0]
             else:
-                gray = cv2.cvtColor((image * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+                # Check if it's already grayscale but in 3 channels
+                if np.all(image[:, :, 0] == image[:, :, 1]) and np.all(image[:, :, 0] == image[:, :, 2]):
+                    gray = image[:, :, 0]
+                else:
+                    gray = cv2.cvtColor((image * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
         else:
             gray = (image * 255).astype(np.uint8) if image.dtype != np.uint8 else image
         
@@ -589,11 +643,15 @@ class AIAnalyzer:
             
             # Apply VOI LUT (window/level) if present
             image = apply_voi_lut(image, dicom)
-            
+
             # Normalize to 0-255
-            image = ((image - image.min()) / (image.max() - image.min()) * 255).astype(np.uint8)
+            denom = float(image.max() - image.min())
+            if denom > 0:
+                image = ((image - image.min()) / denom * 255).astype(np.uint8)
+            else:
+                image = np.zeros_like(image, dtype=np.uint8)
             
             return image
         except Exception as e:
-            print(f"Error loading DICOM: {e}\")")
+            print(f"Error loading DICOM: {e}")
             return None

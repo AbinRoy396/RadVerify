@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, List
+from importlib import metadata
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends, Security
 from fastapi.security.api_key import APIKeyHeader, APIKey
@@ -35,6 +36,50 @@ app = FastAPI(
 # Initialize Core Services
 pipeline = RadVerifyPipeline()
 db = CaseDatabase()
+STARTUP_STATUS: Dict[str, Any] = {}
+
+
+def _get_version(pkg_name: str) -> str:
+    try:
+        return metadata.version(pkg_name)
+    except Exception:
+        return "unknown"
+
+
+def _check_optional_dependencies() -> Dict[str, Any]:
+    status: Dict[str, Any] = {
+        "tensorflow": False,
+        "spacy": False,
+        "spacy_model": False,
+        "realesrgan": False,
+    }
+
+    try:
+        import tensorflow  # noqa: F401
+        status["tensorflow"] = True
+    except Exception:
+        pass
+
+    try:
+        import spacy  # noqa: F401
+        status["spacy"] = True
+        try:
+            import spacy as _spacy
+            _spacy.load("en_core_web_sm")
+            status["spacy_model"] = True
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    try:
+        import realesrgan  # noqa: F401
+        import basicsr  # noqa: F401
+        status["realesrgan"] = True
+    except Exception:
+        pass
+
+    return status
 
 
 app.add_middleware(
@@ -45,17 +90,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def startup_check() -> None:
+    optional = _check_optional_dependencies()
+    STARTUP_STATUS.update(
+        {
+            "optional": optional,
+            "versions": {
+                "fastapi": _get_version("fastapi"),
+                "uvicorn": _get_version("uvicorn"),
+                "numpy": _get_version("numpy"),
+                "opencv-python": _get_version("opencv-python"),
+                "tensorflow": _get_version("tensorflow"),
+                "spacy": _get_version("spacy"),
+                "pydicom": _get_version("pydicom"),
+            },
+        }
+    )
+
+    missing = [k for k, v in optional.items() if not v]
+    if missing:
+        print(f"WARN: Optional dependencies missing: {', '.join(missing)}")
+
 
 @app.get("/health")
 def health() -> Dict[str, str]:
     return {"status": "ok"}
 
+@app.get("/health/details")
+def health_details() -> Dict[str, Any]:
+    return {
+        "status": "ok",
+        "optional": STARTUP_STATUS.get("optional", _check_optional_dependencies()),
+        "versions": STARTUP_STATUS.get("versions", {}),
+    }
 
 @app.post("/verify", response_model=Dict[str, Any])
 async def verify_report(
-    scan: UploadFile = File(..., description="Single medical scan (jpg/png)"),
+    scan: UploadFile = File(..., description="Single medical scan (jpg/png/bmp/tiff/dcm)"),
     report: str = Form(..., description="Radiology report text"),
-    enhance: bool = Form(True, description="Whether to apply AI enhancement"),
+    enhance: bool = Form(True, description="Apply AI enhancement (slower, may improve quality)"),
     api_key: APIKey = Depends(get_api_key)
 ) -> Dict[str, Any]:
     """Runs the full 9-stage verification pipeline on a scan and report."""
@@ -75,6 +149,14 @@ async def verify_report(
         )
         
         if not results['success']:
+            if results.get("stage") == "input_validation":
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "stage": results.get("stage"),
+                        "errors": results.get("errors", []),
+                    },
+                )
             raise HTTPException(status_code=500, detail=f"Pipeline failed at stage: {results['stage']}")
 
         # Save to database

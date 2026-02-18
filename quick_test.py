@@ -15,9 +15,9 @@ try:
     from modules.nlp_parser import NLPParser
     from modules.verification_engine import VerificationEngine
     from pipeline import RadVerifyPipeline
-    print("✅ All imports successful")
+    print("OK: All imports successful")
 except Exception as e:
-    print(f"❌ Import failed: {e}")
+    print(f"FAIL: Import failed: {e}")
     exit(1)
 
 # Test 2: Create mock data
@@ -44,7 +44,7 @@ Brain: Normal
 Heart: Four-chamber view normal
 """
 
-print("✅ Mock data created")
+print("OK: Mock data created")
 
 # Test 3: Test pipeline
 print("\n3. Testing complete pipeline...")
@@ -53,15 +53,15 @@ try:
     results = pipeline.process(img_bytes, report_text, enhance_image=True)
     
     if results['success']:
-        print("✅ Pipeline executed successfully!")
+        print("OK: Pipeline executed successfully!")
         print(f"\n   Agreement Rate: {results['verification_results']['agreement_rate'] * 100:.1f}%")
         print(f"   Risk Level: {results['verification_results']['risk_level']}")
         print(f"   Stage: {results['stage']}")
     else:
-        print(f"❌ Pipeline failed: {results['errors']}")
+        print(f"FAIL: Pipeline failed: {results['errors']}")
         
 except Exception as e:
-    print(f"❌ Pipeline test failed: {e}")
+    print(f"FAIL: Pipeline test failed: {e}")
     import traceback
     traceback.print_exc()
 

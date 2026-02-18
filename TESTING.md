@@ -1,23 +1,26 @@
-# Testing Guide for RadVerify
+﻿# Testing Guide for RadVerify
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 Before running tests, you need to install dependencies:
 
 ```bash
-# Install all required packages
-pip install -r requirements.txt
+# Install core packages
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements.txt
+
+# Install optional ML packages (recommended for full capability)
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements-ml.txt
 
 # Download NLP models
-python -m spacy download en_core_web_sm
-python -m nltk.downloader punkt stopwords
+.\.venv_ml\Scripts\python.exe -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+.\.venv_ml\Scripts\python.exe -m nltk.downloader punkt stopwords
 ```
 
-## 🧪 Running Tests
+## ðŸ§ª Running Tests
 
 ### Option 1: Quick Test (Recommended First)
 ```bash
-python quick_test.py
+.\.venv_ml\Scripts\python.exe quick_test.py
 ```
 
 This runs a simple 3-step test:
@@ -25,11 +28,11 @@ This runs a simple 3-step test:
 2. Create mock data
 3. Run complete pipeline
 
-**Expected output**: Should show ✅ for each step and final agreement rate.
+**Expected output**: Should show OK for each step and final agreement rate.
 
 ### Option 2: Comprehensive Test
 ```bash
-python test_backend.py
+.\.venv_ml\Scripts\python.exe test_backend.py
 ```
 
 This tests all 13 components:
@@ -47,9 +50,9 @@ This tests all 13 components:
 12. Result Generator
 13. Complete Pipeline
 
-**Expected output**: Detailed test results for each module with ✅/❌ indicators.
+**Expected output**: Detailed test results for each module with OK/FAIL indicators.
 
-## 🔍 Manual Testing
+## ðŸ” Manual Testing
 
 ### Test Individual Modules
 
@@ -95,53 +98,53 @@ pipeline = RadVerifyPipeline()
 results = pipeline.process(img_bytes, report, enhance_image=True)
 
 if results['success']:
-    print("✅ Success!")
+    print("OK: Success!")
     print(f"Agreement: {results['verification_results']['agreement_rate']}")
 else:
-    print(f"❌ Failed: {results['errors']}")
+    print(f"FAIL: Failed: {results['errors']}")
 ```
 
-## 🐛 Troubleshooting
+## ðŸ› Troubleshooting
 
 ### Issue: Import errors
 **Solution**: Install dependencies
 ```bash
-pip install -r requirements.txt
+.\.venv_ml\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
 ### Issue: spaCy model not found
 **Solution**: Download the model
 ```bash
-python -m spacy download en_core_web_sm
+.\.venv_ml\Scripts\python.exe -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 ```
 
 ### Issue: "Config file not found"
 **Solution**: Make sure you're running from the RadVerify directory
 ```bash
 cd C:\Users\abinr\RadVerify
-python quick_test.py
+.\.venv_ml\Scripts\python.exe quick_test.py
 ```
 
 ### Issue: No output from tests
 **Solution**: Run with explicit output
 ```bash
-python -u quick_test.py
+.\.venv_ml\Scripts\python.exe quick_test.py
 ```
 
-## ✅ Expected Test Results
+## Expected Test Results
 
 ### Quick Test Success:
 ```
 Testing RadVerify Backend...
 
 1. Testing imports...
-✅ All imports successful
+OK: All imports successful
 
 2. Creating mock data...
-✅ Mock data created
+OK: Mock data created
 
 3. Testing complete pipeline...
-✅ Pipeline executed successfully!
+OK: Pipeline executed successfully!
 
    Agreement Rate: 85.0%
    Risk Level: low
@@ -153,9 +156,9 @@ TEST COMPLETE!
 ```
 
 ### Comprehensive Test Success:
-All 13 tests should show ✅ with detailed metrics for each module.
+All 13 tests should show OK with detailed metrics for each module.
 
-## 📊 What Gets Tested
+## ðŸ“Š What Gets Tested
 
 1. **Module Imports**: All 9 modules load correctly
 2. **Input Validation**: Image and report validation works
@@ -169,15 +172,15 @@ All 13 tests should show ✅ with detailed metrics for each module.
 10. **Results**: Final formatting and packaging
 11. **End-to-End Pipeline**: Complete workflow from input to output
 
-## 🎯 Success Criteria
+## ðŸŽ¯ Success Criteria
 
-- All module imports work ✅
-- Mock data creation succeeds ✅
-- Pipeline completes without errors ✅
-- Agreement rate is calculated ✅
-- Comparison report is generated ✅
+- All module imports work OK
+- Mock data creation succeeds OK
+- Pipeline completes without errors OK
+- Agreement rate is calculated OK
+- Comparison report is generated OK
 
-## 📝 Notes
+## ðŸ“ Notes
 
 - Tests use **mock/simulated data** (not real medical images)
 - AI models use **placeholder implementations** (rule-based fallbacks)
