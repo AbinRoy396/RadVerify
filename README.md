@@ -16,7 +16,7 @@ RadVerify is a **verification and quality assurance tool** designed to:
 ## 🌟 Key Features
 
 ### 🧠 Advanced AI Core
-- **Fetal Structure Detection**: Fine-tuned **EfficientNet-B0** model trained on ~2,000 fetal ultrasound images (75% accuracy).
+- **Fetal Structure Detection**: Fine-tuned **EfficientNet-B0** model trained across **6 anatomical modules** on ~3,000 fetal ultrasound images.
 - **Semantic Segmentation**: Pixel-level masking for Head, Abdomen, and Femur.
 - **Biometry Measurement**: Computer Vision algorithms for BPD, HC, AC, and FL measurements.
 - **Visual Explainability**: Color-coded overlays showing exactly what the AI detected.
@@ -153,9 +153,15 @@ curl -H "X-API-Key: radverify_secret_key" "http://localhost:8000/case/1"
 ## 🔬 Technical Details
 
 ### AI Models & Training
-- **Backbone**: EfficientNet-B0 (Pre-trained on ImageNet, Fine-tuned on Medical Data)
-- **Dataset**: Kaggle Ultrasound Fetus Dataset (1,926 images)
-- **Classes**: Benign, Malignant, Normal
+- **Backbone**: EfficientNet-B0 (Pre-trained on ImageNet, Fine-tuned on Fetal Ultrasound Data)
+- **Dataset**: Kaggle Ultrasound Fetus Dataset (~3,000 images across 6 structure classes)
+- **Trained Modules** (6 classes):
+  - `biometry_abdomen` — AC measurement region
+  - `biometry_femur` — FL measurement region
+  - `brain_cerebellum` — Cerebellum structure
+  - `brain_skull` — BPD / HC measurement region
+  - `brain_ventricles` — Ventricular anatomy
+  - `heart_four_chamber_view` — Cardiac 4-chamber plane
 - **Training**: 20 Epochs, Adam Optimizer, Categorical Crossentropy
 
 ### Measurement Tolerances
@@ -166,7 +172,8 @@ curl -H "X-API-Key: radverify_secret_key" "http://localhost:8000/case/1"
 
 ## 🔮 Roadmap
 - [x] **Phase 7**: Production Deployment (Docker, REST API Ready)
-- [ ] **Phase 8**: Clinical Validation (Large-scale datasets)
+- [x] **Phase 8a**: 6-Module Structure Classifier Trained (biometry + brain + cardiac)
+- [ ] **Phase 8b**: Clinical Validation (Large-scale datasets)
 - [ ] **Phase 9**: Advanced Analytics (Longitudinal Trends)
 
 ## ⚖️ Medical Disclaimer
@@ -180,5 +187,5 @@ curl -H "X-API-Key: radverify_secret_key" "http://localhost:8000/case/1"
 **Abin Roy** - Lead Developer
 
 ---
-**Version**: 1.2.0 - Advanced AI Model  
+**Version**: 1.3.0 - 6-Module Fetal Structure Classifier  
 **Last Updated**: Feb 2026
