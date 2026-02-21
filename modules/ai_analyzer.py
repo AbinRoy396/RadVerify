@@ -469,6 +469,16 @@ class AIAnalyzer:
         else:
             gray = (image * 255).astype(np.uint8) if image.dtype != np.uint8 else image
         
+        # OpenCV quality operators are most stable on uint8 grayscale.
+        if gray.dtype != np.uint8:
+            if np.issubdtype(gray.dtype, np.floating):
+                if gray.max() <= 1.0:
+                    gray = np.clip(gray * 255.0, 0, 255).astype(np.uint8)
+                else:
+                    gray = np.clip(gray, 0, 255).astype(np.uint8)
+            else:
+                gray = np.clip(gray, 0, 255).astype(np.uint8)
+
         # 1. Sharpness (Laplacian variance)
         sharpness = cv2.Laplacian(gray, cv2.CV_64F).var()
         

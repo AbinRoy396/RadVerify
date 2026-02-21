@@ -1,0 +1,165 @@
+﻿{
+    "created":  "2020-06-23T15:05:48.614152+00:00",
+    "modified":  "2020-06-23T22:18:22.989636+00:00",
+    "id":  3904280,
+    "conceptrecid":  "3904279",
+    "doi":  "10.5281/zenodo.3904280",
+    "conceptdoi":  "10.5281/zenodo.3904279",
+    "doi_url":  "https://doi.org/10.5281/zenodo.3904280",
+    "metadata":  {
+                     "title":  "FETAL_PLANES_DB: Common maternal-fetal ultrasound images",
+                     "doi":  "10.5281/zenodo.3904280",
+                     "publication_date":  "2020-06-23",
+                     "description":  "\u003cp\u003eA large dataset of routinely acquired maternal-fetal screening ultrasound images collected from two different hospitals by several operators and ultrasound machines. All images were manually labeled by an expert maternal fetal clinician. Images are divided into 6 classes: four of the most widely used fetal anatomical planes (Abdomen, Brain, Femur and Thorax), the mother\u0026rsquo;s cervix (widely used for prematurity screening) and a general category to include any other less common image plane. Fetal brain images are further categorized into the 3 most common fetal brain planes (Trans-thalamic, Trans-cerebellum, Trans-ventricular) to judge fine grain categorization performance. Meta information (patient number, us machine, operator) is also provided, as well as the training-test split used in the Nature Sci Rep paper.\u003c/p\u003e",
+                     "access_right":  "open",
+                     "creators":  [
+                                      {
+                                          "name":  "Burgos-Artizzu, Xavier P.",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona), Transmural Biotech SL",
+                                          "orcid":  "0000-0001-9681-5404"
+                                      },
+                                      {
+                                          "name":  "Coronado-Gutierrez, David",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona), Transmural Biotech SL",
+                                          "orcid":  "0000-0003-1607-5130"
+                                      },
+                                      {
+                                          "name":  "Valenzuela-Alcaraz, Brenda",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona)",
+                                          "orcid":  "0000-0002-3300-2120"
+                                      },
+                                      {
+                                          "name":  "Bonet-Carne, Elisenda",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona)",
+                                          "orcid":  "0000-0003-0567-6141"
+                                      },
+                                      {
+                                          "name":  "Eixarch, Elisenda",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona)",
+                                          "orcid":  "0000-0001-7379-9608"
+                                      },
+                                      {
+                                          "name":  "Crispi, Fatima",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona)",
+                                          "orcid":  "0000-0002-7422-5240"
+                                      },
+                                      {
+                                          "name":  "Gratacós, Eduard",
+                                          "affiliation":  "BCNatal (Barcelona Center for Maternal-Fetal and Neonatal Medicine (Hospital Clínic and Hospital Sant Joan de Deu, University of Barcelona)",
+                                          "orcid":  "0000-0002-7405-7224"
+                                      }
+                                  ],
+                     "keywords":  [
+                                      "medical imaging",
+                                      "fetal images",
+                                      "ultrasound"
+                                  ],
+                     "related_identifiers":  [
+                                                 {
+                                                     "identifier":  "10.1038/s41598-020-67076-5",
+                                                     "relation":  "isDerivedFrom",
+                                                     "resource_type":  "publication-article",
+                                                     "scheme":  "doi"
+                                                 }
+                                             ],
+                     "version":  "1.0",
+                     "references":  [
+                                        "Burgos-Artizzu, X.P., et al. Evaluation of deep convolutional neural networks for automatic classification of common maternal fetal ultrasound planes. Sci Rep 10, 10200 (2020). https://doi.org/10.1038/s41598-020-67076-5"
+                                    ],
+                     "language":  "eng",
+                     "resource_type":  {
+                                           "title":  "Dataset",
+                                           "type":  "dataset"
+                                       },
+                     "journal":  {
+                                     "pages":  "10200",
+                                     "title":  "Nature Scientific Reports",
+                                     "volume":  "10"
+                                 },
+                     "license":  {
+                                     "id":  "cc-by-4.0"
+                                 },
+                     "relations":  {
+                                       "version":  [
+                                                       {
+                                                           "index":  0,
+                                                           "is_last":  true,
+                                                           "parent":  {
+                                                                          "pid_type":  "recid",
+                                                                          "pid_value":  "3904279"
+                                                                      }
+                                                       }
+                                                   ]
+                                   },
+                     "notes":  "The research leading to these results has received funding from Transmural Biotech SL, \"LaCaixa\" Foundation under grant agreements LCF/PR/GN14/10270005 and LCF/PR/GN18/10310003 the Instituto de Salud Carlos III (PI16/00861, PI17/00675) within the Plan Nacional de I+D+I and cofinanced by ISCIII-Subdirección General de Evaluación together with the Fondo Europeo de Desarrollo Regional (FEDER) \"Una manera de hacer Europa\", Cerebra Foundation for the Brain Injured Child (Carmarthen, Wales, UK), Cellex Foundation and AGAUR under grant 2017 SGR nº 1531. Additionally, EE has received funding from the Departament de Salut under grant SLT008/18/00156."
+                 },
+    "title":  "FETAL_PLANES_DB: Common maternal-fetal ultrasound images",
+    "links":  {
+                  "self":  "https://zenodo.org/api/records/3904280",
+                  "self_html":  "https://zenodo.org/records/3904280",
+                  "preview_html":  "https://zenodo.org/records/3904280?preview=1",
+                  "doi":  "https://doi.org/10.5281/zenodo.3904280",
+                  "self_doi":  "https://doi.org/10.5281/zenodo.3904280",
+                  "self_doi_html":  "https://zenodo.org/doi/10.5281/zenodo.3904280",
+                  "reserve_doi":  "https://zenodo.org/api/records/3904280/draft/pids/doi",
+                  "parent":  "https://zenodo.org/api/records/3904279",
+                  "parent_html":  "https://zenodo.org/records/3904279",
+                  "parent_doi":  "https://doi.org/10.5281/zenodo.3904279",
+                  "parent_doi_html":  "https://zenodo.org/doi/10.5281/zenodo.3904279",
+                  "self_iiif_manifest":  "https://zenodo.org/api/iiif/record:3904280/manifest",
+                  "self_iiif_sequence":  "https://zenodo.org/api/iiif/record:3904280/sequence/default",
+                  "files":  "https://zenodo.org/api/records/3904280/files",
+                  "media_files":  "https://zenodo.org/api/records/3904280/media-files",
+                  "archive":  "https://zenodo.org/api/records/3904280/files-archive",
+                  "archive_media":  "https://zenodo.org/api/records/3904280/media-files-archive",
+                  "latest":  "https://zenodo.org/api/records/3904280/versions/latest",
+                  "latest_html":  "https://zenodo.org/records/3904280/latest",
+                  "versions":  "https://zenodo.org/api/records/3904280/versions",
+                  "draft":  "https://zenodo.org/api/records/3904280/draft",
+                  "access_links":  "https://zenodo.org/api/records/3904280/access/links",
+                  "access_grants":  "https://zenodo.org/api/records/3904280/access/grants",
+                  "access_users":  "https://zenodo.org/api/records/3904280/access/users",
+                  "access_request":  "https://zenodo.org/api/records/3904280/access/request",
+                  "access":  "https://zenodo.org/api/records/3904280/access",
+                  "communities":  "https://zenodo.org/api/records/3904280/communities",
+                  "communities-suggestions":  "https://zenodo.org/api/records/3904280/communities-suggestions",
+                  "request_deletion":  "https://zenodo.org/api/records/3904280/request-deletion",
+                  "file_modification":  "https://zenodo.org/api/records/3904280/file-modification",
+                  "requests":  "https://zenodo.org/api/records/3904280/requests"
+              },
+    "updated":  "2020-06-23T22:18:22.989636+00:00",
+    "recid":  "3904280",
+    "revision":  3,
+    "files":  [
+                  {
+                      "id":  "8cb8eee5-7e89-4618-bbdc-b33a174f7612",
+                      "key":  "FETAL_PLANES_ZENODO.zip",
+                      "size":  2088522169,
+                      "checksum":  "md5:2a5fcc2cefb789bcc0f6c1f73e0ea43f",
+                      "links":  {
+                                    "self":  "https://zenodo.org/api/records/3904280/files/FETAL_PLANES_ZENODO.zip/content"
+                                }
+                  }
+              ],
+    "swh":  {
+
+            },
+    "owners":  [
+                   {
+                       "id":  "108846"
+                   }
+               ],
+    "status":  "published",
+    "stats":  {
+                  "downloads":  15424,
+                  "unique_downloads":  9142,
+                  "views":  31723,
+                  "unique_views":  24506,
+                  "version_downloads":  15373,
+                  "version_unique_downloads":  9106,
+                  "version_unique_views":  24372,
+                  "version_views":  31552
+              },
+    "state":  "done",
+    "submitted":  true
+}
