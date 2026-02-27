@@ -12,6 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import io
 import os
 import time
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
 
 from pipeline import RadVerifyPipeline
 from modules.database import CaseDatabase
@@ -80,6 +84,21 @@ def _check_optional_dependencies() -> Dict[str, Any]:
         pass
 
     return status
+
+
+def _save_enhanced_image(image: np.ndarray, output_dir: str = "logs") -> str:
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    ts = int(time.time())
+    out_path = Path(output_dir) / f"enhanced_{ts}.png"
+    img = image
+    if img.dtype != np.uint8:
+        img = np.clip(img, 0, 255)
+        if img.max() <= 1.0:
+            img = (img * 255).astype(np.uint8)
+        else:
+            img = img.astype(np.uint8)
+    Image.fromarray(img).save(out_path)
+    return str(out_path)
 
 
 app.add_middleware(
@@ -159,6 +178,13 @@ async def verify_report(
                 )
             raise HTTPException(status_code=500, detail=f"Pipeline failed at stage: {results['stage']}")
 
+        # Save enhanced image and remove large arrays from response
+        enhanced = results.get("enhanced_image")
+        enhanced_path = None
+        if enhanced is not None:
+            enhanced_path = _save_enhanced_image(enhanced)
+            results["enhanced_image_path"] = enhanced_path
+
         # Save to database
         case_data = {
             'patient_id': 'API_USER_' + str(int(time.time())),
@@ -167,14 +193,14 @@ async def verify_report(
             'verification_results': results.get('verification_results', {}),
             'comparison_report': results.get('comparison_report_text', ''),
             'medical_narrative': results.get('medical_narrative', ''),
-            'image_path': f"api_upload_{int(time.time())}.png"
+            'image_path': enhanced_path or f"api_upload_{int(time.time())}.png"
         }
         case_id = db.save_case(case_data)
         results['case_id'] = case_id
-
-        # Clean up response for API: Remove large image arrays
-        if 'original_image' in results: del results['original_image']
-        if 'enhanced_image' in results: del results['enhanced_image']
+        if 'original_image' in results:
+            del results['original_image']
+        if 'enhanced_image' in results:
+            del results['enhanced_image']
         
         return results
 

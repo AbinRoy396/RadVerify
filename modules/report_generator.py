@@ -183,6 +183,10 @@ All findings should be reviewed by qualified medical professionals.
             estimated_weight = "Unable to calculate"
         
         impression = self.generate_impression(analysis)
+
+        structures = analysis.get('structures_detected', {}) or {}
+        for key in ['brain', 'face', 'spine', 'heart', 'organs', 'limbs', 'maternal']:
+            structures.setdefault(key, {})
         
         template_data = {
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -190,7 +194,7 @@ All findings should be reviewed by qualified medical professionals.
             'image_quality': analysis.get('overall_quality', 'Unknown').capitalize(),
             'biometry': analysis.get('biometry', {}),
             'estimated_weight': estimated_weight,
-            'structures': analysis.get('structures_detected', {}),
+            'structures': structures,
             'impression': impression
         }
         

@@ -107,6 +107,21 @@ class AIAnalyzer:
             return labels if isinstance(labels, list) else []
         except Exception:
             return []
+
+    def _load_model_path(self) -> str:
+        config_path = os.path.join("config", "config.yaml")
+        if os.path.exists(config_path):
+            try:
+                import yaml
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = yaml.safe_load(f) or {}
+                model_cfg = cfg.get("ai_model", {})
+                cfg_path = model_cfg.get("model_path")
+                if cfg_path:
+                    return cfg_path
+            except Exception:
+                pass
+        return "models/best_model.h5"
     
     def _init_model(self):
         """Initialize the AI model."""
@@ -120,7 +135,7 @@ class AIAnalyzer:
             
             import os
             
-            model_path = "models/best_model.h5"
+            model_path = os.environ.get("RADVERIFY_MODEL_PATH", self._load_model_path())
             
             if os.path.exists(model_path):
                 print(f"Loading custom trained model from {model_path}...")

@@ -124,7 +124,10 @@ else:
     with g1:
         st.markdown('<div class="viewer-box">', unsafe_allow_html=True)
         st.markdown('<div class="float-tool"><div class="tool-btn"><i class="material-icons">search</i></div><div class="tool-btn"><i class="material-icons" style="color:var(--prim)">visibility</i> <span style="font-size:0.5rem; font-weight:900; margin-left:4px;">AI OVERLAY</span></div></div>', unsafe_allow_html=True)
-        st.image(res['enhanced_image'] if res.get('enhanced_image') is not None else res['original_image'], use_container_width=True)
+        if res.get('enhanced_image') is not None:
+            st.image(res['enhanced_image'], use_container_width=True)
+        else:
+            st.warning("Enhanced image not available.")
         st.markdown('<div style="position:absolute; top:50%; left:58%; width:120px; height:150px; border:1px dashed var(--prim); background:rgba(23,191,207,0.05);"><div style="background:var(--prim); font-size:0.5rem; font-weight:900; padding:2px 4px; position:absolute; top:-15px;">Cardiomegaly</div></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     with g2:

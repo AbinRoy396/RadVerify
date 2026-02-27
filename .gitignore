@@ -31,6 +31,7 @@ env.bak/
 venv.bak/
 .venv/
 .venv_ml/
+.venv311/
 
 # IDEs
 .idea/
@@ -41,8 +42,12 @@ venv.bak/
 # Project Specific
 data/
 datasets/
+logs/
+repo_remote/
 models/*.h5
 models/*.keras
+models/archive/
+models/realesrgan/
 *.db
 *.log
 temp_*.png

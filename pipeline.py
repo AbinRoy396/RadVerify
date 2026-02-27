@@ -35,10 +35,16 @@ class RadVerifyPipeline:
         # Initialize modules
         self.input_handler = InputHandler()
         
-        enhancement_config = self.config.get('image_processing', {}).get('enhancement', {})
+        self.enhancement_config = self.config.get('image_processing', {}).get('enhancement', {})
         self.image_enhancer = ImageEnhancer(
-            method=enhancement_config.get('method', 'opencv'),
-            scale_factor=enhancement_config.get('scale_factor', 2)
+            method=self.enhancement_config.get('method', 'opencv'),
+            scale_factor=self.enhancement_config.get('scale_factor', 2),
+            model_path=self.enhancement_config.get('model_path'),
+            model_name=self.enhancement_config.get('model_name'),
+            tile=self.enhancement_config.get('tile', 0),
+            tile_pad=self.enhancement_config.get('tile_pad', 10),
+            pre_pad=self.enhancement_config.get('pre_pad', 0),
+            use_half=self.enhancement_config.get('use_half')
         )
         
         img_proc_config = self.config.get('image_processing', {})
@@ -104,7 +110,7 @@ class RadVerifyPipeline:
             enhanced_image = None
             enhancement_metadata = None
             
-            if enhance_image:
+            if enhance_image and self.enhancement_config.get('enabled', True):
                 results['stage'] = 'image_enhancement'
                 enhancement_results = self.image_enhancer.process(image_array)
                 enhanced_image = enhancement_results['enhanced']
@@ -173,7 +179,6 @@ class RadVerifyPipeline:
             results.update({
                 'success': True,
                 'stage': 'completed',
-                'original_image': image_array,
                 'enhanced_image': enhanced_image,
                 'enhancement_metadata': enhancement_metadata,
                 'preprocessing_metadata': preprocessing_metadata,

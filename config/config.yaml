@@ -7,8 +7,14 @@ image_processing:
   grayscale: false  # Keep color for ultrasound
   enhancement:
     enabled: true
-    method: "realesrgan"  # Options: realesrgan, edsr, swinir
+    method: "realesrgan"  # Options: opencv, realesrgan, edsr
     scale_factor: 2  # 2x or 4x upscaling
+    model_name: "RealESRGAN_x2plus"
+    model_path: "models/realesrgan/RealESRGAN_x2plus.pth"
+    tile: 0
+    tile_pad: 10
+    pre_pad: 0
+    use_half: null
 
 # AI Model Settings
 ai_model:
@@ -17,6 +23,7 @@ ai_model:
   confidence_threshold: 0.8
   batch_size: 1
   weights: "imagenet"  # Use ImageNet pre-trained weights
+  model_path: "models/best_model.h5"
   input_size: [224, 224]  # EfficientNet-B0 input size
   
   # Structure detection settings

@@ -4,5 +4,11 @@
   "brain_cerebellum",
   "brain_skull",
   "brain_ventricles",
-  "heart_four_chamber_view"
+  "face_lips",
+  "face_nasal_bone",
+  "face_profile",
+  "heart_four_chamber_view",
+  "limbs_arms",
+  "limbs_legs",
+  "organs_stomach"
 ]

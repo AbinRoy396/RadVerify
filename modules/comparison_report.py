@@ -32,9 +32,9 @@ class ComparisonReport:
         col_width = 34
         border = f"+{'-' * col_width}+{'-' * col_width}+"
         table.append(border)
-        table.append(
-            f"|{'AI-GENERATED FINDINGS':^{col_width}}|{'DOCTOR\'S REPORT FINDINGS':^{col_width}}|"
-        )
+        ai_header = "AI-GENERATED FINDINGS"
+        doctor_header = "DOCTOR'S REPORT FINDINGS"
+        table.append(f"|{ai_header:^{col_width}}|{doctor_header:^{col_width}}|")
         table.append(border)
 
         # Biometry section

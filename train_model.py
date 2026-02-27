@@ -148,14 +148,9 @@ class FetalUltrasoundTrainer:
             val_dir: Path to validation images
             batch_size: Batch size for training
         """
-        # Training data augmentation (critical for medical imaging)
+        # Training data augmentation (V3: Reduced to preserve medical features)
         train_datagen = ImageDataGenerator(
             rescale=1./255,
-            rotation_range=15,
-            width_shift_range=0.1,
-            height_shift_range=0.1,
-            shear_range=0.1,
-            zoom_range=0.1,
             horizontal_flip=True,
             fill_mode='nearest'
         )
@@ -227,7 +222,7 @@ class FetalUltrasoundTrainer:
 
         # Phase 1: train only the classification head.
         self.base_model.trainable = False
-        self._compile(learning_rate=1e-4)
+        self._compile(learning_rate=2e-4) # V3: Higher initial LR
         history_head = self.model.fit(
             train_generator,
             validation_data=val_generator,
@@ -239,9 +234,9 @@ class FetalUltrasoundTrainer:
 
         # Phase 2: unfreeze top backbone layers and fine-tune with lower LR.
         self.base_model.trainable = True
-        for layer in self.base_model.layers[:-20]:
+        for layer in self.base_model.layers[:-50]: # V3: Unfreeze more layers
             layer.trainable = False
-        self._compile(learning_rate=1e-5)
+        self._compile(learning_rate=5e-5) # V3: Higher fine-tuning LR
         history_ft = self.model.fit(
             train_generator,
             validation_data=val_generator,
@@ -350,11 +345,6 @@ def main():
     # Training Generator (from 'train' folder)
     train_datagen = ImageDataGenerator(
         rescale=1./255,
-        rotation_range=15,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        shear_range=0.1,
-        zoom_range=0.1,
         horizontal_flip=True,
         fill_mode='nearest'
     )
