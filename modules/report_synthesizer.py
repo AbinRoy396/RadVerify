@@ -5,7 +5,7 @@ Supports LLM integration (Gemini) with smart template fallbacks.
 """
 
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any
 import yaml
 
 class ReportSynthesizer:
@@ -93,7 +93,7 @@ class ReportSynthesizer:
 
         # Conclusion
         report.append("\n## IMPRESSION")
-        report.append(f"1. Single live intrauterine gestation.")
+        report.append("1. Single live intrauterine gestation.")
         report.append(f"2. Estimated gestational age {ga.get('total_weeks')} weeks based on AI biometry.")
         
         return "\n".join(report)

@@ -13,6 +13,12 @@ services:
       - radverify-data:/app/data
     environment:
       - ENV=production
+      - RADVERIFY_API_BASE=http://api:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: always
 
   # FastAPI Server
@@ -26,7 +32,14 @@ services:
       - .:/app
       - radverify-data:/app/data
     environment:
-      - API_KEY=radverify_secret_key
+      - RADVERIFY_API_KEY=radverify_secret_key
+      - RADVERIFY_REQUEST_TIMEOUT_SECONDS=120
+      - RADVERIFY_MAX_UPLOAD_BYTES=20971520
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request, json; d=json.load(urllib.request.urlopen('http://localhost:8000/ready', timeout=3)); assert d.get('ready') is True"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     restart: always
 
 volumes:

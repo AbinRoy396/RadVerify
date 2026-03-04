@@ -3,7 +3,7 @@ Verification Engine Module
 Core comparison logic between AI findings and doctor's report findings.
 """
 
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 
 
 class VerificationEngine:
@@ -268,12 +268,18 @@ class VerificationEngine:
             'overstatements': 0
         }
         
+        measurement_status_to_counter = {
+            'match': 'matches',
+            'omission': 'omissions',
+            'mismatch': 'mismatches',
+            'overstatement': 'overstatements',
+        }
+
         for comparison in measurement_comparisons.values():
             status = comparison['status']
-            if status in discrepancies:
-                discrepancies[status + 's'] = discrepancies.get(status + 's', 0) + 1
-            elif status == 'match':
-                discrepancies['matches'] += 1
+            counter_key = measurement_status_to_counter.get(status)
+            if counter_key:
+                discrepancies[counter_key] += 1
         
         for category in structure_comparisons.values():
             for comparison in category.values():

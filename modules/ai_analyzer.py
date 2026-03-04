@@ -6,7 +6,7 @@ Uses deep learning for fetal structure classification and computer vision for me
 
 import numpy as np
 import cv2
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 import warnings
 import os
 import json
@@ -96,6 +96,7 @@ class AIAnalyzer:
         self.calibration_detector = CalibrationDetector()
         self.pixel_to_mm = 0.25 # Current active calibration
         self.labels = self._load_labels()
+        self.class_thresholds = self._load_class_thresholds()
 
     def _load_labels(self) -> List[str]:
         labels_path = os.path.join("models", "labels.json")
@@ -121,7 +122,24 @@ class AIAnalyzer:
                     return cfg_path
             except Exception:
                 pass
+        if os.path.exists("models/best_model.keras"):
+            return "models/best_model.keras"
         return "models/best_model.h5"
+
+    def _load_class_thresholds(self) -> Dict[str, float]:
+        metrics_path = os.path.join("models", "validation_metrics.json")
+        if not os.path.exists(metrics_path):
+            return {}
+        try:
+            with open(metrics_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            out = {}
+            for label, item in (data.get("calibrated_thresholds") or {}).items():
+                thr = float(item.get("threshold", self.confidence_threshold))
+                out[label] = thr
+            return out
+        except Exception:
+            return {}
     
     def _init_model(self):
         """Initialize the AI model."""
@@ -139,12 +157,13 @@ class AIAnalyzer:
             
             if os.path.exists(model_path):
                 print(f"Loading custom trained model from {model_path}...")
-                self.model = tf.keras.models.load_model(model_path)
+                # Use compile=False to avoid requiring training-only custom loss/metric functions at inference time.
+                self.model = tf.keras.models.load_model(model_path, compile=False)
                 print("OK: Custom model loaded successfully")
                 self.model_type = "custom_trained"
             else:
                 print(f"Custom model not found at {model_path}")
-                print(f"Falling back to pre-trained EfficientNet-B0 (ImageNet)...")
+                print("Falling back to pre-trained EfficientNet-B0 (ImageNet)...")
                 
                 # Load pre-trained EfficientNet-B0 with ImageNet weights
                 base_model = EfficientNetB0(
@@ -193,7 +212,6 @@ class AIAnalyzer:
             return self._rule_based_detection(image)
             
         try:
-            import tensorflow as tf
             
             # Prepare image for EfficientNet (224x224x3)
             img_resized = cv2.resize(image, (224, 224))
@@ -206,18 +224,28 @@ class AIAnalyzer:
             
             # Run inference
             features = self.model.predict(img_batch, verbose=0)
+            raw_scores = np.asarray(features[0], dtype=np.float32).reshape(-1)
+            if raw_scores.size == 0:
+                raise ValueError("Model output has no feature dimensions")
+            # Use model outputs directly when they are already probabilities (e.g., softmax).
+            if np.all((raw_scores >= 0.0) & (raw_scores <= 1.0)):
+                conf_scores = raw_scores
+            else:
+                # Fallback: normalize logits with softmax for stable class confidence scores.
+                shifted = raw_scores - np.max(raw_scores)
+                exp_scores = np.exp(shifted)
+                denom = float(np.sum(exp_scores))
+                conf_scores = exp_scores / denom if denom > 0 else np.zeros_like(raw_scores)
             
             # Extract confidence scores from features
             # In a real system, these would map to specific structure classes
             # Here we map feature values to our structure dictionary for demonstration
             structures_detected = {}
             feature_idx = 0
-            feature_len = features.shape[1] if features.ndim > 1 else 0
-            if feature_len <= 0:
-                raise ValueError("Model output has no feature dimensions")
+            feature_len = conf_scores.size
             if self.labels and len(self.labels) == feature_len:
                 for label in self.labels:
-                    conf = float(tf.nn.sigmoid(features[0, feature_idx]).numpy())
+                    conf = float(conf_scores[feature_idx])
                     if "/" in label:
                         category, structure = label.split("/", 1)
                     elif ":" in label:
@@ -225,8 +253,13 @@ class AIAnalyzer:
                     else:
                         category, structure = "unknown", label
                     category_detections = structures_detected.setdefault(category, {})
+                    threshold_key = f"{category}/{structure}"
+                    threshold = self.class_thresholds.get(
+                        threshold_key,
+                        self.class_thresholds.get(structure, self.confidence_threshold)
+                    )
                     category_detections[structure] = {
-                        'present': conf > self.confidence_threshold,
+                        'present': conf > threshold,
                         'confidence': round(conf, 3)
                     }
                     feature_idx += 1
@@ -243,7 +276,7 @@ class AIAnalyzer:
                     for structure in structures:
                         # Map feature index to confidence (simulated mapping for placeholder weights)
                         # Real weights would have a dedicated output layer for these
-                        conf = float(tf.nn.sigmoid(features[0, feature_idx % feature_len]).numpy())
+                        conf = float(conf_scores[feature_idx % feature_len])
                         category_detections[structure] = {
                             'present': conf > self.confidence_threshold,
                             'confidence': round(conf, 3)
@@ -363,16 +396,13 @@ class AIAnalyzer:
         
         measurements = {}
         
-        # 0.5 Check for masks from segmentation
-        # (This makes it hybrid: CV contours + Segmentation masks)
-        masks = self.segment_structures(image)
-
-        
         # BPD and HC (Head) - Look for largest elliptical contour
         head_contour = None
         for c in contours:
             area = cv2.contourArea(c)
-            if area < 5000: continue # Too small for head
+            # Too small for head
+            if area < 5000:
+                continue
             
             # Try fitting ellipse
             if len(c) >= 5:
@@ -403,10 +433,12 @@ class AIAnalyzer:
                     
         # 3. AC (Abdomen) - Look for circular structures, often smaller than head
         for c in contours:
-            if head_contour is not None and np.array_equal(c, head_contour): continue
+            if head_contour is not None and np.array_equal(c, head_contour):
+                continue
             
             area = cv2.contourArea(c)
-            if area < 3000: continue
+            if area < 3000:
+                continue
             
             if len(c) >= 5:
                 ellipse = cv2.fitEllipse(c)
@@ -428,7 +460,8 @@ class AIAnalyzer:
         # 4. FL (Femur) - Look for long linear/rectangular structures
         for c in contours:
             area = cv2.contourArea(c)
-            if area < 500 or area > 5000: continue
+            if area < 500 or area > 5000:
+                continue
             
             rect = cv2.minAreaRect(c)
             (center, axes, angle) = rect
@@ -509,22 +542,33 @@ class AIAnalyzer:
         
         # Quality score calculation
         score = 0
-        if sharpness > 400: score += 40
-        elif sharpness > 200: score += 20
+        if sharpness > 400:
+            score += 40
+        elif sharpness > 200:
+            score += 20
         
-        if contrast > 40: score += 30
-        elif contrast > 20: score += 15
+        if contrast > 40:
+            score += 30
+        elif contrast > 20:
+            score += 15
         
-        if 40 < brightness < 200: score += 20
+        if 40 < brightness < 200:
+            score += 20
         
-        if noise < 10: score += 10
-        elif noise < 20: score += 5
+        if noise < 10:
+            score += 10
+        elif noise < 20:
+            score += 5
         
         # Map score to category
-        if score >= 80: return 'excellent'
-        elif score >= 60: return 'good'
-        elif score >= 30: return 'fair'
-        else: return 'poor'
+        if score >= 80:
+            return 'excellent'
+        elif score >= 60:
+            return 'good'
+        elif score >= 30:
+            return 'fair'
+        else:
+            return 'poor'
     
     def estimate_gestational_age(self, biometry: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -658,7 +702,10 @@ class AIAnalyzer:
         """
         try:
             import pydicom
-            from pydicom.pixel_data_handlers.util import apply_voi_lut
+            try:
+                from pydicom.pixels import apply_voi_lut
+            except Exception:  # pragma: no cover - compatibility fallback
+                from pydicom.pixel_data_handlers.util import apply_voi_lut
             
             # Read DICOM file
             dicom = pydicom.dcmread(dicom_path)

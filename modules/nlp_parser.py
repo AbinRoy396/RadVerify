@@ -4,7 +4,7 @@ Extracts structured meaning from doctor's radiology report text.
 """
 
 import re
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -60,7 +60,7 @@ class NLPParser:
         if SPACY_AVAILABLE:
             try:
                 self.nlp = spacy.load("en_core_web_sm")
-            except:
+            except Exception:
                 print("spaCy model not loaded, using basic parsing")
     
     def extract_sentences(self, text: str) -> List[str]:

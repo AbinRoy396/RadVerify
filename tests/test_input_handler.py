@@ -2,7 +2,7 @@
 import datetime as dt
 import numpy as np
 import pydicom
-from pydicom.dataset import Dataset, FileDataset, FileMetaDataset
+from pydicom.dataset import FileDataset, FileMetaDataset
 
 from modules.input_handler import InputHandler
 
@@ -15,8 +15,6 @@ def _make_dicom_bytes(width: int = 128, height: int = 128) -> io.BytesIO:
     file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
 
     ds = FileDataset(None, {}, file_meta=file_meta, preamble=b"\0" * 128)
-    ds.is_little_endian = True
-    ds.is_implicit_VR = False
     ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
     ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
     ds.StudyDate = dt.datetime.now().strftime("%Y%m%d")
@@ -33,7 +31,7 @@ def _make_dicom_bytes(width: int = 128, height: int = 128) -> io.BytesIO:
     ds.PixelData = pixels.tobytes()
 
     buf = io.BytesIO()
-    pydicom.dcmwrite(buf, ds)
+    pydicom.dcmwrite(buf, ds, little_endian=True, implicit_vr=False)
     buf.seek(0)
     buf.name = "test.dcm"
     return buf

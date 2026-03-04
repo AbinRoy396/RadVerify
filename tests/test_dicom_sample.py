@@ -16,8 +16,6 @@ def _write_dicom(path: Path, width: int = 128, height: int = 128) -> None:
     file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
 
     ds = FileDataset(str(path), {}, file_meta=file_meta, preamble=b"\0" * 128)
-    ds.is_little_endian = True
-    ds.is_implicit_VR = False
     ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
     ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
     ds.StudyDate = dt.datetime.now().strftime("%Y%m%d")
@@ -33,7 +31,7 @@ def _write_dicom(path: Path, width: int = 128, height: int = 128) -> None:
     pixels = (np.random.rand(height, width) * 4095).astype(np.uint16)
     ds.PixelData = pixels.tobytes()
 
-    pydicom.dcmwrite(str(path), ds)
+    pydicom.dcmwrite(str(path), ds, little_endian=True, implicit_vr=False)
 
 
 def test_dicom_sample_loads(tmp_path: Path):

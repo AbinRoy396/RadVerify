@@ -1,0 +1,8 @@
+{
+  "locked_at_utc": "2026-03-04T16:46:15.029381Z",
+  "source_archive": "models/archive/20260228_204710",
+  "model_file": "models/best_model.keras",
+  "labels_file": "models/labels.json",
+  "metrics_file": "models/validation_metrics.json",
+  "notes": "Production lock after regression in newer v5 tuned run."
+}

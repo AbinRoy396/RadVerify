@@ -23,7 +23,7 @@ ai_model:
   confidence_threshold: 0.8
   batch_size: 1
   weights: "imagenet"  # Use ImageNet pre-trained weights
-  model_path: "models/best_model.h5"
+  model_path: "models/best_model.keras"
   input_size: [224, 224]  # EfficientNet-B0 input size
   
   # Structure detection settings
@@ -138,3 +138,10 @@ comparison:
     low: 0.85
     medium: 0.70
     high: 0.50
+
+# API runtime settings
+api:
+  request_timeout_seconds: 120
+  max_upload_bytes: 20971520
+  rate_limit_requests: 30
+  rate_limit_window_seconds: 60

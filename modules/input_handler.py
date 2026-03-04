@@ -129,7 +129,10 @@ class InputHandler:
                 image_file.seek(0)
                 try:
                     import pydicom
-                    from pydicom.pixel_data_handlers.util import apply_voi_lut
+                    try:
+                        from pydicom.pixels import apply_voi_lut
+                    except Exception:  # pragma: no cover - compatibility fallback
+                        from pydicom.pixel_data_handlers.util import apply_voi_lut
                 except Exception as e:
                     raise RuntimeError(f"pydicom is required for DICOM files: {e}")
 

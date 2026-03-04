@@ -1,0 +1,57 @@
+name: backend-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      RADVERIFY_API_KEY: ci_secret_key
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff
+
+      - name: Lint
+        run: |
+          ruff check api_server.py train_model.py modules/image_enhancer.py modules/verification_engine.py tests/test_api_integration.py tests/test_verification_engine.py
+
+      - name: Run tests
+        run: |
+          pytest -q -m "not slow"
+
+      - name: API smoke test
+        run: |
+          python - <<'PY'
+          from PIL import Image
+          import os
+          os.makedirs("logs", exist_ok=True)
+          Image.new("RGB", (160, 160), color="gray").save("logs/ci_smoke.png")
+          PY
+          python -u api_server.py > logs/ci_api.log 2>&1 &
+          sleep 8
+          curl -sS -X POST "http://localhost:8000/verify" \
+            -H "X-API-Key: ci_secret_key" \
+            -F "scan=@logs/ci_smoke.png" \
+            -F "report=Sample fetal ultrasound report text for pipeline verification. Normal anatomy reported." \
+            -F "enhance=false" > logs/ci_api_response.json
+          python - <<'PY'
+          import json
+          with open("logs/ci_api_response.json", "r", encoding="utf-8") as f:
+            payload = json.load(f)
+          assert payload.get("success") is True, payload
+          PY

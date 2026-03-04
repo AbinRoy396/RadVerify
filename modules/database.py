@@ -5,7 +5,6 @@ Stores and retrieves verification case history using SQLite.
 
 import sqlite3
 import json
-from datetime import datetime
 from typing import Dict, Any, List
 import os
 

@@ -4,7 +4,6 @@ Enhances ultrasound scan quality using clarity filters + optional super-resoluti
 """
 
 import numpy as np
-from PIL import Image
 import cv2
 from typing import Dict, Any, Tuple, Optional
 import warnings
@@ -173,10 +172,10 @@ class ImageEnhancer:
 
     def _apply_clahe(self, image: np.ndarray) -> np.ndarray:
         lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
-        l, a, b = cv2.split(lab)
+        l_channel, a_channel, b_channel = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
-        merged = cv2.merge([l, a, b])
+        l_channel = clahe.apply(l_channel)
+        merged = cv2.merge([l_channel, a_channel, b_channel])
         return cv2.cvtColor(merged, cv2.COLOR_LAB2RGB)
 
     def _apply_unsharp_mask(self, image: np.ndarray) -> np.ndarray:
@@ -348,3 +347,21 @@ class ImageEnhancer:
             'enhancement_metadata': enhancement_metadata,
             'comparison_metrics': comparison
         }
+
+    def self_check(self) -> Dict[str, Any]:
+        """Return startup diagnostics for enhancement backend."""
+        status = {
+            "configured_method": self.method,
+            "scale_factor": self.scale_factor,
+            "model_path": self.model_path,
+            "available": True,
+            "reason": "ok",
+        }
+        if self.method == "realesrgan":
+            if self.realesrganer is None:
+                status["available"] = False
+                status["reason"] = "realesrgan_not_initialized"
+        if self.method == "edsr" and self.model is None:
+            status["available"] = False
+            status["reason"] = "edsr_not_initialized"
+        return status

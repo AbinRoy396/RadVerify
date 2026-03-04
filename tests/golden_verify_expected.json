@@ -1,0 +1,12 @@
+{
+  "expected_success": true,
+  "expected_stage": "completed",
+  "required_top_keys": [
+    "success",
+    "stage",
+    "verification_results",
+    "final_results",
+    "ai_findings",
+    "enhanced_image_path"
+  ]
+}

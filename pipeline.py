@@ -3,8 +3,8 @@ Main Pipeline Module
 Orchestrates the complete verification workflow.
 """
 
-from typing import Dict, Any, Optional
-from pathlib import Path
+from functools import lru_cache
+from typing import Dict, Any
 import yaml
 
 from modules.input_handler import InputHandler
@@ -203,6 +203,12 @@ class RadVerifyPipeline:
 
 
 # Convenience function for quick usage
+@lru_cache(maxsize=1)
+def _get_pipeline_singleton(config_path: str = "config/config.yaml") -> "RadVerifyPipeline":
+    """Cache a single pipeline instance per process to avoid model re-initialization."""
+    return RadVerifyPipeline(config_path)
+
+
 def verify_report(image_file, doctor_report_text: str, 
                  config_path: str = "config/config.yaml",
                  enhance_image: bool = True) -> Dict[str, Any]:
@@ -218,5 +224,5 @@ def verify_report(image_file, doctor_report_text: str,
     Returns:
         Verification results
     """
-    pipeline = RadVerifyPipeline(config_path)
+    pipeline = _get_pipeline_singleton(config_path)
     return pipeline.process(image_file, doctor_report_text, enhance_image)

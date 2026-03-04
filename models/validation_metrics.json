@@ -1,260 +1,578 @@
 {
-  "class_names": [
-    "biometry_abdomen",
-    "biometry_femur",
-    "brain_cerebellum",
-    "brain_skull",
-    "brain_ventricles",
-    "face_lips",
-    "face_nasal_bone",
-    "face_profile",
-    "heart_four_chamber_view",
-    "limbs_arms",
-    "limbs_legs",
-    "organs_stomach"
-  ],
-  "confusion_matrix": [
-    [
-      44,
-      83,
-      46,
-      25,
-      33,
-      9,
-      0,
-      16,
-      15,
-      39,
-      26,
-      22
+  "validation": {
+    "class_names": [
+      "biometry_abdomen",
+      "biometry_femur",
+      "brain_cerebellum",
+      "brain_skull",
+      "brain_ventricles",
+      "face_lips",
+      "face_nasal_bone",
+      "face_profile",
+      "heart_four_chamber_view",
+      "limbs_arms",
+      "limbs_legs",
+      "organs_stomach"
     ],
-    [
-      69,
-      125,
-      68,
-      28,
-      48,
-      12,
-      0,
-      20,
-      16,
-      58,
-      29,
-      51
+    "confusion_matrix": [
+      [
+        0,
+        18,
+        0,
+        0,
+        0,
+        0,
+        0,
+        23,
+        0,
+        23,
+        66,
+        228
+      ],
+      [
+        0,
+        35,
+        0,
+        0,
+        0,
+        0,
+        0,
+        18,
+        0,
+        20,
+        99,
+        352
+      ],
+      [
+        0,
+        19,
+        0,
+        0,
+        0,
+        0,
+        0,
+        20,
+        0,
+        18,
+        61,
+        221
+      ],
+      [
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        58,
+        0,
+        36,
+        157,
+        530
+      ],
+      [
+        0,
+        16,
+        0,
+        0,
+        0,
+        0,
+        0,
+        28,
+        0,
+        19,
+        55,
+        184
+      ],
+      [
+        0,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0,
+        4,
+        22,
+        60
+      ],
+      [
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        6,
+        0,
+        5,
+        16,
+        68
+      ],
+      [
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        4,
+        10,
+        77
+      ],
+      [
+        0,
+        57,
+        0,
+        0,
+        0,
+        0,
+        0,
+        33,
+        0,
+        24,
+        140,
+        406
+      ],
+      [
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        18,
+        0,
+        19,
+        81,
+        229
+      ],
+      [
+        0,
+        23,
+        0,
+        0,
+        1,
+        0,
+        0,
+        38,
+        0,
+        32,
+        92,
+        303
+      ],
+      [
+        0,
+        20,
+        0,
+        0,
+        0,
+        0,
+        0,
+        15,
+        0,
+        13,
+        66,
+        203
+      ]
     ],
-    [
-      56,
-      53,
-      31,
-      29,
-      31,
-      7,
-      0,
-      12,
-      14,
-      44,
-      22,
-      40
+    "per_class": {
+      "biometry_abdomen": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 358
+      },
+      "biometry_femur": {
+        "precision": 0.1273,
+        "recall": 0.0668,
+        "f1": 0.0876,
+        "support": 524
+      },
+      "brain_cerebellum": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 339
+      },
+      "brain_skull": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 831
+      },
+      "brain_ventricles": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 302
+      },
+      "face_lips": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 99
+      },
+      "face_nasal_bone": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 99
+      },
+      "face_profile": {
+        "precision": 0.0149,
+        "recall": 0.0408,
+        "f1": 0.0218,
+        "support": 98
+      },
+      "heart_four_chamber_view": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 660
+      },
+      "limbs_arms": {
+        "precision": 0.0876,
+        "recall": 0.0511,
+        "f1": 0.0645,
+        "support": 372
+      },
+      "limbs_legs": {
+        "precision": 0.1064,
+        "recall": 0.1881,
+        "f1": 0.1359,
+        "support": 489
+      },
+      "organs_stomach": {
+        "precision": 0.071,
+        "recall": 0.6404,
+        "f1": 0.1278,
+        "support": 317
+      }
+    },
+    "macro_f1": 0.0365,
+    "accuracy": 0.0787,
+    "samples": 4488
+  },
+  "test": {
+    "class_names": [
+      "biometry_abdomen",
+      "biometry_femur",
+      "brain_cerebellum",
+      "brain_skull",
+      "brain_ventricles",
+      "face_lips",
+      "face_nasal_bone",
+      "face_profile",
+      "heart_four_chamber_view",
+      "limbs_arms",
+      "limbs_legs",
+      "organs_stomach"
     ],
-    [
-      104,
-      180,
-      81,
-      61,
-      80,
-      16,
-      1,
-      29,
-      28,
-      108,
-      56,
-      87
+    "confusion_matrix": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        18,
+        0,
+        0,
+        0,
+        1,
+        0,
+        40,
+        0,
+        1,
+        0,
+        38
+      ],
+      [
+        0,
+        14,
+        0,
+        0,
+        0,
+        0,
+        0,
+        44,
+        0,
+        0,
+        0,
+        40
+      ],
+      [
+        0,
+        16,
+        0,
+        0,
+        0,
+        0,
+        0,
+        42,
+        0,
+        0,
+        0,
+        41
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     ],
-    [
-      38,
-      62,
-      34,
-      20,
-      21,
-      7,
-      1,
-      11,
-      14,
-      44,
-      25,
-      25
-    ],
-    [
-      13,
-      21,
-      7,
-      6,
-      9,
-      2,
-      0,
-      4,
-      3,
-      20,
-      8,
-      6
-    ],
-    [
-      17,
-      19,
-      12,
-      4,
-      10,
-      6,
-      0,
-      4,
-      2,
-      11,
-      5,
-      9
-    ],
-    [
-      11,
-      23,
-      11,
-      5,
-      8,
-      0,
-      0,
-      5,
-      6,
-      14,
-      8,
-      7
-    ],
-    [
-      106,
-      163,
-      64,
-      40,
-      46,
-      15,
-      0,
-      26,
-      22,
-      80,
-      41,
-      57
-    ],
-    [
-      54,
-      86,
-      29,
-      24,
-      37,
-      12,
-      1,
-      12,
-      5,
-      50,
-      21,
-      41
-    ],
-    [
-      63,
-      101,
-      55,
-      31,
-      40,
-      18,
-      0,
-      18,
-      21,
-      60,
-      24,
-      58
-    ],
-    [
-      42,
-      78,
-      37,
-      20,
-      29,
-      7,
-      0,
-      6,
-      8,
-      48,
-      15,
-      27
-    ]
-  ],
-  "per_class": {
+    "per_class": {
+      "biometry_abdomen": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "biometry_femur": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "brain_cerebellum": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "brain_skull": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "brain_ventricles": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "face_lips": {
+        "precision": 1.0,
+        "recall": 0.0102,
+        "f1": 0.0202,
+        "support": 98
+      },
+      "face_nasal_bone": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 98
+      },
+      "face_profile": {
+        "precision": 0.3333,
+        "recall": 0.4242,
+        "f1": 0.3733,
+        "support": 99
+      },
+      "heart_four_chamber_view": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "limbs_arms": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "limbs_legs": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "organs_stomach": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      }
+    },
+    "macro_f1": 0.0328,
+    "accuracy": 0.1458,
+    "samples": 295
+  },
+  "calibrated_thresholds": {
     "biometry_abdomen": {
-      "precision": 0.0713,
-      "recall": 0.1229,
-      "f1": 0.0903,
-      "support": 358
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "biometry_femur": {
-      "precision": 0.1258,
-      "recall": 0.2385,
-      "f1": 0.1647,
-      "support": 524
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "brain_cerebellum": {
-      "precision": 0.0653,
-      "recall": 0.0914,
-      "f1": 0.0762,
-      "support": 339
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "brain_skull": {
-      "precision": 0.2082,
-      "recall": 0.0734,
-      "f1": 0.1085,
-      "support": 831
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "brain_ventricles": {
-      "precision": 0.0536,
-      "recall": 0.0695,
-      "f1": 0.0605,
-      "support": 302
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "face_lips": {
-      "precision": 0.018,
-      "recall": 0.0202,
-      "f1": 0.019,
-      "support": 99
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "face_nasal_bone": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "support": 99
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "face_profile": {
-      "precision": 0.0307,
-      "recall": 0.051,
-      "f1": 0.0383,
-      "support": 98
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "heart_four_chamber_view": {
-      "precision": 0.1429,
-      "recall": 0.0333,
-      "f1": 0.0541,
-      "support": 660
+      "threshold": 0.3,
+      "f1": 0.0
     },
     "limbs_arms": {
-      "precision": 0.0868,
-      "recall": 0.1344,
-      "f1": 0.1055,
-      "support": 372
+      "threshold": 0.3,
+      "f1": 0.131
     },
     "limbs_legs": {
-      "precision": 0.0857,
-      "recall": 0.0491,
-      "f1": 0.0624,
-      "support": 489
+      "threshold": 0.3,
+      "f1": 0.1393
     },
     "organs_stomach": {
-      "precision": 0.0628,
-      "recall": 0.0852,
-      "f1": 0.0723,
-      "support": 317
+      "threshold": 0.3,
+      "f1": 0.0
     }
   }
 }
