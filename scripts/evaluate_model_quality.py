@@ -82,7 +82,8 @@ def main() -> int:
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
 
-    model = tf.keras.models.load_model(model_path)
+    # Avoid deserialization failures when model was trained with custom losses/metrics.
+    model = tf.keras.models.load_model(model_path, compile=False)
     datagen = ImageDataGenerator(rescale=1.0 / 255.0)
     generator = datagen.flow_from_directory(
         str(dataset_split),

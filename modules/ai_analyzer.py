@@ -244,6 +244,20 @@ class AIAnalyzer:
             feature_idx = 0
             feature_len = conf_scores.size
             if self.labels and len(self.labels) == feature_len:
+                # For single-label softmax classifiers, a global threshold like 0.8 is too strict.
+                # If no calibrated per-class thresholds exist, mark only the top class as present.
+                softmax_like = bool(
+                    np.all((conf_scores >= 0.0) & (conf_scores <= 1.0))
+                    and abs(float(np.sum(conf_scores)) - 1.0) < 1e-2
+                )
+                has_calibrated_thresholds = bool(self.class_thresholds)
+                multiclass_top1_threshold = max(
+                    float(os.getenv("RADVERIFY_MULTICLASS_PRESENT_THRESHOLD", "0.25")),
+                    1.5 / max(feature_len, 1),
+                )
+                top_idx = int(np.argmax(conf_scores)) if feature_len > 0 else -1
+                use_top1_policy = softmax_like and not has_calibrated_thresholds
+
                 for label in self.labels:
                     conf = float(conf_scores[feature_idx])
                     if "/" in label:
@@ -258,8 +272,12 @@ class AIAnalyzer:
                         threshold_key,
                         self.class_thresholds.get(structure, self.confidence_threshold)
                     )
+                    if use_top1_policy:
+                        present = (feature_idx == top_idx and conf >= multiclass_top1_threshold)
+                    else:
+                        present = conf > threshold
                     category_detections[structure] = {
-                        'present': conf > threshold,
+                        'present': present,
                         'confidence': round(conf, 3)
                     }
                     feature_idx += 1
