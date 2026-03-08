@@ -1,0 +1,13 @@
+{
+  "release": "core6_v1",
+  "timestamp": "20260306_004922",
+  "candidate_dir": "models\\experiments\\core6_v1_run3",
+  "backup_dir": "models\\releases\\backup_before_core6_v1_20260306_004922",
+  "activated_files": [
+    "best_model.keras",
+    "best_model.h5",
+    "labels.json",
+    "validation_metrics.json",
+    "MODEL_CARD.md"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "baseline_path": "models\\experiments\\core6_v1_run3\\validation_metrics.json",
+  "candidate_path": "models\\experiments\\core6_v1_run6_gpu\\validation_metrics.json",
+  "baseline": {
+    "val_accuracy": 0.5294,
+    "val_macro_f1": 0.435,
+    "test_accuracy": 0.5107,
+    "test_macro_f1": 0.4264
+  },
+  "candidate": {
+    "val_accuracy": 0.3985,
+    "val_macro_f1": 0.2247,
+    "test_accuracy": 0.3752,
+    "test_macro_f1": 0.2348
+  },
+  "delta": {
+    "val_accuracy": -0.1309,
+    "val_macro_f1": -0.2103,
+    "test_accuracy": -0.1355,
+    "test_macro_f1": -0.1916
+  },
+  "promote": false
+}

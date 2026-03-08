@@ -1,0 +1,242 @@
+{
+  "validation": {
+    "class_names": [
+      "biometry_abdomen",
+      "biometry_femur",
+      "brain_cerebellum",
+      "brain_skull",
+      "brain_ventricles",
+      "heart_four_chamber_view"
+    ],
+    "confusion_matrix": [
+      [
+        6,
+        17,
+        0,
+        0,
+        0,
+        60
+      ],
+      [
+        1,
+        96,
+        0,
+        0,
+        0,
+        17
+      ],
+      [
+        0,
+        3,
+        0,
+        0,
+        0,
+        148
+      ],
+      [
+        1,
+        10,
+        0,
+        0,
+        0,
+        16
+      ],
+      [
+        0,
+        3,
+        0,
+        0,
+        0,
+        115
+      ],
+      [
+        4,
+        14,
+        0,
+        0,
+        0,
+        169
+      ]
+    ],
+    "per_class": {
+      "biometry_abdomen": {
+        "precision": 0.5,
+        "recall": 0.0723,
+        "f1": 0.1263,
+        "support": 83
+      },
+      "biometry_femur": {
+        "precision": 0.6713,
+        "recall": 0.8421,
+        "f1": 0.7471,
+        "support": 114
+      },
+      "brain_cerebellum": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 151
+      },
+      "brain_skull": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 27
+      },
+      "brain_ventricles": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 118
+      },
+      "heart_four_chamber_view": {
+        "precision": 0.3219,
+        "recall": 0.9037,
+        "f1": 0.4747,
+        "support": 187
+      }
+    },
+    "macro_f1": 0.2247,
+    "accuracy": 0.3985,
+    "samples": 680
+  },
+  "test": {
+    "class_names": [
+      "biometry_abdomen",
+      "biometry_femur",
+      "brain_cerebellum",
+      "brain_skull",
+      "brain_ventricles",
+      "heart_four_chamber_view"
+    ],
+    "confusion_matrix": [
+      [
+        11,
+        21,
+        0,
+        0,
+        0,
+        52
+      ],
+      [
+        0,
+        88,
+        0,
+        0,
+        0,
+        16
+      ],
+      [
+        1,
+        2,
+        0,
+        0,
+        0,
+        79
+      ],
+      [
+        0,
+        15,
+        0,
+        0,
+        1,
+        163
+      ],
+      [
+        0,
+        5,
+        0,
+        2,
+        0,
+        72
+      ],
+      [
+        3,
+        6,
+        0,
+        0,
+        0,
+        164
+      ]
+    ],
+    "per_class": {
+      "biometry_abdomen": {
+        "precision": 0.7333,
+        "recall": 0.131,
+        "f1": 0.2222,
+        "support": 84
+      },
+      "biometry_femur": {
+        "precision": 0.6423,
+        "recall": 0.8462,
+        "f1": 0.7303,
+        "support": 104
+      },
+      "brain_cerebellum": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 82
+      },
+      "brain_skull": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 179
+      },
+      "brain_ventricles": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 79
+      },
+      "heart_four_chamber_view": {
+        "precision": 0.3004,
+        "recall": 0.948,
+        "f1": 0.4562,
+        "support": 173
+      }
+    },
+    "macro_f1": 0.2348,
+    "accuracy": 0.3752,
+    "samples": 701
+  },
+  "calibrated_thresholds": {
+    "biometry_abdomen": {
+      "threshold": 0.25,
+      "f1": 0.3662,
+      "precision": 0.2587,
+      "recall": 0.6265
+    },
+    "biometry_femur": {
+      "threshold": 0.29,
+      "f1": 0.7834,
+      "precision": 0.8252,
+      "recall": 0.7456
+    },
+    "brain_cerebellum": {
+      "threshold": 0.08,
+      "f1": 0.4699,
+      "precision": 0.3424,
+      "recall": 0.7483
+    },
+    "brain_skull": {
+      "threshold": 0.09,
+      "f1": 0.1095,
+      "precision": 0.0587,
+      "recall": 0.8148
+    },
+    "brain_ventricles": {
+      "threshold": 0.08,
+      "f1": 0.6307,
+      "precision": 0.6179,
+      "recall": 0.6441
+    },
+    "heart_four_chamber_view": {
+      "threshold": 0.31,
+      "f1": 0.6581,
+      "precision": 0.6337,
+      "recall": 0.6845
+    }
+  }
+}
