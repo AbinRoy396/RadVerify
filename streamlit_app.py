@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
+import html
 import json
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import requests
 import streamlit as st
 
 
@@ -119,10 +123,216 @@ def init_state() -> None:
             "narrative": True,
             "discrepancy": True,
         },
+        "backend_url": os.getenv("RADVERIFY_BACKEND_URL", "http://localhost:8000"),
+        "backend_api_key": os.getenv("RADVERIFY_API_KEY", "radverify_secret_key"),
+        "backend_connected": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
+
+def _backend_headers() -> Dict[str, str]:
+    return {"X-API-Key": st.session_state.backend_api_key.strip()}
+
+
+def _backend_url(path: str) -> str:
+    return st.session_state.backend_url.rstrip("/") + path
+
+
+def backend_health_check() -> tuple[bool, str]:
+    try:
+        resp = requests.get(_backend_url("/health"), timeout=4)
+        if resp.status_code == 200:
+            return True, "Connected"
+        return False, f"Health failed: {resp.status_code}"
+    except Exception as exc:
+        return False, f"Backend unreachable: {exc}"
+
+
+def fetch_history_backend(limit: int = 20) -> List[Dict[str, Any]]:
+    resp = requests.get(
+        _backend_url("/history"),
+        params={"limit": limit},
+        headers=_backend_headers(),
+        timeout=10,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"/history failed: {resp.status_code} {resp.text}")
+
+    raw = resp.json()
+    history: List[Dict[str, Any]] = []
+    for item in raw:
+        vr = item.get("verification_results") or {}
+        risk = str(vr.get("risk_level") or "-").upper()
+        history.append(
+            {
+                "id": f"CASE-{item.get('id', '-')}",
+                "scan_type": item.get("image_path") or "Uploaded Scan",
+                "patient_id": item.get("patient_id", "-"),
+                "created_at": str(item.get("created_at", "-")),
+                "verification_status": "Verified" if risk == "LOW" else "Discrepancy Found",
+                "risk": risk,
+            }
+        )
+    return history
+
+
+def _flatten_structures(structures: Dict[str, Any]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    for category, vals in (structures or {}).items():
+        if isinstance(vals, dict):
+            for name, data in vals.items():
+                if isinstance(data, dict):
+                    out.append(
+                        {
+                            "name": name,
+                            "category": category,
+                            "present": bool(data.get("present", False)),
+                            "confidence": float(data.get("confidence", 0.0)),
+                        }
+                    )
+    return out
+
+
+def _resolve_enhanced_image_bytes(path_value: Optional[str]) -> Optional[bytes]:
+    if not path_value:
+        return None
+
+    raw = str(path_value).strip()
+    if not raw:
+        return None
+
+    candidates = [
+        Path(raw),
+        Path.cwd() / raw,
+        Path.cwd() / raw.replace("\\", "/"),
+    ]
+    for candidate in candidates:
+        try:
+            if candidate.exists() and candidate.is_file():
+                return candidate.read_bytes()
+        except OSError:
+            continue
+    return None
+
+
+def _build_discrepancy_summary(api_result: Dict[str, Any]) -> str:
+    vr = api_result.get("verification_results") or {}
+    risk = str(vr.get("risk_level", "unknown")).upper()
+    agreement = float(vr.get("agreement_rate", 0.0)) * 100
+    counts = vr.get("discrepancy_counts") or {}
+    comp = vr.get("measurement_comparisons") or {}
+
+    lines = [
+        f"Risk Level: {risk}",
+        f"Agreement: {agreement:.1f}%",
+        (
+            "Counts: "
+            f"matches={int(counts.get('matches', 0))}, "
+            f"omissions={int(counts.get('omissions', 0))}, "
+            f"mismatches={int(counts.get('mismatches', 0))}, "
+            f"overstatements={int(counts.get('overstatements', 0))}"
+        ),
+    ]
+
+    if comp:
+        lines.append("")
+        lines.append("Measurement Comparison:")
+        for name, row in comp.items():
+            status = str(row.get("status", "unknown")).upper()
+            ai_v = row.get("ai_value")
+            dr_v = row.get("doctor_value")
+            if ai_v is not None and dr_v is not None:
+                diff = row.get("difference")
+                tol = row.get("tolerance")
+                lines.append(f"- {name}: {status} (AI={ai_v}, Doctor={dr_v}, diff={diff}, tol={tol})")
+            else:
+                lines.append(f"- {name}: {status}")
+
+    return "\n".join(lines)
+
+
+def normalize_backend_result(api_result: Dict[str, Any], file_name: str, report_text: str) -> Dict[str, Any]:
+    ai = api_result.get("ai_findings") or {}
+    vr = api_result.get("verification_results") or {}
+    structures = _flatten_structures(ai.get("structures_detected") or {})
+    top = sorted(structures, key=lambda x: x["confidence"], reverse=True)[:6]
+
+    findings: List[Dict[str, Any]] = []
+    for row in top:
+        status = "mismatch" if row["present"] else "low_confidence"
+        findings.append(
+            {
+                "name": row["name"].replace("_", " ").title(),
+                "confidence": row["confidence"],
+                "rationale": f"Category: {row['category']}. Present={row['present']}.",
+                "status": status,
+            }
+        )
+
+    if not findings:
+        findings.append(
+            {
+                "name": "No high-confidence structure",
+                "confidence": 0.0,
+                "rationale": "No structure-level detections available in response.",
+                "status": "low_confidence",
+            }
+        )
+
+    escaped = html.escape(report_text).replace("\n", "<br/>")
+    comparison_text_raw = (
+        api_result.get("comparison_report_text")
+        or (api_result.get("final_results") or {}).get("comparison_report")
+        or "Comparison summary unavailable."
+    )
+    comparison_text_pretty = _build_discrepancy_summary(api_result)
+    enhanced_path = api_result.get("enhanced_image_path")
+
+    return {
+        "meta": {
+            "file_name": file_name,
+            "generated_at": datetime.now().strftime("%b %d, %I:%M %p"),
+            "study": f"Uploaded Study | {file_name}",
+            "study_id": f"CASE-{api_result.get('case_id', '-')}",
+            "timestamp": datetime.now().strftime("%b %d, %Y %I:%M %p").upper(),
+        },
+        "ai_findings": findings,
+        "report": {
+            "raw_text": report_text,
+            "highlighted_html": f"<p>{escaped}</p>",
+        },
+        "comparison": {
+            "risk_level": vr.get("risk_level", "unknown"),
+            "agreement_rate": float(vr.get("agreement_rate", 0.0)),
+            "discrepancy_counts": vr.get("discrepancy_counts", {}),
+            "comparison_report_text": comparison_text_pretty,
+            "comparison_report_text_raw": comparison_text_raw,
+        },
+        "enhanced_image_bytes": _resolve_enhanced_image_bytes(enhanced_path),
+        "enhanced_image_path": enhanced_path,
+        "raw_api_result": api_result,
+    }
+
+
+def verify_backend(file_name: str, image_bytes: bytes, report_text: str, enhance: bool = True) -> Dict[str, Any]:
+    files = {"scan": (file_name, image_bytes, "application/octet-stream")}
+    data = {"report": report_text, "enhance": str(enhance).lower()}
+    resp = requests.post(
+        _backend_url("/verify"),
+        headers=_backend_headers(),
+        files=files,
+        data=data,
+        timeout=240,
+    )
+    if resp.status_code != 200:
+        try:
+            detail = resp.json()
+        except Exception:
+            detail = resp.text
+        raise RuntimeError(f"/verify failed: {resp.status_code} {detail}")
+    return normalize_backend_result(resp.json(), file_name, report_text)
 
 
 def inject_css() -> None:
@@ -317,6 +527,7 @@ def inject_css() -> None:
           border:1px solid #24272b;
           border-radius:14px;
           overflow:hidden;
+          box-shadow: 0 24px 48px rgba(2, 6, 23, 0.35);
         }
         .dark-bar {
           background:#1e2124;
@@ -329,24 +540,34 @@ def inject_css() -> None:
           gap:12px;
         }
         .dark-sub { color:#9ca3af; font-size:0.8rem; }
-        .dark-grid { display:grid; grid-template-columns: 1.35fr 0.82fr 1fr; min-height: 580px; }
+        .dark-grid { display:grid; grid-template-columns: 1.32fr 0.92fr 1.12fr; min-height: 580px; max-height: 74vh; }
         .dark-panel { border-right:1px solid #2a2e33; }
         .dark-panel:last-child { border-right:none; }
-        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 16px; display:flex; align-items:center; justify-content:center; }
-        .dark-findings { background:#1a1c1e; padding: 0; }
-        .dark-report { background:#1e2124; padding: 0; }
-        .dark-head { padding: 12px 14px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; }
+        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 16px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .dark-viewer img { max-height: 66vh; object-fit: contain; border-radius: 10px; }
+        .dark-findings { background:#1a1c1e; padding: 0; overflow-y:auto; }
+        .dark-report { background:#1e2124; padding: 0; overflow-y:auto; }
+        .dark-head { position: sticky; top: 0; z-index: 4; padding: 12px 14px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; background:#1f2226; }
         .dark-title { font-size:0.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#9ca3af; }
-        .finding-card { margin: 12px 14px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.4); background: rgba(30,41,59,0.35); border: 1px solid rgba(148,163,184,0.14); }
+        .finding-card { margin: 12px 14px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.45); background: rgba(15,23,42,0.72); border: 1px solid rgba(148,163,184,0.22); }
         .finding-card.active { border-left-color: rgba(20,143,184,1); box-shadow: 0 0 16px rgba(20,143,184,0.2); border-color: rgba(20,143,184,0.22); }
         .finding-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
         .finding-name { font-weight:800; color:#f8fafc; }
         .finding-conf { font-size:0.68rem; font-weight:800; color: rgba(20,143,184,1); background: rgba(20,143,184,0.15); border:1px solid rgba(20,143,184,0.2); padding: 3px 8px; border-radius: 999px; white-space:nowrap; }
-        .finding-text { margin-top: 8px; color:#94a3b8; font-size:0.86rem; line-height:1.4; }
-        .report-body { padding: 14px; color:#cbd5e1; font-size:1.06rem; line-height:1.65; }
-        .note-box { margin: 14px; padding: 14px; border-radius: 14px; background: rgba(223,73,90,0.08); border:1px solid rgba(223,73,90,0.16); }
+        .finding-text { margin-top: 8px; color:#cbd5e1; font-size:0.86rem; line-height:1.45; }
+        .report-body { padding: 14px; color:#dde6f3; font-size:1.02rem; line-height:1.62; }
+        .report-body p { margin: 0 0 0.8rem 0; }
+        .note-box { margin: 14px; padding: 14px; border-radius: 14px; background: rgba(77,23,33,0.58); border:1px solid rgba(223,73,90,0.34); }
         .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#fb7185; }
-        .note-text { margin-top: 8px; color:#cbd5e1; }
+        .note-text { margin-top: 8px; color:#ffe4e8; }
+        .note-pre { margin-top: 8px; color:#ffe4e8; font-size:0.92rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; font-family:'Manrope',sans-serif; max-height: 36vh; overflow-y:auto; }
+
+        @media (max-width: 1500px) {
+          .dark-grid { grid-template-columns: 1fr; max-height:none; }
+          .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; min-height: 320px; }
+          .dark-panel:last-child { border-bottom:none; }
+          .dark-viewer img { max-height: 54vh; }
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -403,8 +624,14 @@ def render_sidebar() -> None:
                 st.rerun()
 
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='sidebar-card'><div class='api-title'>DEMO MODE</div>", unsafe_allow_html=True)
-        st.markdown("<div class='subtle' style='font-size:0.88rem;'>Offline · Mock data</div>", unsafe_allow_html=True)
+        st.session_state.backend_url = st.text_input("Backend URL", value=st.session_state.backend_url)
+        st.session_state.backend_api_key = st.text_input("API Key", value=st.session_state.backend_api_key, type="password")
+        connected, status_msg = backend_health_check()
+        st.session_state.backend_connected = connected
+        mode_title = "BACKEND MODE" if connected else "DEMO FALLBACK"
+        mode_sub = status_msg if connected else f"{status_msg} - using mock data"
+        st.markdown(f"<div class='sidebar-card'><div class='api-title'>{mode_title}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='subtle' style='font-size:0.88rem;'>{mode_sub}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown(
             """
@@ -451,6 +678,12 @@ def top_header() -> None:
 
 
 def render_dashboard() -> None:
+    if st.session_state.backend_connected:
+        try:
+            st.session_state.history_cache = fetch_history_backend(limit=20)
+        except Exception as exc:
+            st.session_state.last_error = str(exc)
+
     st.markdown(
         """
         <div style="max-width: 980px;">
@@ -522,21 +755,32 @@ def render_dashboard() -> None:
             st.session_state.last_error = ""
             with st.spinner("Running AI verification..."):
                 try:
-                    result = mock_verify(st.session_state.image_name, st.session_state.report_text.strip())
+                    if st.session_state.backend_connected:
+                        result = verify_backend(
+                            st.session_state.image_name,
+                            st.session_state.image_bytes,
+                            st.session_state.report_text.strip(),
+                            enhance=True,
+                        )
+                    else:
+                        result = mock_verify(st.session_state.image_name, st.session_state.report_text.strip())
                     st.session_state.last_result = result
                     st.session_state.active_page = "Analysis Workspace"
 
-                    st.session_state.history_cache = [
-                        {
-                            "id": result.get("meta", {}).get("study_id", "CASE") + "-DEMO",
-                            "scan_type": st.session_state.image_name or "Uploaded Scan",
-                            "patient_id": "PAT-DEMO",
-                            "created_at": datetime.now().strftime("%b %d, %I:%M %p"),
-                            "verification_status": "Discrepancy Found",
-                            "risk": str((result.get("comparison") or {}).get("risk_level") or "-").upper(),
-                        },
-                        *st.session_state.history_cache,
-                    ]
+                    if st.session_state.backend_connected:
+                        st.session_state.history_cache = fetch_history_backend(limit=20)
+                    else:
+                        st.session_state.history_cache = [
+                            {
+                                "id": result.get("meta", {}).get("study_id", "CASE") + "-DEMO",
+                                "scan_type": st.session_state.image_name or "Uploaded Scan",
+                                "patient_id": "PAT-DEMO",
+                                "created_at": datetime.now().strftime("%b %d, %I:%M %p"),
+                                "verification_status": "Discrepancy Found",
+                                "risk": str((result.get("comparison") or {}).get("risk_level") or "-").upper(),
+                            },
+                            *st.session_state.history_cache,
+                        ]
 
                     st.rerun()
                 except Exception as exc:
@@ -556,7 +800,7 @@ def render_dashboard() -> None:
     for item in history:
         rows.append(
             {
-                "Scan ID / Type": f"#{item.get('id', '-') } · {item.get('scan_type','-')}",
+                "Scan ID / Type": f"#{item.get('id', '-') } - {item.get('scan_type','-')}",
                 "Patient Ref": item.get("patient_id", "-"),
                 "Timestamp": item.get("created_at", "-"),
                 "Verification Status": item.get("verification_status", "-"),
@@ -583,7 +827,7 @@ def render_analysis() -> None:
           <div class='dark-bar'>
             <div>
               <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','')}</div>
-              <div class='dark-sub'>STUDY ID: {meta.get('study_id','')} · {meta.get('timestamp','')} · <span style='color:rgba(20,143,184,1)'>STAT</span></div>
+              <div class='dark-sub'>STUDY ID: {meta.get('study_id','')} - {meta.get('timestamp','')} - <span style='color:rgba(20,143,184,1)'>STAT</span></div>
             </div>
             <div style='display:flex;gap:8px;flex-wrap:wrap;'>
               <span style='padding:6px 10px;border-radius:999px;background:rgba(223,73,90,0.14);border:1px solid rgba(223,73,90,0.25);color:#fb7185;font-weight:800;font-size:0.75rem;'>Mismatch {int(counts.get('mismatches') or 0)}</span>
@@ -598,8 +842,11 @@ def render_analysis() -> None:
 
     with col1:
         st.markdown("<div class='dark-panel dark-viewer'>", unsafe_allow_html=True)
-        if st.session_state.image_bytes:
-            st.image(st.session_state.image_bytes, use_container_width=True)
+        enhanced_bytes = result.get("enhanced_image_bytes")
+        if enhanced_bytes:
+            st.image(enhanced_bytes, use_container_width=True, caption="Enhanced scan")
+        elif st.session_state.image_bytes:
+            st.image(st.session_state.image_bytes, use_container_width=True, caption="Original scan")
         else:
             st.image(
                 "https://lh3.googleusercontent.com/aida-public/AB6AXuD57tZCNaKTyMhcARHi_e-_h-n7kbEwkDiu0bPOhG77MnZk9-Grvq1m0lT1ibcLZrbmk84D_B0As5R3nMwHzzNmBNqB40E0o9u_T49Cjw2KN9nPWd2dBribnY_2lgYQsbde1AKX4Y8NnbtkxyGjc997jLmqBRPTBz7TiVNZIuyjmnY2Le6GUrz5UVhDi_a-pN8lc9vGjkcEsJIONcykPB4qNQF1zdKqQ2UVYPH2WRgXlHtrx0lAe9o0sUJ3AcKDswdk7rd-07p_FxI",
@@ -625,21 +872,31 @@ def render_analysis() -> None:
         st.markdown(cards_html + "</div>", unsafe_allow_html=True)
 
     with col3:
+        report_html = (result.get("report") or {}).get("highlighted_html") or ""
+        if not report_html:
+            report_html = f"<p>{html.escape((result.get('report') or {}).get('raw_text', ''))}</p>"
+        cmp_text = cmp.get("comparison_report_text", "")
+        cmp_html = f"<pre class='note-pre'>{html.escape(str(cmp_text))}</pre>"
         st.markdown(
             "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Human Authored Report</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
             unsafe_allow_html=True,
         )
         st.markdown("<div class='report-body'>", unsafe_allow_html=True)
-        st.markdown((result.get("report") or {}).get("highlighted_html") or "", unsafe_allow_html=True)
+        st.markdown(report_html, unsafe_allow_html=True)
         st.markdown(
             f"""
             <div class='note-box'>
               <div class='note-title'>Discrepancy Detail</div>
-              <div class='note-text'>{cmp.get('comparison_report_text','')}</div>
+              <div class='note-text'>Clean comparison summary:</div>
+              {cmp_html}
             </div>
             """ + "</div></div>",
             unsafe_allow_html=True,
         )
+        raw_cmp = cmp.get("comparison_report_text_raw")
+        if raw_cmp and raw_cmp != cmp_text:
+            with st.expander("Show raw backend comparison text"):
+                st.code(str(raw_cmp))
 
     b1, b2, b3 = st.columns([1.2, 1.2, 1.6])
     with b1:
@@ -652,7 +909,7 @@ def render_analysis() -> None:
             st.rerun()
     with b3:
         st.markdown(
-            f"<div class='subtle' style='text-align:right;padding-top:10px;'>Agreement: {int(float(cmp.get('agreement_rate',0)) * 100)}% · Risk: <b>{str(cmp.get('risk_level','-')).upper()}</b></div>",
+            f"<div class='subtle' style='text-align:right;padding-top:10px;'>Agreement: {int(float(cmp.get('agreement_rate',0)) * 100)}% - Risk: <b>{str(cmp.get('risk_level','-')).upper()}</b></div>",
             unsafe_allow_html=True,
         )
 
@@ -661,6 +918,11 @@ def render_analysis() -> None:
 
 def render_history() -> None:
     st.markdown("## History & Archive")
+    if st.session_state.backend_connected:
+        try:
+            st.session_state.history_cache = fetch_history_backend(limit=50)
+        except Exception as exc:
+            st.error(str(exc))
     history = st.session_state.history_cache
     st.dataframe(history, use_container_width=True, hide_index=True)
 
