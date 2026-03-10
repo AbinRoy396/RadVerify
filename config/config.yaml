@@ -141,7 +141,7 @@ comparison:
 
 # API runtime settings
 api:
-  request_timeout_seconds: 120
+  request_timeout_seconds: 300
   max_upload_bytes: 20971520
   rate_limit_requests: 30
   rate_limit_window_seconds: 60
