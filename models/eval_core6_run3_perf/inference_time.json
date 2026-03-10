@@ -1,0 +1,11 @@
+{
+  "model": "models/experiments/core6_v1_run3/best_model.keras",
+  "dataset": "data/structure_dataset_core6_v1/test",
+  "samples": 701,
+  "avg_ms": 75.32,
+  "p50_ms": 75.068,
+  "p95_ms": 81.879,
+  "min_ms": 66.064,
+  "max_ms": 166.603,
+  "throughput_img_per_s": 13.276
+}

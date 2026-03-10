@@ -1,0 +1,99 @@
+{
+  "generated_at_utc": "2026-03-06T15:00:34.808832+00:00",
+  "model_path": "models\\experiments\\core6_v1_run3\\best_model.keras",
+  "dataset_split": "data\\structure_dataset_core6_v1\\validation",
+  "samples": 680,
+  "accuracy": 0.5220588235294118,
+  "macro_precision": 0.6573284012243263,
+  "macro_recall": 0.5374428771311195,
+  "macro_f1": 0.42434077364669953,
+  "weighted_f1": 0.4218170164630493,
+  "per_class": {
+    "biometry_abdomen": {
+      "precision": 1.0,
+      "recall": 0.07228915662650602,
+      "f1": 0.1348314606741573,
+      "support": 83
+    },
+    "biometry_femur": {
+      "precision": 0.5885714285714285,
+      "recall": 0.9903846153846154,
+      "f1": 0.7383512544802867,
+      "support": 104
+    },
+    "brain_cerebellum": {
+      "precision": 0.33125,
+      "recall": 0.6708860759493671,
+      "f1": 0.4435146443514644,
+      "support": 79
+    },
+    "brain_skull": {
+      "precision": 1.0,
+      "recall": 0.011299435028248588,
+      "f1": 0.0223463687150838,
+      "support": 177
+    },
+    "brain_ventricles": {
+      "precision": 0.35454545454545455,
+      "recall": 0.5909090909090909,
+      "f1": 0.4431818181818182,
+      "support": 66
+    },
+    "heart_four_chamber_view": {
+      "precision": 0.6696035242290749,
+      "recall": 0.8888888888888888,
+      "f1": 0.7638190954773869,
+      "support": 171
+    }
+  },
+  "confusion_matrix": [
+    [
+      6,
+      32,
+      1,
+      0,
+      0,
+      44
+    ],
+    [
+      0,
+      103,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      53,
+      0,
+      14,
+      10
+    ],
+    [
+      0,
+      16,
+      81,
+      2,
+      57,
+      21
+    ],
+    [
+      0,
+      4,
+      23,
+      0,
+      39,
+      0
+    ],
+    [
+      0,
+      18,
+      1,
+      0,
+      0,
+      152
+    ]
+  ]
+}

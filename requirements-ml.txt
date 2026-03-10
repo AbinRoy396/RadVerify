@@ -7,8 +7,7 @@ scipy>=1.11.0
 realesrgan>=0.3.0
 basicsr>=1.4.2
 scikit-image>=0.21.0
-torch==2.0.1+cpu
-torchvision==0.15.2+cpu
+# torch/torchvision are installed separately for CPU or GPU builds
 
 # Optional Enhancement / Visualization
 matplotlib>=3.8.0

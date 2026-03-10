@@ -32,10 +32,12 @@ except Exception:  # pragma: no cover - optional dependency
 
 try:
     from prometheus_client import Counter, Gauge, Histogram
+    from prometheus_client import REGISTRY as PROM_REGISTRY
 except Exception:  # pragma: no cover - optional dependency
     Counter = None
     Gauge = None
     Histogram = None
+    PROM_REGISTRY = None
 
 logger = logging.getLogger("radverify.api")
 if not logger.handlers:
@@ -214,11 +216,31 @@ if REDIS_URL:
 else:
     RATE_LIMITER = InMemoryRateLimiter(RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_SECONDS)
 
-PROM_REQUESTS_TOTAL = Counter("radverify_requests_total", "Total processed API requests") if Counter else None
-PROM_REQUESTS_FAILED = Counter("radverify_requests_failed", "Total failed API requests") if Counter else None
-PROM_LATENCY_MS = Histogram("radverify_latency_ms", "Request latency in ms", buckets=(5, 10, 25, 50, 100, 200, 500, 1000, 3000, 10000)) if Histogram else None
-PROM_ERROR_RATE = Gauge("radverify_error_rate", "Error rate") if Gauge else None
-PROM_ENHANCEMENT_METHOD = Counter("radverify_enhancement_method_total", "Count by enhancement method", ["method"]) if Counter else None
+def _metric_or_existing(factory, name: str, description: str, *args, **kwargs):
+    """Create Prometheus metric once, or reuse existing on module reload."""
+    if not factory or PROM_REGISTRY is None:
+        return None
+    try:
+        return factory(name, description, *args, **kwargs)
+    except ValueError:
+        return getattr(PROM_REGISTRY, "_names_to_collectors", {}).get(name)
+
+
+PROM_REQUESTS_TOTAL = _metric_or_existing(Counter, "radverify_requests_total", "Total processed API requests")
+PROM_REQUESTS_FAILED = _metric_or_existing(Counter, "radverify_requests_failed", "Total failed API requests")
+PROM_LATENCY_MS = _metric_or_existing(
+    Histogram,
+    "radverify_latency_ms",
+    "Request latency in ms",
+    buckets=(5, 10, 25, 50, 100, 200, 500, 1000, 3000, 10000),
+)
+PROM_ERROR_RATE = _metric_or_existing(Gauge, "radverify_error_rate", "Error rate")
+PROM_ENHANCEMENT_METHOD = _metric_or_existing(
+    Counter,
+    "radverify_enhancement_method_total",
+    "Count by enhancement method",
+    ["method"],
+)
 
 
 def _get_version(pkg_name: str) -> str:

@@ -1,0 +1,8 @@
+2026-03-06 14:06:35.232329: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-03-06 14:06:39.255764: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Traceback (most recent call last):
+  File "C:\Users\abinr\RadVerify\train_model.py", line 456, in <module>
+    main()
+  File "C:\Users\abinr\RadVerify\train_model.py", line 391, in main
+    raise RuntimeError("RADVERIFY_REQUIRE_GPU=1 but no GPU detected. Aborting training.")
+RuntimeError: RADVERIFY_REQUIRE_GPU=1 but no GPU detected. Aborting training.

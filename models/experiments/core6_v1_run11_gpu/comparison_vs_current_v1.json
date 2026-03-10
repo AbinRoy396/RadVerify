@@ -1,0 +1,43 @@
+{
+  "generated_at_utc": "2026-03-06T17:44:26.827794+00:00",
+  "baseline_dir": "models\\experiments\\core6_v1_run9_gpu",
+  "candidate_dir": "models\\experiments\\core6_v1_run11_gpu",
+  "baseline": {
+    "validation": {
+      "accuracy": 0.575,
+      "macro_f1": 0.5381
+    },
+    "test": {
+      "accuracy": 0.5835,
+      "macro_f1": 0.5625
+    }
+  },
+  "candidate": {
+    "validation": {
+      "accuracy": 0.3912,
+      "macro_f1": 0.2242
+    },
+    "test": {
+      "accuracy": 0.378,
+      "macro_f1": 0.2155
+    }
+  },
+  "delta": {
+    "validation": {
+      "accuracy": -0.1838,
+      "macro_f1": -0.3139
+    },
+    "test": {
+      "accuracy": -0.2055,
+      "macro_f1": -0.347
+    }
+  },
+  "checks": {
+    "validation_accuracy": false,
+    "validation_macro_f1": false,
+    "test_accuracy": false,
+    "test_macro_f1": false
+  },
+  "promote": false,
+  "applied": false
+}
