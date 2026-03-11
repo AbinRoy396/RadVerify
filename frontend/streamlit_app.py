@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List
 
 import requests
@@ -166,6 +167,64 @@ def inject_css() -> None:
           background:#fff;
           padding:12px;
         }
+
+        .dark-shell {
+          background: linear-gradient(135deg, rgba(23,25,28,1) 0%, rgba(18,20,24,1) 100%);
+          border:1px solid #24272b;
+          border-radius:16px;
+          overflow:hidden;
+          box-shadow: 0 24px 48px rgba(2, 6, 23, 0.35);
+        }
+        .dark-bar {
+          background: linear-gradient(90deg, rgba(29,33,38,1) 0%, rgba(24,27,31,1) 100%);
+          border-bottom:1px solid #2a2e33;
+          padding:14px 18px;
+          color:#e5e7eb;
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          gap:12px;
+        }
+        .dark-sub { color:#9ca3af; font-size:0.8rem; }
+        .dark-grid { display:grid; grid-template-columns: 1.32fr 0.92fr 1.12fr; min-height: 600px; max-height: 76vh; }
+        .dark-panel { border-right:1px solid #2a2e33; }
+        .dark-panel:last-child { border-right:none; }
+        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 18px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .dark-viewer img { max-height: 66vh; object-fit: contain; border-radius: 10px; }
+        .dark-findings { background:#1a1c1e; padding: 0; overflow-y:auto; }
+        .dark-report { background:#1e2124; padding: 0; overflow-y:auto; }
+        .dark-head { position: sticky; top: 0; z-index: 4; padding: 12px 16px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; background:#1f2226; }
+        .dark-title { font-size:0.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#9ca3af; }
+        .finding-card { margin: 12px 16px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.45); background: rgba(15,23,42,0.72); border: 1px solid rgba(148,163,184,0.22); }
+        .finding-card.active { border-left-color: rgba(20,143,184,1); box-shadow: 0 0 16px rgba(20,143,184,0.2); border-color: rgba(20,143,184,0.22); }
+        .finding-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+        .finding-name { font-weight:800; color:#f8fafc; }
+        .finding-conf { font-size:0.68rem; font-weight:800; color: rgba(20,143,184,1); background: rgba(20,143,184,0.15); border:1px solid rgba(20,143,184,0.2); padding: 3px 8px; border-radius: 999px; white-space:nowrap; }
+        .finding-text { margin-top: 8px; color:#94a3b8; font-size:0.86rem; line-height:1.4; }
+        .report-body { padding: 16px; color:#e2e8f0; font-size:1.05rem; line-height:1.7; }
+        .note-box { margin: 14px 16px; padding: 14px; border-radius: 14px; background: #8b5a63; border:1px solid #a56a73; }
+        .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#ffe4e6; }
+        .note-text { margin-top: 8px; color:#f8fafc; }
+        .raw-report {
+          margin: 12px 16px 16px;
+          padding: 14px;
+          border-radius: 12px;
+          background: #101418;
+          border: 1px solid #2a2e33;
+          color: #f59e0b;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+          font-size: 0.9rem;
+          line-height: 1.55;
+          white-space: pre-wrap;
+        }
+        .analysis-wrap { margin-top: 8px; }
+        .agreement-row { text-align:right; padding:8px 16px 14px; color:#cbd5e1; }
+        @media (max-width: 1100px) {
+          .dark-grid { grid-template-columns: 1fr; max-height:none; }
+          .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; }
+          .dark-panel:last-child { border-bottom:none; }
+          .dark-viewer img { max-height: 52vh; }
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -188,6 +247,92 @@ def fetch_history(limit: int = 10) -> List[Dict[str, Any]]:
     resp = requests.get(f"{API_BASE}/history", headers=api_headers(), params={"limit": limit}, timeout=30)
     resp.raise_for_status()
     return resp.json()
+
+
+def _resolve_image_bytes(path_value: Any) -> bytes | None:
+    if not path_value:
+        return None
+    try:
+        path = str(path_value)
+        if not path:
+            return None
+        file_path = Path(path)
+        if not file_path.is_absolute():
+            repo_root = Path(__file__).resolve().parents[1]
+            candidate = repo_root / file_path
+            if candidate.exists():
+                return candidate.read_bytes()
+            normalized = Path(str(path).replace("\\", "/"))
+            candidate = repo_root / normalized
+            if candidate.exists():
+                return candidate.read_bytes()
+        if file_path.exists():
+            return file_path.read_bytes()
+    except Exception:
+        return None
+    return None
+
+
+def _flatten_ai_findings(raw: Dict[str, Any]) -> List[Dict[str, Any]]:
+    findings: List[Dict[str, Any]] = []
+    structures = (raw.get("ai_findings") or {}).get("structures_detected") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            confidence = float(info.get("confidence") or 0.0)
+            present = info.get("present")
+            findings.append(
+                {
+                    "name": name.replace("_", " ").title(),
+                    "confidence": confidence,
+                    "rationale": f"Category: {group}. Present={present}.",
+                }
+            )
+    findings.sort(key=lambda item: item.get("confidence", 0.0), reverse=True)
+    return findings
+
+
+def _build_comparison_table(verification: Dict[str, Any]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    measurements = verification.get("measurement_comparisons") or {}
+    for name, info in measurements.items():
+        if not isinstance(info, dict):
+            continue
+        rows.append(
+            {
+                "type": "measurement",
+                "name": name,
+                "status": info.get("status"),
+                "ai_value": info.get("ai_value"),
+                "doctor_value": info.get("doctor_value"),
+                "difference": info.get("difference"),
+                "tolerance": info.get("tolerance"),
+                "severity": info.get("severity"),
+            }
+        )
+    structures = verification.get("structure_comparisons") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            rows.append(
+                {
+                    "type": f"structure:{group}",
+                    "name": name,
+                    "status": info.get("status"),
+                    "ai_present": info.get("ai_present"),
+                    "ai_confidence": info.get("ai_confidence"),
+                    "doctor_mentioned": info.get("doctor_mentioned"),
+                    "doctor_negated": info.get("doctor_negated"),
+                    "severity": info.get("severity"),
+                }
+            )
+    return rows
 
 
 def render_sidebar() -> None:
@@ -358,8 +503,131 @@ def render_analysis() -> None:
     if not result:
         st.info("Run analysis from Dashboard first.")
         return
-    st.markdown("## Analysis Workspace")
-    st.json(result.get("verification_results", {}))
+    meta = result.get("metadata") or result.get("meta") or {}
+    verification = result.get("verification_results") or {}
+    counts = verification.get("discrepancy_counts") or {}
+    ai_findings = _flatten_ai_findings(result)
+
+    st.markdown("<div class='analysis-wrap'>", unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class='dark-shell'>
+          <div class='dark-bar'>
+            <div>
+              <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','Uploaded Study')}</div>
+              <div class='dark-sub'>STUDY ID: {meta.get('study_id','CASE')} · {meta.get('timestamp','')} · <span style='color:rgba(20,143,184,1)'>STAT</span></div>
+            </div>
+            <div style='display:flex;gap:8px;flex-wrap:wrap;'>
+              <span style='padding:6px 10px;border-radius:999px;background:rgba(223,73,90,0.14);border:1px solid rgba(223,73,90,0.25);color:#fb7185;font-weight:800;font-size:0.75rem;'>Mismatch {int(counts.get('mismatches') or 0)}</span>
+              <span style='padding:6px 10px;border-radius:999px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.25);color:#fbbf24;font-weight:800;font-size:0.75rem;'>Omission {int(counts.get('omissions') or 0)}</span>
+            </div>
+          </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3 = st.columns([1.35, 0.82, 1], gap="small")
+
+    with col1:
+        st.markdown("<div class='dark-panel dark-viewer'>", unsafe_allow_html=True)
+        enhanced_bytes = _resolve_image_bytes(result.get("enhanced_image_path"))
+        original_bytes = st.session_state.image_bytes
+        if enhanced_bytes or original_bytes:
+            tabs = st.tabs(["Enhanced", "Original"])
+            with tabs[0]:
+                if enhanced_bytes:
+                    st.image(enhanced_bytes, use_container_width=True, caption="Enhanced scan")
+                else:
+                    st.info("Enhanced image not available.")
+            with tabs[1]:
+                if original_bytes:
+                    st.image(original_bytes, use_container_width=True, caption="Original scan")
+                else:
+                    st.info("Original image not available.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(
+            "<div class='dark-panel dark-findings'><div class='dark-head'><div class='dark-title'>AI Findings</div><div style='font-size:0.72rem;color:#9ca3af;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.15);padding:2px 8px;border-radius:999px;'>v2.4.1</div></div>",
+            unsafe_allow_html=True,
+        )
+        cards_html = ""
+        for idx, f in enumerate(ai_findings):
+            active = "active" if idx == 0 else ""
+            cards_html += (
+                f"<div class='finding-card {active}'>"
+                f"<div class='finding-top'><div class='finding-name'>{f.get('name','')}</div><div class='finding-conf'>{int(float(f.get('confidence',0)) * 100)}% CONF.</div></div>"
+                f"<div class='finding-text'>{f.get('rationale','')}</div>"
+                "</div>"
+            )
+        st.markdown(cards_html + "</div>", unsafe_allow_html=True)
+
+    with col3:
+        report_text = (result.get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+        report_html = "<br>".join((report_text or "").splitlines())
+        st.markdown(
+            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Human Authored Report</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div class='report-body'>", unsafe_allow_html=True)
+        st.markdown(report_html, unsafe_allow_html=True)
+        counts = verification.get("discrepancy_counts") or {}
+        risk_level = str(verification.get("risk_level") or "-").upper()
+        agreement = verification.get("agreement_rate")
+        agreement_pct = int(float(agreement or 0) * 100)
+        measurement_lines = []
+        for name, info in (verification.get("measurement_comparisons") or {}).items():
+            if not isinstance(info, dict):
+                continue
+            measurement_lines.append(
+                f"{name}: {str(info.get('status','-')).upper()} (AI={info.get('ai_value')}, Doctor={info.get('doctor_value')}, diff={info.get('difference')}, tol={info.get('tolerance')})"
+            )
+        if not measurement_lines:
+            measurement_lines.append("No measurement discrepancies.")
+        bullets = "".join([f"<li>{line}</li>" for line in measurement_lines])
+        st.markdown(
+            f"""
+            <div class='note-box'>
+              <div class='note-title'>Discrepancy Detail</div>
+              <div class='note-text'>
+                Clean comparison summary:<br/>
+                Risk Level: <b>{risk_level}</b> &nbsp; Agreement: <b>{agreement_pct}%</b><br/>
+                Counts: matches={counts.get('matches',0)}, omissions={counts.get('omissions',0)}, mismatches={counts.get('mismatches',0)}, overstatements={counts.get('overstatements',0)}<br/>
+                Measurement Comparison:
+                <ul style='margin:8px 0 0 18px; padding:0;'>{bullets}</ul>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        ai_report = result.get("ai_report_text") or ""
+        if ai_report:
+            parts = [p for p in ai_report.splitlines() if p.strip()]
+            preview = "\n".join(parts[:20])
+            st.markdown("<div class='raw-report'>", unsafe_allow_html=True)
+            st.markdown(preview, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            with st.expander("View full AI report"):
+                st.markdown(
+                    f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
+                    unsafe_allow_html=True,
+                )
+
+        with st.expander("View full JSON report"):
+            st.json(result)
+
+        agreement = verification.get("agreement_rate")
+        risk = verification.get("risk_level")
+        if agreement is not None or risk:
+            st.markdown(
+                f"<div class='agreement-row'>Agreement: {int(float(agreement or 0) * 100)}% · Risk: <b>{str(risk or '-').upper()}</b></div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 def render_history() -> None:
