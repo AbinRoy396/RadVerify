@@ -1,191 +1,87 @@
 ﻿<!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RAVEN | Full Web App</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stitch Demo | Frontend Only</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#1f66ad',
-            'background-light': '#f6f7f8',
-            'background-dark': '#121920',
-            discrepancy: '#DF495A',
-            omission: '#f59e0b'
-          },
-          fontFamily: {
-            display: ['Lexend', 'sans-serif'],
-            body: ['Manrope', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body { font-family: 'Manrope', sans-serif; }
-    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    .dashed-border {
-      border: 2px dashed #c8d5e5;
-      border-radius: 12px;
-      background-image: linear-gradient(145deg, rgba(31,102,173,0.03), rgba(31,102,173,0.09));
-    }
-    .diagnostic-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); }
-    .hl-bad { background: rgba(223,73,90,0.18); border-bottom: 2px solid #DF495A; padding: 0 .1rem; }
-    .hl-warn { background: rgba(245,158,11,0.2); border-bottom: 2px solid #f59e0b; padding: 0 .1rem; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300..700" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
-<body class="bg-background-light text-[#121417] min-h-screen flex">
-  <div id="signInScreen" class="fixed inset-0 z-[70] bg-[#0d1117] text-white hidden">
-    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div class="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#0a0c10] to-[#112033]">
-        <div class="flex items-center gap-3">
-          <div class="bg-primary p-2 rounded-lg"><span class="material-symbols-outlined text-3xl">radiology</span></div>
-          <h1 class="font-display text-3xl font-extrabold">RAVEN</h1>
-        </div>
-        <div>
-          <h2 class="font-display text-5xl font-bold leading-tight mb-4">Precision in Every Pixel.</h2>
-          <p class="text-white/80">AI-assisted radiology verification workflow with closed-loop review and auditability.</p>
-        </div>
-        <p class="text-white/50 text-sm">© 2026 Raven Medical Systems</p>
-      </div>
-      <div class="bg-white text-[#121417] flex items-center justify-center p-8">
-        <div class="w-full max-w-md space-y-6">
-          <div>
-            <h2 class="font-display text-4xl font-bold">Sign In</h2>
-            <p class="text-[#657586]">Access the RAVEN diagnostic suite</p>
+<body>
+  <div id="app" class="app">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="sidebar__top">
+        <div class="brand">
+          <div class="brand__mark" aria-hidden="true">
+            <span class="material-symbols-outlined">clinical_notes</span>
           </div>
-          <div class="space-y-4">
-            <div>
-              <label class="text-sm font-semibold">Institutional Email</label>
-              <input id="loginEmail" class="mt-1 w-full rounded-lg border border-[#dce0e5] px-4 py-3" placeholder="physician@hospital.org" />
-            </div>
-            <div>
-              <label class="text-sm font-semibold">Password</label>
-              <input id="loginPassword" type="password" class="mt-1 w-full rounded-lg border border-[#dce0e5] px-4 py-3" placeholder="••••••••" />
-            </div>
-            <div>
-              <label class="text-sm font-semibold">Role</label>
-              <select id="loginRole" class="mt-1 w-full rounded-lg border border-[#dce0e5] px-4 py-3">
-                <option>Radiologist</option>
-                <option>Resident</option>
-                <option>Admin</option>
-              </select>
-            </div>
-            <button id="loginBtn" class="w-full bg-primary text-white font-bold py-3 rounded-lg">Sign In</button>
-            <p id="loginError" class="text-red-600 text-sm"></p>
+          <div class="brand__text">
+            <div class="brand__name">RAVEN AI</div>
+            <div class="brand__sub">Radiology Verification</div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <div id="processingOverlay" class="fixed inset-0 z-[60] bg-black/45 hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-8 w-[420px] text-center shadow-2xl">
-      <div class="mx-auto size-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-      <h3 class="mt-4 text-xl font-bold font-display">Processing</h3>
-      <p class="text-[#657586] mt-1">Running AI inference and NLP comparison...</p>
-    </div>
-  </div>
-
-  <div id="onboardingModal" class="fixed inset-0 z-[55] bg-black/35 hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 w-[640px] max-w-[95vw]">
-      <h3 class="text-2xl font-bold font-display">Quick Start Guide</h3>
-      <ul class="mt-3 list-disc ml-6 text-sm text-[#657586] space-y-1">
-        <li>Use <b>Upload Portal</b> to submit scan + report.</li>
-        <li>Open <b>Analysis Workspace</b> to resolve discrepancies.</li>
-        <li>Finalize through <b>Export Config</b> and archive results.</li>
-      </ul>
-      <div class="mt-5 flex justify-end">
-        <button id="onboardingCloseBtn" class="bg-primary text-white px-4 py-2 rounded-lg font-bold">Got it</button>
+        <nav id="nav" class="nav"></nav>
       </div>
-    </div>
-  </div>
 
-  <div id="exportModal" class="fixed inset-0 z-[58] bg-black/35 hidden items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 w-[680px] max-w-[95vw]">
-      <h3 class="text-2xl font-bold font-display">Report Export Configuration</h3>
-      <p class="text-sm text-[#657586] mt-1">Choose elements for final exported PDF-style document.</p>
-      <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
-        <label class="flex items-center gap-2"><input id="expHeatmap" type="checkbox" checked> Include heatmap overlay</label>
-        <label class="flex items-center gap-2"><input id="expSummary" type="checkbox" checked> Include AI summary</label>
-        <label class="flex items-center gap-2"><input id="expNarrative" type="checkbox" checked> Include narrative</label>
-        <label class="flex items-center gap-2"><input id="expDiscrepancy" type="checkbox" checked> Include discrepancy log</label>
-      </div>
-      <div class="mt-6 flex justify-end gap-2">
-        <button id="cancelExportBtn" class="px-4 py-2 rounded-lg border border-gray-300 font-semibold">Cancel</button>
-        <button id="confirmExportBtn" class="px-4 py-2 rounded-lg bg-primary text-white font-bold">Generate Final Export</button>
-      </div>
-    </div>
-  </div>
-
-  <aside id="mainSidebar" class="w-64 border-r border-[#dce0e5] bg-white h-screen sticky top-0 flex flex-col justify-between p-4 shrink-0">
-    <div class="flex flex-col gap-8">
-      <div class="flex items-center gap-3 px-2">
-        <div class="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center">
-          <span class="material-symbols-outlined">clinical_notes</span>
+      <div class="sidebar__bottom">
+        <div class="status-card">
+          <div class="status-card__label">DEMO MODE</div>
+          <div class="status-card__value">Offline · Mock data</div>
         </div>
-        <div>
-          <h1 class="text-primary text-lg font-extrabold leading-none tracking-tight font-display">RAVEN AI</h1>
-          <p class="text-[#657586] text-[10px] font-medium uppercase tracking-widest">Radiology Verification</p>
-        </div>
-      </div>
-      <nav id="navMenu" class="flex flex-col gap-1"></nav>
-    </div>
-    <div class="flex flex-col gap-4">
-      <div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
-        <p class="text-xs font-bold text-primary mb-1">API STATUS</p>
-        <p id="apiStatus" class="text-[11px] text-[#657586] leading-relaxed">Checking backend...</p>
-      </div>
-      <div class="flex items-center gap-3 px-2 py-2">
-        <div class="size-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">RV</div>
-        <div class="overflow-hidden">
-          <p class="text-sm font-bold truncate">RAVEN Operator</p>
-          <p class="text-[11px] text-[#657586] truncate">Clinical Reviewer</p>
-        </div>
-      </div>
-    </div>
-  </aside>
 
-  <main id="mainApp" class="flex-1 flex flex-col min-w-0">
-    <header class="h-16 flex items-center justify-between px-8 bg-white/80 backdrop-blur-md border-b border-[#dce0e5] sticky top-0 z-10">
-      <div class="flex flex-col">
-        <h2 id="pageTitle" class="text-lg font-bold text-[#121417]">Upload Portal</h2>
-        <p id="pageSub" class="text-xs text-[#657586]"></p>
-      </div>
-      <div class="flex items-center gap-4">
-        <div id="statusPill" class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase"></div>
-        <button id="newAnalysisBtn" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-sm">
-          <span class="material-symbols-outlined text-sm">add</span>
-          New Analysis
+        <button id="openSignIn" class="user" type="button">
+          <div class="user__avatar" aria-hidden="true">RV</div>
+          <div class="user__meta">
+            <div id="userName" class="user__name">RAVEN Operator</div>
+            <div id="userRole" class="user__role">Clinical Reviewer</div>
+          </div>
         </button>
       </div>
-    </header>
+    </aside>
 
-    <section id="page-upload" class="p-8 max-w-7xl mx-auto w-full space-y-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-analysis" class="hidden p-6 overflow-auto scrollbar-thin"></section>
-    <section id="page-history" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-analytics" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-settings" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-help" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-discrepancy-resolution" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-export-final" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-peer-review" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-student-performance" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-badges" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-leaderboard" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-model-performance" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-ai-sensitivity" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-protocol-testing" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-    <section id="page-audit-logs" class="hidden p-8 overflow-auto scrollbar-thin"></section>
-  </main>
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar__left">
+          <button id="sidebarToggle" class="icon-btn hamburger" type="button" aria-label="Open navigation">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          </button>
+          <div class="topbar__title">
+            <div id="pageTitle" class="topbar__h">Upload Portal</div>
+            <div id="pageSub" class="topbar__sub"></div>
+          </div>
+        </div>
+        <div class="topbar__actions">
+          <div id="statusPill" class="pill" hidden></div>
+          <button id="newAnalysisBtn" class="btn btn--primary" type="button">
+            <span class="material-symbols-outlined" aria-hidden="true">add</span>
+            New Analysis
+          </button>
+        </div>
+      </header>
 
-  <script src="./app.js"></script>
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div id="backdrop" class="backdrop" hidden></div>
+
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div id="modalTitle" class="modal__title"></div>
+        <button id="modalClose" class="icon-btn" type="button" aria-label="Close">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div id="modalBody" class="modal__body"></div>
+      <div id="modalFooter" class="modal__footer"></div>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
 </body>
 </html>
