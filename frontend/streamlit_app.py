@@ -147,6 +147,23 @@ def inject_css() -> None:
           color:#121417 !important;
           font-size:1.05rem !important;
         }
+        [data-testid="stTextInput"] input {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+          box-shadow:none !important;
+          padding:10px 12px !important;
+        }
+        [data-testid="stSelectbox"] div[role="combobox"] {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+        }
+        [data-testid="stSelectbox"] svg {
+          color:#475569 !important;
+        }
 
         [data-testid="stFileUploaderDropzone"] {
           border:1px solid #cad8e7 !important;
@@ -154,12 +171,81 @@ def inject_css() -> None:
           background:#eef3f8 !important;
           min-height:320px;
         }
+        [data-testid="stFileUploaderDropzone"] * {
+          color:#607086 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] svg {
+          color:#7a8aa0 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] small,
+        [data-testid="stFileUploaderDropzone"] p,
+        [data-testid="stFileUploaderDropzone"] span {
+          color:#607086 !important;
+        }
         [data-testid="stFileUploaderDropzone"] button {
           background:#1f66ad !important;
           color:#fff !important;
           border:1px solid #1f66ad !important;
           border-radius:10px !important;
         }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] ul {
+          padding-left:0 !important;
+          margin:6px 0 0 0 !important;
+          display:inline-flex !important;
+          flex-direction:column !important;
+          gap:6px !important;
+        }
+        [data-testid="stFileUploader"] li {
+          list-style:none !important;
+          width: fit-content !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] li > div {
+          width: fit-content !important;
+          max-width:100% !important;
+          display:inline-flex !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] div,
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] span {
+          width:auto !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] {
+          color:#1f66ad !important;
+          font-weight:600 !important;
+          font-size:0.95rem !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileSize"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"] {
+          color:#64748b !important;
+          border-radius:999px !important;
+          padding:2px !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"]:hover {
+          color:#ef4444 !important;
+          background:#fee2e2 !important;
+        }
+        [data-testid="stFileUploader"] svg {
+          color:#1f66ad !important;
+          width:18px !important;
+          height:18px !important;
+        }
+
+        .selected-pill {
+          margin-top:8px;
+          padding:10px 14px;
+          border-radius:12px;
+          background:#e6f4ff;
+          border:1px solid #b9d8f5;
+          color:#1f66ad;
+          font-weight:700;
+        }
+        .selected-inline { display:none !important; }
         .table-shell {
           margin-top:8px;
           border:1px solid #dce3ea;
@@ -167,6 +253,46 @@ def inject_css() -> None:
           background:#fff;
           padding:12px;
         }
+        .history-wrap {
+          border:1px solid #dce3ea;
+          border-radius:12px;
+          overflow:hidden;
+          background:#fff;
+        }
+        .history-table {
+          width:100%;
+          border-collapse:collapse;
+          font-size:0.95rem;
+        }
+        .history-table th {
+          text-align:left;
+          font-weight:700;
+          color:#3a4a5a;
+          padding:10px 12px;
+          border-bottom:1px solid #e3e8ef;
+          background:#f7f9fc;
+        }
+        .history-table td {
+          padding:10px 12px;
+          border-bottom:1px solid #eef2f7;
+          color:#243043;
+        }
+        .history-table tbody tr:hover {
+          background:#f3f7fb;
+        }
+        .history-pill {
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:4px 10px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:0.78rem;
+        }
+        .pill-low { background:#e8f7ee; color:#15803d; }
+        .pill-med { background:#fff7e6; color:#b45309; }
+        .pill-high { background:#fde8e8; color:#b91c1c; }
+        .pill-unk { background:#eef2f7; color:#475569; }
 
         .dark-shell {
           background: linear-gradient(135deg, rgba(23,25,28,1) 0%, rgba(18,20,24,1) 100%);
@@ -437,7 +563,7 @@ def render_dashboard() -> None:
         if file is not None:
             st.session_state.image_bytes = file.getvalue()
             st.session_state.image_name = file.name
-            st.success(f"Selected: {file.name}")
+            # no extra pill display
 
     with right:
         st.markdown("### 2. Human-Written Radiology Report")
@@ -473,29 +599,6 @@ def render_dashboard() -> None:
         st.error(st.session_state.last_error)
 
     st.write("")
-    h1, h2 = st.columns([4, 1])
-    with h1:
-        st.markdown("### Recent Activity")
-    with h2:
-        st.markdown("<div style='text-align:right;color:#1f66ad;font-weight:700;margin-top:8px;'>View Full History</div>", unsafe_allow_html=True)
-    try:
-        history = fetch_history(limit=10)
-        st.session_state.history_cache = history
-        rows = []
-        for item in history:
-            rows.append(
-                {
-                    "Case ID": item.get("id") or item.get("case_id"),
-                    "Patient Ref": item.get("patient_id", "-"),
-                    "Risk": str((item.get("verification_results") or {}).get("risk_level", "-")).upper(),
-                    "Created": item.get("created_at", "-"),
-                }
-            )
-        st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-        st.dataframe(rows, use_container_width=True, hide_index=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    except Exception as exc:
-        st.warning(f"Could not load history: {exc}")
 
 
 def render_analysis() -> None:
@@ -563,56 +666,62 @@ def render_analysis() -> None:
         st.markdown(cards_html + "</div>", unsafe_allow_html=True)
 
     with col3:
-        report_text = (result.get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
-        report_html = "<br>".join((report_text or "").splitlines())
         st.markdown(
-            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Human Authored Report</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
+            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Report Views</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
             unsafe_allow_html=True,
         )
-        st.markdown("<div class='report-body'>", unsafe_allow_html=True)
-        st.markdown(report_html, unsafe_allow_html=True)
-        counts = verification.get("discrepancy_counts") or {}
-        risk_level = str(verification.get("risk_level") or "-").upper()
-        agreement = verification.get("agreement_rate")
-        agreement_pct = int(float(agreement or 0) * 100)
-        measurement_lines = []
-        for name, info in (verification.get("measurement_comparisons") or {}).items():
-            if not isinstance(info, dict):
-                continue
-            measurement_lines.append(
-                f"{name}: {str(info.get('status','-')).upper()} (AI={info.get('ai_value')}, Doctor={info.get('doctor_value')}, diff={info.get('difference')}, tol={info.get('tolerance')})"
-            )
-        if not measurement_lines:
-            measurement_lines.append("No measurement discrepancies.")
-        bullets = "".join([f"<li>{line}</li>" for line in measurement_lines])
-        st.markdown(
-            f"""
-            <div class='note-box'>
-              <div class='note-title'>Discrepancy Detail</div>
-              <div class='note-text'>
-                Clean comparison summary:<br/>
-                Risk Level: <b>{risk_level}</b> &nbsp; Agreement: <b>{agreement_pct}%</b><br/>
-                Counts: matches={counts.get('matches',0)}, omissions={counts.get('omissions',0)}, mismatches={counts.get('mismatches',0)}, overstatements={counts.get('overstatements',0)}<br/>
-                Measurement Comparison:
-                <ul style='margin:8px 0 0 18px; padding:0;'>{bullets}</ul>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        tabs = st.tabs(["Doctor Report", "AI Generated Report"])
 
-        ai_report = result.get("ai_report_text") or ""
-        if ai_report:
-            parts = [p for p in ai_report.splitlines() if p.strip()]
-            preview = "\n".join(parts[:20])
-            st.markdown("<div class='raw-report'>", unsafe_allow_html=True)
-            st.markdown(preview, unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-            with st.expander("View full AI report"):
-                st.markdown(
-                    f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
-                    unsafe_allow_html=True,
+        with tabs[0]:
+            report_text = (result.get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+            report_html = "<br>".join((report_text or "").splitlines())
+            st.markdown("<div class='report-body'>", unsafe_allow_html=True)
+            st.markdown(report_html, unsafe_allow_html=True)
+            counts = verification.get("discrepancy_counts") or {}
+            risk_level = str(verification.get("risk_level") or "-").upper()
+            agreement = verification.get("agreement_rate")
+            agreement_pct = int(float(agreement or 0) * 100)
+            measurement_lines = []
+            for name, info in (verification.get("measurement_comparisons") or {}).items():
+                if not isinstance(info, dict):
+                    continue
+                measurement_lines.append(
+                    f"{name}: {str(info.get('status','-')).upper()} (AI={info.get('ai_value')}, Doctor={info.get('doctor_value')}, diff={info.get('difference')}, tol={info.get('tolerance')})"
                 )
+            if not measurement_lines:
+                measurement_lines.append("No measurement discrepancies.")
+            bullets = "".join([f"<li>{line}</li>" for line in measurement_lines])
+            st.markdown(
+                f"""
+                <div class='note-box'>
+                  <div class='note-title'>Discrepancy Detail</div>
+                  <div class='note-text'>
+                    Clean comparison summary:<br/>
+                    Risk Level: <b>{risk_level}</b> &nbsp; Agreement: <b>{agreement_pct}%</b><br/>
+                    Counts: matches={counts.get('matches',0)}, omissions={counts.get('omissions',0)}, mismatches={counts.get('mismatches',0)}, overstatements={counts.get('overstatements',0)}<br/>
+                    Measurement Comparison:
+                    <ul style='margin:8px 0 0 18px; padding:0;'>{bullets}</ul>
+                  </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with tabs[1]:
+            ai_report = result.get("ai_report_text") or ""
+            if ai_report:
+                parts = [p for p in ai_report.splitlines() if p.strip()]
+                preview = "\n".join(parts[:20])
+                st.markdown("<div class='raw-report'>", unsafe_allow_html=True)
+                st.markdown(preview, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+                with st.expander("View full AI report"):
+                    st.markdown(
+                        f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.info("AI report not available for this case.")
 
         with st.expander("View full JSON report"):
             st.json(result)
@@ -632,14 +741,60 @@ def render_analysis() -> None:
 
 def render_history() -> None:
     st.markdown("## History & Archive")
-    history = st.session_state.history_cache
-    if not history:
-        try:
-            history = fetch_history(limit=50)
-        except Exception as exc:
-            st.error(str(exc))
-            return
-    st.dataframe(history, use_container_width=True)
+    st.markdown("<p class='small-kicker'>Review and export prior verification cases.</p>", unsafe_allow_html=True)
+    st.write("")
+    try:
+        history = fetch_history(limit=50)
+        st.session_state.history_cache = history
+        rows = []
+        for item in history:
+            risk = str((item.get("verification_results") or {}).get("risk_level", "-")).upper()
+            if risk == "LOW":
+                risk_class = "pill-low"
+            elif risk == "MEDIUM":
+                risk_class = "pill-med"
+            elif risk == "HIGH":
+                risk_class = "pill-high"
+            else:
+                risk_class = "pill-unk"
+            rows.append(
+                {
+                    "case_id": item.get("id") or item.get("case_id") or "-",
+                    "patient": item.get("patient_id", "-"),
+                    "risk": f"<span class='history-pill {risk_class}'>{risk}</span>",
+                    "created": item.get("created_at", "-"),
+                    "status": item.get("status") or item.get("stage") or "-",
+                }
+            )
+        table_rows = "".join(
+            [
+                f"<tr><td>{r['case_id']}</td><td>{r['patient']}</td><td>{r['risk']}</td><td>{r['created']}</td><td>{r['status']}</td></tr>"
+                for r in rows
+            ]
+        )
+        st.markdown(
+            f"""
+            <div class='history-wrap'>
+              <table class='history-table'>
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Patient Ref</th>
+                    <th>Risk</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {table_rows}
+                </tbody>
+              </table>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    except Exception as exc:
+        st.warning(f"Could not load history: {exc}")
 
 
 def render_simple(title: str) -> None:
