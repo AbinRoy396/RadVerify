@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -333,15 +334,112 @@ def inject_css() -> None:
         .note-text { margin-top: 8px; color:#f8fafc; }
         .raw-report {
           margin: 12px 16px 16px;
-          padding: 14px;
-          border-radius: 12px;
-          background: #101418;
-          border: 1px solid #2a2e33;
-          color: #f59e0b;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-          font-size: 0.9rem;
-          line-height: 1.55;
+          padding: 16px 18px;
+          border-radius: 14px;
+          background: #0f172a;
+          border: 1px solid #233044;
+          color: #e2e8f0;
+          font-family: "Manrope", sans-serif;
+          font-size: 0.96rem;
+          line-height: 1.7;
           white-space: pre-wrap;
+        }
+        .ai-report-card {
+          margin: 12px 16px 16px;
+          padding: 18px 20px;
+          border-radius: 16px;
+          background: #0f172a;
+          border: 1px solid #243247;
+          color: #e2e8f0;
+          box-shadow: 0 18px 36px rgba(2, 6, 23, 0.25);
+        }
+        .ai-report-title {
+          font-family: "Lexend", sans-serif;
+          font-size: 1.2rem;
+          font-weight: 800;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+          color: #e2e8f0;
+        }
+        .ai-report-meta {
+          margin-top: 10px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 8px 14px;
+          font-size: 0.92rem;
+          color: #cbd5f5;
+        }
+        .ai-report-meta strong { color:#93c5fd; font-weight:700; }
+        .ai-report-divider {
+          margin: 14px 0;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(148,163,184,0) 0%, rgba(148,163,184,0.45) 50%, rgba(148,163,184,0) 100%);
+        }
+        .ai-report-section {
+          margin-top: 12px;
+          font-weight: 800;
+          color: #f8fafc;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          font-size: 0.78rem;
+        }
+        .ai-report-list { margin: 8px 0 0 18px; padding:0; color:#e2e8f0; }
+        .ai-report-list li { margin: 6px 0; }
+        .ai-report-text { color:#d1d5db; line-height:1.65; font-size:0.95rem; }
+
+        .export-shell {
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:16px;
+          padding:20px;
+          box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+        }
+        .export-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .export-title { font-size:2rem; font-weight:800; }
+        .export-sub { color:#6b7b8c; margin-top:4px; }
+        .export-badges { display:flex; gap:8px; flex-wrap:wrap; }
+        .export-badge {
+          padding:6px 12px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:0.75rem;
+          letter-spacing:.02em;
+        }
+        .export-badge.low { background:#e8f7ee; color:#15803d; }
+        .export-badge.med { background:#fff7e6; color:#b45309; }
+        .export-badge.high { background:#fde8e8; color:#b91c1c; }
+        .export-card {
+          border:1px solid #e2e8f0;
+          border-radius:14px;
+          padding:14px 16px;
+          background:#f8fafc;
+        }
+        .export-kv { display:flex; justify-content:space-between; gap:10px; }
+        .export-kv span { color:#64748b; }
+        .export-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .export-card [data-testid="stDownloadButton"] button {
+          background:#e8f1ff !important;
+          border:1px solid #c7ddff !important;
+          color:#1f66ad !important;
+          font-weight:700 !important;
+          border-radius:12px !important;
+        }
+        .export-card [data-testid="stDownloadButton"] button:hover {
+          background:#dbeafe !important;
+          border-color:#bfd6fb !important;
+          color:#1f66ad !important;
+        }
+        [data-testid="stDownloadButton"] button {
+          background:#e8f1ff !important;
+          border:1px solid #c7ddff !important;
+          color:#1f66ad !important;
+          font-weight:700 !important;
+          border-radius:12px !important;
+        }
+        [data-testid="stDownloadButton"] button:hover {
+          background:#dbeafe !important;
+          border-color:#bfd6fb !important;
+          color:#1f66ad !important;
         }
         .analysis-wrap { margin-top: 8px; }
         .agreement-row { text-align:right; padding:8px 16px 14px; color:#cbd5e1; }
@@ -350,6 +448,52 @@ def inject_css() -> None:
           .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; }
           .dark-panel:last-child { border-bottom:none; }
           .dark-viewer img { max-height: 52vh; }
+        }
+
+        /* Tabs visibility on dark panels */
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab-list"] {
+          background:#f8fafc !important;
+          border:1px solid #e2e8f0 !important;
+          border-radius:999px !important;
+          padding:4px !important;
+          gap:4px !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"],
+        .dark-panel [data-testid="stTabs"] button[role="tab"],
+        .dark-panel [data-testid="stTabs"] div[role="tab"] {
+          background:transparent !important;
+          color:#111827 !important;
+          font-weight:700 !important;
+          border-radius:999px !important;
+          padding:6px 14px !important;
+          border:none !important;
+          opacity:1 !important;
+          mix-blend-mode:normal !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"] *,
+        .dark-panel [data-testid="stTabs"] button[role="tab"] *,
+        .dark-panel [data-testid="stTabs"] div[role="tab"] * {
+          color:#111827 !important;
+          opacity:1 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [role="tab"] {
+          color:#111827 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [role="tab"] * {
+          color:#111827 !important;
+        }
+        [data-testid="stTabs"] [data-baseweb="tab"] span,
+        [data-testid="stTabs"] [data-baseweb="tab"] p,
+        [data-testid="stTabs"] [data-baseweb="tab"] div {
+          color:#111827 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+          background:#1f66ad !important;
+          color:#ffffff !important;
+          box-shadow: 0 8px 20px rgba(31, 102, 173, 0.35) !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"]::after {
+          border-bottom:none !important;
         }
         </style>
         """,
@@ -459,6 +603,63 @@ def _build_comparison_table(verification: Dict[str, Any]) -> List[Dict[str, Any]
                 }
             )
     return rows
+
+
+def _render_ai_report_html(ai_report: str) -> str:
+    if not ai_report:
+        return ""
+    lines = [ln.strip() for ln in ai_report.splitlines() if ln.strip()]
+    title = "AI Generated Ultrasound Report"
+    meta_pairs: List[tuple[str, str]] = []
+    sections: List[tuple[str, List[str]]] = []
+    current_section = ""
+    current_items: List[str] = []
+
+    def _flush_section() -> None:
+        nonlocal current_section, current_items
+        if current_section or current_items:
+            sections.append((current_section or "Section", current_items))
+        current_section = ""
+        current_items = []
+
+    for ln in lines:
+        if set(ln) <= {"=", "━", "-", "—", "_"}:
+            continue
+        if ln.upper().startswith("PREGNANCY ULTRASOUND REPORT"):
+            title = ln.replace("(", " (").strip()
+            continue
+        if ln.endswith(":") and len(ln.split()) <= 4:
+            _flush_section()
+            current_section = ln.replace(":", "").strip()
+            continue
+        if ":" in ln and current_section == "":
+            key, val = ln.split(":", 1)
+            if len(key) <= 24:
+                meta_pairs.append((key.strip().title(), val.strip()))
+                continue
+        if ln.startswith("-"):
+            current_items.append(ln.lstrip("-").strip())
+        else:
+            current_items.append(ln)
+
+    _flush_section()
+    meta_html = "".join([f"<div><strong>{k}:</strong> {v}</div>" for k, v in meta_pairs])
+    sections_html = ""
+    for sec, items in sections:
+        sec_title = sec or "Details"
+        items_html = "".join([f"<li>{item}</li>" for item in items])
+        sections_html += (
+            f"<div class='ai-report-section'>{sec_title}</div>"
+            f"<ul class='ai-report-list'>{items_html}</ul>"
+        )
+    return (
+        "<div class='ai-report-card'>"
+        f"<div class='ai-report-title'>{title}</div>"
+        f"<div class='ai-report-meta'>{meta_html}</div>"
+        "<div class='ai-report-divider'></div>"
+        f"<div class='ai-report-text'>{sections_html}</div>"
+        "</div>"
+    )
 
 
 def render_sidebar() -> None:
@@ -710,11 +911,7 @@ def render_analysis() -> None:
         with tabs[1]:
             ai_report = result.get("ai_report_text") or ""
             if ai_report:
-                parts = [p for p in ai_report.splitlines() if p.strip()]
-                preview = "\n".join(parts[:20])
-                st.markdown("<div class='raw-report'>", unsafe_allow_html=True)
-                st.markdown(preview, unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown(_render_ai_report_html(ai_report), unsafe_allow_html=True)
                 with st.expander("View full AI report"):
                     st.markdown(
                         f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
@@ -802,6 +999,93 @@ def render_simple(title: str) -> None:
     st.info("This section is available. Next I can wire full interactions screen-by-screen.")
 
 
+def render_export() -> None:
+    result = st.session_state.last_result
+    verification = (result or {}).get("verification_results") or {}
+    risk = str(verification.get("risk_level") or "unknown").lower()
+    risk_class = "low" if risk == "low" else "med" if risk == "medium" else "high" if risk == "high" else "med"
+    agreement = verification.get("agreement_rate")
+    agreement_pct = int(float(agreement or 0) * 100)
+    case_id = (result or {}).get("case_id") or "-"
+    created = (result or {}).get("metadata", {}).get("timestamp") or "-"
+
+    st.markdown(
+        f"""
+        <div class="export-shell">
+          <div class="export-header">
+            <div>
+              <div class="export-title">Final Export</div>
+              <div class="export-sub">Package and download the verification results.</div>
+            </div>
+            <div class="export-badges">
+              <span class="export-badge {risk_class}">Risk: {risk.upper()}</span>
+              <span class="export-badge" style="background:#e8f1ff;color:#1f66ad;">Agreement: {agreement_pct}%</span>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.write("")
+    col1, col2 = st.columns([1.1, 1])
+    with col1:
+        st.markdown(
+            f"""
+            <div class="export-card">
+              <div class="export-kv"><span>Case ID</span><b>{case_id}</b></div>
+              <div class="export-kv"><span>Generated</span><b>{created}</b></div>
+              <div class="export-kv"><span>Model</span><b>{(result or {}).get('ai_findings', {}).get('model_used','-')}</b></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        st.markdown(
+            """
+            <div class="export-card">
+              <div style="font-weight:700;margin-bottom:6px;">Export Checklist</div>
+              <ul style="margin:0 0 0 18px; padding:0; color:#475569;">
+                <li>AI report included</li>
+                <li>Doctor report included</li>
+                <li>Comparison summary included</li>
+                <li>Images attached (if available)</li>
+              </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown("<div class='export-card'>", unsafe_allow_html=True)
+        st.markdown("<div style='font-weight:700;margin-bottom:6px;'>Download Files</div>", unsafe_allow_html=True)
+        json_payload = result or {}
+        st.download_button(
+            "Download JSON Report",
+            data=json.dumps(json_payload, indent=2),
+            file_name="radverify_report.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+        ai_report = (result or {}).get("ai_report_text") or ""
+        if ai_report:
+            st.download_button(
+                "Download AI Report (TXT)",
+                data=ai_report,
+                file_name="ai_report.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+        doctor_report = ((result or {}).get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+        if doctor_report:
+            st.download_button(
+                "Download Doctor Report (TXT)",
+                data=doctor_report,
+                file_name="doctor_report.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
 def main() -> None:
     st.set_page_config(page_title="RAVEN Web App", page_icon="R", layout="wide", initial_sidebar_state="expanded")
     init_state()
@@ -820,7 +1104,7 @@ def main() -> None:
     elif page == "Discrepancy Resolution":
         render_simple("Discrepancy Resolution")
     elif page == "Final Export":
-        render_simple("Final Export")
+        render_export()
     elif page == "Help Center":
         render_simple("Help Center")
     elif page == "Comparative Analytics":
