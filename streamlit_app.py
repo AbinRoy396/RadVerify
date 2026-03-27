@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import io
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -1017,98 +1018,517 @@ def render_final_export() -> None:
 
 
 def render_help_center() -> None:
-    st.markdown("## Help Center")
-    st.markdown("<p class='small-kicker'>Quick answers and workflow guidance.</p>", unsafe_allow_html=True)
-    q = st.text_input("Search help", placeholder="Try: upload scans, discrepancy resolution, export...")
+    st.markdown("<div class='page-title'>Help Center</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Search documentation, workflows, and common actions for doctors and technicians.</div>",
+        unsafe_allow_html=True,
+    )
 
-    articles = [
-        {"title": "Uploading scans", "body": "Use Dashboard to upload a scan and paste the doctor report. Then click Start AI Analysis."},
-        {"title": "Discrepancy resolution", "body": "Open Discrepancy Resolution to accept, dismiss, or modify mismatches/omissions."},
-        {"title": "Final export", "body": "Use Final Export to download a JSON bundle for archiving."},
-        {"title": "Backend connection", "body": "If FastAPI is offline, the app will automatically use demo results so you can keep testing the UI."},
-        {"title": "Troubleshooting", "body": "If you see errors, check Settings for API base URL and API key, then rerun analysis."},
+    q = st.text_input("Help search", placeholder="Search… (upload scans, discrepancies, export)")
+
+    a1, a2, a3, a4 = st.columns(4, gap="small")
+    with a1:
+        if st.button("Upload Scan", type="secondary", width="stretch"):
+            st.session_state.active_page = "Dashboard"
+            st.rerun()
+    with a2:
+        if st.button("Resolve", type="secondary", width="stretch"):
+            st.session_state.active_page = "Discrepancy Resolution"
+            st.rerun()
+    with a3:
+        if st.button("Export", type="secondary", width="stretch"):
+            st.session_state.active_page = "Final Export"
+            st.rerun()
+    with a4:
+        if st.button("Settings", type="secondary", width="stretch"):
+            st.session_state.active_page = "Settings"
+            st.rerun()
+
+    st.write("")
+    st.markdown("### Categories")
+    cats = [
+        {"k": "Getting Started", "d": "First time setup"},
+        {"k": "Uploading Scans", "d": "DICOM / PNG / JPEG"},
+        {"k": "AI Analysis", "d": "Verification basics"},
+        {"k": "Discrepancies", "d": "Accept / dismiss / modify"},
+        {"k": "Export", "d": "Download bundles"},
+        {"k": "Troubleshooting", "d": "Common issues"},
     ]
-    if q:
-        qq = q.strip().lower()
-        articles = [a for a in articles if qq in a["title"].lower() or qq in a["body"].lower()]
-
-    cols = st.columns(2, gap="large")
-    for i, a in enumerate(articles):
-        with cols[i % 2]:
+    c1, c2, c3 = st.columns(3, gap="large")
+    for idx, cat in enumerate(cats):
+        col = [c1, c2, c3][idx % 3]
+        with col:
             st.markdown(
-                f"<div class='table-shell'><div style='font-family:Lexend,sans-serif;font-weight:900;margin-bottom:6px;'>{a['title']}</div><div class='subtle'>{a['body']}</div></div>",
+                "<div class='card'>"
+                f"<div class='card-title'>{cat['k']} <span class='badge'>Help</span></div>"
+                f"<div class='subtle'>{cat['d']}</div>"
+                "</div>",
                 unsafe_allow_html=True,
             )
 
+    st.write("")
+    st.markdown("### Guides")
+    guides = {
+        "Upload DICOM scans": [
+            "Go to Dashboard.",
+            "Upload DICOM / PNG / JPEG.",
+            "Paste the doctor report.",
+            "Click Start AI Analysis.",
+        ],
+        "Resolve discrepancies": [
+            "Open Discrepancy Resolution.",
+            "Choose Accept / Dismiss / Modify.",
+            "Continue to Final Export.",
+        ],
+        "Export final report": [
+            "Open Final Export.",
+            "Select export options.",
+            "Download JSON bundle.",
+        ],
+    }
+    selected = st.selectbox("Choose a guide", list(guides.keys()), index=0)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card-title'>{selected} <span class='badge'>Steps</span></div>", unsafe_allow_html=True)
+    st.markdown("\n".join([f"- {s}" for s in guides.get(selected, [])]))
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.write("")
+    st.markdown("### FAQ")
+    faq = [
+        ("Supported formats", "DICOM (.dcm), PNG, JPG. Backend support depends on server configuration."),
+        ("If AI and doctor differ", "Use Discrepancy Resolution to accept, dismiss, or modify before export."),
+        ("Backend not connected", "You can still use the UI; it will fall back to demo results if the API is unavailable."),
+    ]
+    for q_item, a_item in faq:
+        with st.expander(q_item):
+            st.write(a_item)
+
+    st.write("")
+    st.markdown("### Contact")
+    c_left, c_right = st.columns([1.2, 0.8], gap="large")
+    with c_left:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<div class='card-title'>Contact Support <span class='badge'>Support</span></div>", unsafe_allow_html=True)
+        st.text_input("Email", placeholder="you@hospital.org")
+        st.text_area("Message", placeholder="Describe the issue...")
+        st.button("Send", type="primary", width="stretch")
+        st.markdown("</div>", unsafe_allow_html=True)
+    with c_right:
+        st.markdown(
+            "<div class='card'>"
+            "<div class='card-title'>Support Info <span class='badge'>Info</span></div>"
+            "<div class='subtle'><b>Email:</b> support@raven-ai.local</div>"
+            "<div class='subtle' style='margin-top:8px;'><b>Hours:</b> Mon–Fri, 9am–5pm</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+    if q:
+        query = q.strip().lower()
+        haystack = "\n".join([c["k"] + " " + c["d"] for c in cats] + list(guides.keys()) + [f[0] + " " + f[1] for f in faq])
+        if query and query not in haystack.lower():
+            st.info("No results found.")
+
 
 def render_comparative_analytics() -> None:
-    result = st.session_state.last_result
-    st.markdown("## Comparative Analytics")
-    st.markdown("<p class='small-kicker'>Summaries and tables based on the most recent analysis.</p>", unsafe_allow_html=True)
-    if not result:
-        st.info("Run analysis from Dashboard first.")
-        return
+    st.markdown("<div class='page-title'>Comparative Analytics</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Compare AI results with radiologist diagnoses across cases. Filters and charts update instantly.</div>",
+        unsafe_allow_html=True,
+    )
 
-    verification = result.get("verification_results") or {}
-    counts = verification.get("discrepancy_counts") or {}
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.metric("Agreement", f"{int(float(verification.get('agreement_rate') or 0) * 100)}%")
-    with c2:
-        st.metric("Risk", str(verification.get("risk_level") or "-").upper())
-    with c3:
-        st.metric("Mismatches", int(counts.get("mismatches") or 0))
-    with c4:
-        st.metric("Omissions", int(counts.get("omissions") or 0))
+    # Demo dataset (used when backend history is unavailable).
+    demo_cases = [
+        {
+            "case_id": "CASE-1001",
+            "date": "2026-03-20",
+            "scan_type": "X-Ray",
+            "ai_prediction": "Abnormal",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.86,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Patel",
+        },
+        {
+            "case_id": "CASE-1002",
+            "date": "2026-03-21",
+            "scan_type": "CT",
+            "ai_prediction": "Critical",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.73,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Nguyen",
+        },
+        {
+            "case_id": "CASE-1003",
+            "date": "2026-03-22",
+            "scan_type": "MRI",
+            "ai_prediction": "Normal",
+            "radiologist_diagnosis": "Normal",
+            "confidence": 0.91,
+            "model": "v2.3.9",
+            "radiologist": "Dr. Chen",
+        },
+        {
+            "case_id": "CASE-1004",
+            "date": "2026-03-23",
+            "scan_type": "X-Ray",
+            "ai_prediction": "Abnormal",
+            "radiologist_diagnosis": "Critical",
+            "confidence": 0.67,
+            "model": "v2.3.9",
+            "radiologist": "Dr. Patel",
+        },
+        {
+            "case_id": "CASE-1005",
+            "date": "2026-03-24",
+            "scan_type": "CT",
+            "ai_prediction": "Normal",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.62,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Nguyen",
+        },
+    ]
+
+    with st.expander("Filters", expanded=True):
+        f1, f2, f3, f4 = st.columns([1.2, 1.0, 1.0, 1.0], gap="large")
+        with f1:
+            date_start = st.date_input("Start date", value=datetime(2026, 3, 20).date())
+            date_end = st.date_input("End date", value=datetime(2026, 3, 24).date())
+        with f2:
+            scan_type = st.selectbox("Scan type", ["All", "CT", "MRI", "X-Ray"], index=0)
+        with f3:
+            model_ver = st.selectbox("AI model", ["All", "v2.4.1", "v2.3.9"], index=0)
+        with f4:
+            rad_name = st.selectbox("Radiologist", ["All", "Dr. Patel", "Dr. Nguyen", "Dr. Chen"], index=0)
+
+    def _in_range(d: str) -> bool:
+        try:
+            dt = datetime.strptime(d, "%Y-%m-%d").date()
+        except Exception:
+            return True
+        return bool(date_start <= dt <= date_end)
+
+    filtered = [c for c in demo_cases if _in_range(c["date"])]
+    if scan_type != "All":
+        filtered = [c for c in filtered if c["scan_type"] == scan_type]
+    if model_ver != "All":
+        filtered = [c for c in filtered if c["model"] == model_ver]
+    if rad_name != "All":
+        filtered = [c for c in filtered if c["radiologist"] == rad_name]
+
+    total = len(filtered)
+    matches = len([c for c in filtered if c["ai_prediction"] == c["radiologist_diagnosis"]])
+    mismatches = total - matches
+    accuracy = (matches / total) if total else 0.0
+    # Agreement rate ties to most recent analysis when available.
+    last = st.session_state.last_result or {}
+    last_ver = (last.get("verification_results") or {}) if isinstance(last, dict) else {}
+    agreement = float(last_ver.get("agreement_rate") or accuracy)
+
+    m1, m2, m3, m4 = st.columns(4, gap="large")
+    with m1:
+        st.markdown(f"<div class='metric-card'><div class='metric-k'>Total Scans</div><div class='metric-v'>{total}</div></div>", unsafe_allow_html=True)
+    with m2:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>AI Accuracy</div><div class='metric-v'>{int(accuracy * 100)}%</div></div>",
+            unsafe_allow_html=True,
+        )
+    with m3:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>Agreement Rate</div><div class='metric-v'>{int(agreement * 100)}%</div></div>",
+            unsafe_allow_html=True,
+        )
+    with m4:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>Discrepancies</div><div class='metric-v'>{mismatches}</div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.write("")
+    st.markdown("### Interactive Charts")
+
+    # Bar chart: AI vs Radiologist findings counts.
+    classes = ["Normal", "Abnormal", "Critical"]
+    ai_counts = {c: 0 for c in classes}
+    rad_counts = {c: 0 for c in classes}
+    for row in filtered:
+        ai_counts[row["ai_prediction"]] = ai_counts.get(row["ai_prediction"], 0) + 1
+        rad_counts[row["radiologist_diagnosis"]] = rad_counts.get(row["radiologist_diagnosis"], 0) + 1
+    bar_data = []
+    for c in classes:
+        bar_data.append({"category": c, "series": "AI", "count": ai_counts.get(c, 0)})
+        bar_data.append({"category": c, "series": "Radiologist", "count": rad_counts.get(c, 0)})
+
+    # Line chart: accuracy over time.
+    daily = {}
+    for row in filtered:
+        d = row["date"]
+        daily.setdefault(d, {"date": d, "total": 0, "match": 0})
+        daily[d]["total"] += 1
+        daily[d]["match"] += 1 if row["ai_prediction"] == row["radiologist_diagnosis"] else 0
+    line_data = []
+    for d in sorted(daily.keys()):
+        entry = daily[d]
+        acc = (entry["match"] / entry["total"]) if entry["total"] else 0
+        line_data.append({"date": entry["date"], "accuracy": round(acc * 100, 1)})
+
+    # Pie chart: classification distribution (AI).
+    pie_data = [{"label": c, "value": ai_counts.get(c, 0)} for c in classes]
+
+    ch1, ch2, ch3 = st.columns([1.1, 1.1, 0.9], gap="large")
+    with ch1:
+        st.markdown("<div class='card'><div class='card-title'>AI vs Radiologist Findings <span class='badge'>Bar</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": bar_data},
+                "mark": {"type": "bar", "cornerRadiusTopLeft": 6, "cornerRadiusTopRight": 6},
+                "encoding": {
+                    "x": {"field": "category", "type": "nominal", "axis": {"labelAngle": 0}},
+                    "y": {"field": "count", "type": "quantitative"},
+                    "color": {
+                        "field": "series",
+                        "type": "nominal",
+                        "scale": {"range": ["#1f66ad", "#0ea5e9"]},
+                    },
+                    "xOffset": {"field": "series"},
+                    "tooltip": [
+                        {"field": "series", "type": "nominal"},
+                        {"field": "category", "type": "nominal"},
+                        {"field": "count", "type": "quantitative"},
+                    ],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    with ch2:
+        st.markdown("<div class='card'><div class='card-title'>Accuracy Over Time <span class='badge'>Line</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": line_data},
+                "mark": {"type": "line", "point": True},
+                "encoding": {
+                    "x": {"field": "date", "type": "temporal", "title": "Date"},
+                    "y": {"field": "accuracy", "type": "quantitative", "title": "Accuracy (%)"},
+                    "color": {"value": "#1f66ad"},
+                    "tooltip": [
+                        {"field": "date", "type": "temporal"},
+                        {"field": "accuracy", "type": "quantitative"},
+                    ],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    with ch3:
+        st.markdown("<div class='card'><div class='card-title'>AI Distribution <span class='badge'>Pie</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": pie_data},
+                "mark": {"type": "arc", "innerRadius": 55},
+                "encoding": {
+                    "theta": {"field": "value", "type": "quantitative"},
+                    "color": {
+                        "field": "label",
+                        "type": "nominal",
+                        "scale": {"range": ["#22c55e", "#f59e0b", "#ef4444"]},
+                    },
+                    "tooltip": [{"field": "label", "type": "nominal"}, {"field": "value", "type": "quantitative"}],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.write("")
     st.markdown("### Comparison Table")
-    table = _build_comparison_table(verification)
-    if table:
-        st.dataframe(table, width="stretch", hide_index=True)
-    else:
-        st.info("No comparison rows available.")
+    table_rows = []
+    for row in filtered:
+        match = row["ai_prediction"] == row["radiologist_diagnosis"]
+        table_rows.append(
+            {
+                "Case ID": row["case_id"],
+                "Scan Type": row["scan_type"],
+                "AI Prediction": row["ai_prediction"],
+                "Radiologist Diagnosis": row["radiologist_diagnosis"],
+                "Confidence Score": round(float(row["confidence"]), 2),
+                "Status": "Match" if match else "Mismatch",
+            }
+        )
+    st.dataframe(table_rows, width="stretch", hide_index=True)
+
+    st.write("")
+    st.markdown("### Export Options")
+    exp1, exp2, exp3 = st.columns([1, 1, 1], gap="large")
+    export_payload = {
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "filters": {
+            "start": str(date_start),
+            "end": str(date_end),
+            "scan_type": scan_type,
+            "model": model_ver,
+            "radiologist": rad_name,
+        },
+        "summary": {"total": total, "accuracy": accuracy, "agreement_rate": agreement, "discrepancies": mismatches},
+        "rows": table_rows,
+    }
+
+    try:
+        import json
+
+        export_json = json.dumps(export_payload, indent=2)
+    except Exception:
+        export_json = str(export_payload)
+
+    csv_buf = io.StringIO()
+    if table_rows:
+        headers = list(table_rows[0].keys())
+        csv_buf.write(",".join(headers) + "\n")
+        for r in table_rows:
+            csv_buf.write(",".join([str(r.get(h, "")).replace(",", " ") for h in headers]) + "\n")
+    export_csv = csv_buf.getvalue()
+
+    with exp1:
+        st.download_button("Download analytics report (JSON)", data=export_json, file_name="raven_analytics.json", mime="application/json", width="stretch")
+    with exp2:
+        st.download_button("CSV data export", data=export_csv, file_name="raven_analytics.csv", mime="text/csv", width="stretch")
+    with exp3:
+        st.button("Export charts as PDF", type="secondary", width="stretch", disabled=True)
 
 
 def render_settings() -> None:
-    st.markdown("## Settings")
-    st.markdown("<p class='small-kicker'>Configure backend connectivity and app behavior.</p>", unsafe_allow_html=True)
-    s = st.session_state.settings or {}
-    c1, c2 = st.columns([1.1, 0.9], gap="large")
-    with c1:
-        s["api_base"] = st.text_input("API base URL", value=str(s.get("api_base") or API_BASE))
-        s["api_key"] = st.text_input("API key", value=str(s.get("api_key") or ""), type="password")
-        s["prefer_backend"] = st.checkbox("Prefer backend (fallback to demo if unavailable)", value=bool(s.get("prefer_backend", True)))
-        s["backend_timeout_sec"] = st.number_input(
+    st.markdown("<div class='page-title'>Settings</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Manage your profile, preferences, AI configuration, security, and integrations.</div>",
+        unsafe_allow_html=True,
+    )
+
+    settings = st.session_state.settings or {}
+    if "user_profile" not in settings:
+        settings["user_profile"] = {"name": "", "email": "", "role": "Radiologist", "avatar_bytes": None}
+    if "system_prefs" not in settings:
+        settings["system_prefs"] = {
+            "theme": "Light",
+            "language": "English",
+            "notifications": True,
+            "default_export": "JSON",
+        }
+    if "ai_config" not in settings:
+        settings["ai_config"] = {"model_version": "v2.4.1", "confidence": 0.75, "auto_verify": True}
+    if "security" not in settings:
+        settings["security"] = {"two_factor": False, "data_retention_days": 365, "api_keys": [{"name": "Default", "key": settings.get("api_key", "")}]}
+    if "integrations" not in settings:
+        settings["integrations"] = {
+            "pacs_status": "Disconnected",
+            "dicom_host": "",
+            "dicom_port": 104,
+            "api_endpoint": settings.get("api_base", API_BASE),
+        }
+
+    left, right = st.columns([1.15, 0.85], gap="large")
+
+    with left:
+        st.markdown("<div class='card'><div class='card-title'>User Profile Settings <span class='badge'>Profile</span></div>", unsafe_allow_html=True)
+        up = settings["user_profile"]
+        avatar = st.file_uploader("Profile picture", type=["png", "jpg", "jpeg"], key="settings_avatar")
+        if avatar is not None:
+            up["avatar_bytes"] = avatar.getvalue()
+        if up.get("avatar_bytes"):
+            st.image(up["avatar_bytes"], width=96)
+        up["name"] = st.text_input("Name", value=str(up.get("name") or ""))
+        up["email"] = st.text_input("Email", value=str(up.get("email") or ""))
+        up["role"] = st.selectbox("Role", ["Radiologist", "Admin", "Technician"], index=["Radiologist", "Admin", "Technician"].index(str(up.get("role") or "Radiologist")))
+        with st.expander("Change password"):
+            st.text_input("Current password", type="password")
+            st.text_input("New password", type="password")
+            st.text_input("Confirm new password", type="password")
+            st.button("Update password", type="secondary", width="stretch", disabled=True)
+        settings["user_profile"] = up
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>System Preferences <span class='badge'>Preferences</span></div>", unsafe_allow_html=True)
+        prefs = settings["system_prefs"]
+        prefs["theme"] = st.radio("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(str(prefs.get("theme") or "Light")), horizontal=True)
+        prefs["language"] = st.selectbox("Language", ["English", "Spanish", "French", "German"], index=["English", "Spanish", "French", "German"].index(str(prefs.get("language") or "English")))
+        prefs["notifications"] = st.toggle("Notification preferences", value=bool(prefs.get("notifications", True)))
+        prefs["default_export"] = st.selectbox("Default export format", ["PDF", "CSV", "JSON"], index=["PDF", "CSV", "JSON"].index(str(prefs.get("default_export") or "JSON")))
+        settings["system_prefs"] = prefs
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>AI Model Configuration <span class='badge'>AI</span></div>", unsafe_allow_html=True)
+        ai = settings["ai_config"]
+        ai["model_version"] = st.selectbox("AI model version", ["v2.4.1", "v2.3.9", "v2.3.1"], index=["v2.4.1", "v2.3.9", "v2.3.1"].index(str(ai.get("model_version") or "v2.4.1")))
+        ai["confidence"] = st.slider("Confidence threshold", min_value=0.50, max_value=0.99, value=float(ai.get("confidence") or 0.75), step=0.01)
+        ai["auto_verify"] = st.toggle("Auto verification", value=bool(ai.get("auto_verify", True)))
+        settings["ai_config"] = ai
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with right:
+        st.markdown("<div class='card'><div class='card-title'>Data & Security <span class='badge'>Security</span></div>", unsafe_allow_html=True)
+        sec = settings["security"]
+        sec["two_factor"] = st.toggle("Two-factor authentication", value=bool(sec.get("two_factor", False)))
+        sec["data_retention_days"] = st.number_input("Data retention (days)", min_value=30, max_value=3650, value=int(sec.get("data_retention_days") or 365), step=30)
+        st.markdown("<div class='subtle' style='margin-top:8px;font-weight:700;'>API key management</div>", unsafe_allow_html=True)
+        api_key_value = st.text_input("Active API key", value=str(settings.get("api_key") or ""), type="password")
+        settings["api_key"] = api_key_value
+        sec["api_keys"] = sec.get("api_keys") or []
+        st.markdown("</div>", unsafe_allow_html=True)
+        settings["security"] = sec
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>Integration Settings <span class='badge'>Integrations</span></div>", unsafe_allow_html=True)
+        integ = settings["integrations"]
+        status = str(integ.get("pacs_status") or "Disconnected")
+        pacs_badge = "<span class='badge'>Connected</span>" if status.lower() == "connected" else "<span class='badge'>Offline</span>"
+        st.markdown(f"<div class='subtle' style='margin-bottom:8px;'><b>PACS integration status:</b> {status} {pacs_badge}</div>", unsafe_allow_html=True)
+        integ["dicom_host"] = st.text_input("DICOM server host", value=str(integ.get("dicom_host") or ""), placeholder="pacs.hospital.local")
+        integ["dicom_port"] = st.number_input("DICOM port", min_value=1, max_value=65535, value=int(integ.get("dicom_port") or 104))
+        integ["api_endpoint"] = st.text_input("API endpoint configuration", value=str(settings.get("api_base") or API_BASE))
+        settings["api_base"] = integ["api_endpoint"]
+        settings["integrations"] = integ
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>Backend Connectivity <span class='badge'>API</span></div>", unsafe_allow_html=True)
+        settings["prefer_backend"] = st.toggle("Prefer backend (fallback to demo)", value=bool(settings.get("prefer_backend", True)))
+        settings["backend_timeout_sec"] = st.number_input(
             "Backend timeout (seconds)",
             min_value=5,
             max_value=600,
-            value=int(s.get("backend_timeout_sec") or 180),
+            value=int(settings.get("backend_timeout_sec") or 180),
             step=5,
         )
-        st.session_state.settings = s
-
         if st.button("Test Connection", type="secondary", width="stretch"):
             try:
-                h = requests.get(f"{s['api_base']}/health", timeout=5)
+                h = requests.get(f"{settings['api_base']}/health", timeout=5)
                 if h.ok:
                     st.success("Backend is reachable.")
                 else:
                     st.warning("Backend responded but is not healthy.")
             except Exception as exc:
                 st.warning(f"Could not reach backend: {exc}")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    with c2:
-        st.markdown("### Current Run")
-        st.markdown(
-            f"<div class='table-shell'><div style='font-weight:900;'>Active page</div><div class='subtle'>{st.session_state.active_page}</div></div>",
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            f"<div class='table-shell'><div style='font-weight:900;'>Uploaded scan</div><div class='subtle'>{st.session_state.image_name or '-'}</div></div>",
-            unsafe_allow_html=True,
-        )
-        if st.button("Clear errors", type="secondary", width="stretch"):
+    st.write("")
+    a1, a2 = st.columns([1, 1])
+    with a1:
+        if st.button("Save Settings", type="primary", width="stretch"):
+            st.session_state.settings = settings
+            st.success("Settings saved.")
+    with a2:
+        if st.button("Reset", type="secondary", width="stretch"):
+            st.session_state.settings = {
+                "api_base": API_BASE,
+                "api_key": API_KEY,
+                "prefer_backend": True,
+                "backend_timeout_sec": 180,
+            }
             st.session_state.last_error = ""
             st.rerun()
 
