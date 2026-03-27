@@ -4,211 +4,25 @@ from __future__ import annotations
 
 from datetime import datetime
 import json
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List
 
+import requests
 import streamlit as st
 
-
-PAGES: Dict[str, Dict[str, str]] = {
-    "Dashboard": {"title": "Upload Portal", "sub": "Clinical input and processing"},
-    "Analysis Workspace": {"title": "Analysis Workspace", "sub": "AI findings and report comparison"},
-    "Discrepancy Resolution": {"title": "Discrepancy Resolution", "sub": "Accept, dismiss, or modify AI findings"},
-    "Final Export": {"title": "Final Export", "sub": "Finalize and archive verified report"},
-    "Protocol Library": {"title": "Diagnostic Protocol Library", "sub": "Configure and deploy clinical AI sensitivity thresholds"},
-    "History & Archive": {"title": "History & Archive", "sub": "Compliance-grade audit retrieval"},
-    "Help Center": {"title": "Help Center", "sub": "Tutorials and support channels"},
-}
-
-
-def demo_protocols() -> List[Dict[str, Any]]:
-    return [
-        {
-            "id": "PROTO-ER-TRAUMA",
-            "name": "Emergency Trauma",
-            "department": "Emergency",
-            "creator": "System Defaults",
-            "tag": "Urgent Care",
-            "accent": "#ea580c",
-            "metric_a_label": "Fracture Sensitivity",
-            "metric_a": 0.98,
-            "metric_b_label": "Soft Tissue Specificity",
-            "metric_b": 0.72,
-            "updated": "Updated 1d ago",
-            "description": "Optimized for rapid detection of acute fractures, dislocations, and internal hemorrhaging in ER settings.",
-        },
-        {
-            "id": "PROTO-ROUTINE",
-            "name": "Routine Screening",
-            "department": "Radiology",
-            "creator": "Dr. Aris (Lead)",
-            "tag": "Standard",
-            "accent": "#1f66ad",
-            "metric_a_label": "Pathology Detection",
-            "metric_a": 0.85,
-            "metric_b_label": "False Positive Rate",
-            "metric_b": 0.04,
-            "updated": "Updated 2h ago",
-            "description": "Balanced sensitivity for early pathology detection. Focus on longitudinal comparison and noise reduction.",
-        },
-        {
-            "id": "PROTO-PEDS-CHEST",
-            "name": "Pediatric Chest",
-            "department": "Pediatrics",
-            "creator": "Dr. Aris (Lead)",
-            "tag": "Pediatric",
-            "accent": "#2563eb",
-            "metric_a_label": "Specificity for Nodules",
-            "metric_a": 0.94,
-            "metric_b_label": "Noise Filtering",
-            "metric_b": 0.90,
-            "updated": "Updated 5d ago",
-            "description": "High specificity to reduce false positives in pediatric cases. Enhanced bone suppression for clearer lung views.",
-        },
-        {
-            "id": "PROTO-ONC-FU",
-            "name": "Oncology Follow-up",
-            "department": "Oncology",
-            "creator": "Clinic Admin",
-            "tag": "Advanced",
-            "accent": "#7c3aed",
-            "metric_a_label": "RECIST Accuracy",
-            "metric_a": 0.99,
-            "metric_b_label": "Volumetric Drift",
-            "metric_b": 0.20,
-            "updated": "Updated 2w ago",
-            "description": "Strict specificity for volumetric measurement and RECIST 1.1 compliance in tracking tumor growth.",
-        },
-        {
-            "id": "PROTO-CARDIAC-CT",
-            "name": "Cardiac CT",
-            "department": "Radiology",
-            "creator": "Clinic Admin",
-            "tag": "Cardiovascular",
-            "accent": "#e11d48",
-            "metric_a_label": "Calcium Scoring",
-            "metric_a": 0.92,
-            "metric_b_label": "Motion De-blur",
-            "metric_b": 0.85,
-            "updated": "Updated 3w ago",
-            "description": "Calcium scoring automation and motion artifact correction for coronary artery assessments.",
-        },
-    ]
-
-
-def demo_history() -> List[Dict[str, Any]]:
-    return [
-        {
-            "id": "SCN-9021",
-            "scan_type": "Chest PA/Lateral X-Ray",
-            "patient_id": "PAT-7728-B",
-            "created_at": "Oct 24, 10:45 AM",
-            "verification_status": "Verified",
-            "risk": "LOW",
-        },
-        {
-            "id": "SCN-8842",
-            "scan_type": "Abdominal Ultrasound",
-            "patient_id": "PAT-9102-X",
-            "created_at": "Oct 24, 09:12 AM",
-            "verification_status": "Discrepancy Found",
-            "risk": "HIGH",
-        },
-        {
-            "id": "SCN-8811",
-            "scan_type": "Lumbar Spine MRI",
-            "patient_id": "PAT-1142-D",
-            "created_at": "Oct 23, 04:55 PM",
-            "verification_status": "Processing",
-            "risk": "MEDIUM",
-        },
-    ]
-
-
-def mock_verify(file_name: str, report_text: str, study_date: str) -> Dict[str, Any]:
-    now = datetime.now().strftime("%b %d, %I:%M %p")
-    enhanced = (
-        report_text.strip()
-        + "\n\n---\nAI Enhanced Draft (demo):\n"
-        + "1) Correlate with clinical presentation and prior imaging if available.\n"
-        + "2) Consider follow-up imaging if symptoms persist.\n"
-        + "3) Document key negative findings explicitly to reduce ambiguity.\n"
-    ).strip()
-    return {
-        "meta": {
-            "file_name": file_name,
-            "generated_at": now,
-            "study": "DOE, JOHN | 45Y | Chest X-Ray (PA View)",
-            "study_id": "88291-XA",
-            "timestamp": f"{study_date} · 09:42 AM",
-        },
-        "ai_findings": [
-            {
-                "name": "Cardiomegaly",
-                "confidence": 0.98,
-                "rationale": "Transverse heart diameter exceeds 50% of thoracic diameter. Likely indicative of underlying CHF.",
-                "status": "mismatch",
-            },
-            {
-                "name": "Pleural Effusion",
-                "confidence": 0.82,
-                "rationale": "Blunting of the right costophrenic angle suggesting mild fluid accumulation.",
-                "status": "omission",
-            },
-            {
-                "name": "Pulmonary Nodule",
-                "confidence": 0.22,
-                "rationale": "Shadow in upper left lobe; likely vessel end-on or artifact.",
-                "status": "low_confidence",
-            },
-        ],
-        "report": {
-            "raw_text": report_text,
-            "ai_enhanced_text": enhanced,
-            "highlighted_html": (
-                "<p>Lungs are clear bilaterally without focal consolidation. "
-                "<span style='background:rgba(223,73,90,0.18);border-bottom:2px solid #DF495A;padding:0 .1rem;' "
-                "title='AI detected Cardiomegaly (98% confidence)'>The cardiomediastinal silhouette is within normal limits.</span> "
-                "The pulmonary vasculature is not congested.</p>"
-                "<p>No evidence of pneumothorax is seen. "
-                "<span style='background:rgba(245,158,11,0.22);border-bottom:2px solid #f59e0b;padding:0 .1rem;' "
-                "title='Potential Omission: AI detected mild blunting of right costophrenic angle'>Bony structures and soft tissues are unremarkable.</span></p>"
-                "<p style='color:#6b7280;font-style:italic;'>IMPRESSION: No acute cardiopulmonary abnormality.</p>"
-            ),
-        },
-        "comparison": {
-            "risk_level": "HIGH",
-            "agreement_rate": 0.78,
-            "discrepancy_counts": {"mismatches": 1, "omissions": 1, "overstatements": 0},
-            "comparison_report_text": (
-                "The human report indicates a \"normal\" heart size, but Raven Analysis detects a cardiothoracic ratio "
-                "of 0.58, which constitutes cardiomegaly."
-            ),
-        },
-    }
+API_BASE = "http://localhost:8000"
+API_KEY = "radverify_secret_key"
 
 
 def init_state() -> None:
     defaults = {
         "active_page": "Dashboard",
-        "scans": [],
-        "active_scan_idx": 0,
         "image_bytes": None,
         "image_name": "",
         "report_text": "",
-        "study_date": datetime.now().date(),
-        "enhanced_report_text": "",
         "last_result": None,
         "last_error": "",
-        "history_cache": demo_history(),
-        "protocols": demo_protocols(),
-        "active_protocol_id": "PROTO-ROUTINE",
-        "resolution": {},
-        "export_config": {
-            "heatmap": True,
-            "summary": True,
-            "narrative": True,
-            "discrepancy": True,
-        },
+        "history_cache": [],
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -221,29 +35,15 @@ def inject_css() -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
-        :root {
-          --bg: #f3f5f8;
-          --panel: #ffffff;
-          --panel-2: #fcfcfd;
-          --text: #111827;
-          --muted: #657586;
-          --border: #d9e0e8;
-          --primary: #1f66ad;
-          --primary-2: #245f9d;
-          --shadow: 0 18px 40px rgba(17, 24, 39, 0.08);
-          --shadow-sm: 0 10px 24px rgba(17, 24, 39, 0.06);
-        }
-
-        .stApp { background: var(--bg); color: var(--text); font-family:'Manrope',sans-serif; }
+        .stApp { background:#f3f5f8; color:#111827; font-family:'Manrope',sans-serif; }
         h1,h2,h3,h4 { font-family:'Lexend',sans-serif; letter-spacing:-0.02em; }
-        a { color: inherit; }
 
         #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { display:none !important; }
         header[data-testid="stHeader"] { background:transparent !important; border:none !important; box-shadow:none !important; }
-        [data-testid="stAppViewContainer"] { background: var(--bg); }
+        [data-testid="stAppViewContainer"] { background:#f3f5f8; }
         [data-testid="stMainBlockContainer"] { padding-top:1.2rem; max-width:1400px; }
 
-        [data-testid="stSidebar"] { background: var(--panel); border-right:1px solid var(--border); min-width:278px; max-width:278px; }
+        [data-testid="stSidebar"] { background:#ffffff; border-right:1px solid #d9e0e8; min-width:278px; max-width:278px; }
         section[data-testid="stSidebar"] {
           transform: none !important;
           visibility: visible !important;
@@ -283,7 +83,7 @@ def inject_css() -> None:
         }
 
         .logo-wrap { display:flex; align-items:center; gap:12px; margin:6px 0 14px 2px; }
-        .logo-box { width:40px; height:40px; border-radius:12px; background: var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; box-shadow: 0 10px 24px rgba(31,102,173,0.25); }
+        .logo-box { width:40px; height:40px; border-radius:10px; background:#1f66ad; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; }
         .sidebar-card {
           margin-top:10px;
           border:1px solid #d9e3ee;
@@ -300,14 +100,12 @@ def inject_css() -> None:
         }
 
         .top-shell {
-          background: rgba(255,255,255,0.90);
-          border:1px solid rgba(217,224,232,0.9);
-          border-radius:16px;
-          padding:12px 18px;
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:0;
+          padding:10px 18px;
           margin-left:-0.5rem;
           margin-right:-0.5rem;
-          box-shadow: var(--shadow-sm);
-          backdrop-filter: blur(10px);
         }
         .hero-title { font-size:3.7rem; font-weight:800; line-height:1.06; letter-spacing:-0.03em; margin-top:.15rem; }
         .subtle { color:#657586; }
@@ -332,39 +130,67 @@ def inject_css() -> None:
 
         .stButton > button { border-radius:10px !important; font-weight:700 !important; }
         [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="primary"] {
-          background: var(--primary) !important;
-          border:1px solid var(--primary) !important;
+          background:#2b6eb6 !important;
+          border:1px solid #2b6eb6 !important;
           color:#fff !important;
-          box-shadow: 0 12px 24px rgba(31,102,173,0.20);
         }
         [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="primary"]:hover {
-          background: var(--primary-2) !important;
-          border-color: var(--primary-2) !important;
-        }
-
-        [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="secondary"] {
-          border-radius: 12px !important;
-          border: 1px solid rgba(217,224,232,0.9) !important;
-          background: rgba(255,255,255,0.92) !important;
-          box-shadow: 0 10px 20px rgba(17,24,39,0.05);
+          background:#245f9d !important;
+          border-color:#245f9d !important;
         }
 
         [data-testid="stTextArea"] textarea {
           min-height:300px !important;
-          border-radius:14px !important;
-          border:1px solid rgba(217,224,232,0.95) !important;
-          box-shadow: 0 10px 20px rgba(17,24,39,0.04) !important;
+          border-radius:12px !important;
+          border:1px solid #dce0e5 !important;
+          box-shadow:none !important;
           background:#fff !important;
           color:#121417 !important;
           font-size:1.05rem !important;
         }
+        [data-testid="stTextArea"] label,
+        [data-testid="stSelectbox"] label {
+          color:#1f2937 !important;
+          font-weight:700 !important;
+        }
+        [data-testid="stTextArea"] textarea::placeholder {
+          color:#94a3b8 !important;
+          opacity:1 !important;
+        }
+        [data-testid="stTextInput"] input {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+          box-shadow:none !important;
+          padding:10px 12px !important;
+        }
+        [data-testid="stSelectbox"] div[role="combobox"] {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+        }
+        [data-testid="stSelectbox"] svg {
+          color:#475569 !important;
+        }
 
         [data-testid="stFileUploaderDropzone"] {
-          border:1px solid rgba(202,216,231,0.95) !important;
-          border-radius:14px !important;
+          border:1px solid #cad8e7 !important;
+          border-radius:12px !important;
           background:#eef3f8 !important;
           min-height:320px;
-          box-shadow: 0 14px 30px rgba(17,24,39,0.06);
+        }
+        [data-testid="stFileUploaderDropzone"] * {
+          color:#607086 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] svg {
+          color:#7a8aa0 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] small,
+        [data-testid="stFileUploaderDropzone"] p,
+        [data-testid="stFileUploaderDropzone"] span {
+          color:#607086 !important;
         }
         [data-testid="stFileUploaderDropzone"] button {
           background:#1f66ad !important;
@@ -372,46 +198,123 @@ def inject_css() -> None:
           border:1px solid #1f66ad !important;
           border-radius:10px !important;
         }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] ul {
+          padding-left:0 !important;
+          margin:6px 0 0 0 !important;
+          display:inline-flex !important;
+          flex-direction:column !important;
+          gap:6px !important;
+        }
+        [data-testid="stFileUploader"] li {
+          list-style:none !important;
+          width: fit-content !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] li > div {
+          width: fit-content !important;
+          max-width:100% !important;
+          display:inline-flex !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] div,
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] span {
+          width:auto !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] {
+          color:#1f66ad !important;
+          font-weight:600 !important;
+          font-size:0.95rem !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileSize"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"] {
+          color:#64748b !important;
+          border-radius:999px !important;
+          padding:2px !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"]:hover {
+          color:#ef4444 !important;
+          background:#fee2e2 !important;
+        }
+        [data-testid="stFileUploader"] svg {
+          color:#1f66ad !important;
+          width:18px !important;
+          height:18px !important;
+        }
+
+        .selected-pill {
+          margin-top:8px;
+          padding:10px 14px;
+          border-radius:12px;
+          background:#e6f4ff;
+          border:1px solid #b9d8f5;
+          color:#1f66ad;
+          font-weight:700;
+        }
+        .selected-inline { display:none !important; }
         .table-shell {
           margin-top:8px;
-          border:1px solid rgba(217,224,232,0.9);
-          border-radius:16px;
+          border:1px solid #dce3ea;
+          border-radius:12px;
           background:#fff;
           padding:12px;
-          box-shadow: var(--shadow-sm);
         }
-
-        .metric-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
-        .metric {
-          border: 1px solid rgba(217,224,232,0.9);
-          border-radius: 16px;
-          background: rgba(255,255,255,0.95);
-          padding: 14px;
-          box-shadow: var(--shadow-sm);
+        .history-wrap {
+          border:1px solid #dce3ea;
+          border-radius:12px;
+          overflow:hidden;
+          background:#fff;
         }
-        .metric-label { font-size: 0.82rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6d7f93; }
-        .metric-value { font-family: Lexend,sans-serif; font-size: 2rem; font-weight: 900; margin-top: 6px; }
-        .metric-sub { margin-top: 4px; font-size: 0.92rem; color: var(--muted); }
-
-        @media (max-width: 980px) {
-          .metric-grid { grid-template-columns: 1fr; }
+        .history-table {
+          width:100%;
+          border-collapse:collapse;
+          font-size:0.95rem;
         }
-
-        .pill { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
-        .pill-ok { background:rgba(22,163,74,0.12); color:#15803d; border:1px solid rgba(22,163,74,0.22); }
-        .pill-warn { background:rgba(245,158,11,0.14); color:#b45309; border:1px solid rgba(245,158,11,0.26); }
-        .pill-bad { background:rgba(223,73,90,0.14); color:#b42318; border:1px solid rgba(223,73,90,0.26); }
+        .history-table th {
+          text-align:left;
+          font-weight:700;
+          color:#3a4a5a;
+          padding:10px 12px;
+          border-bottom:1px solid #e3e8ef;
+          background:#f7f9fc;
+        }
+        .history-table td {
+          padding:10px 12px;
+          border-bottom:1px solid #eef2f7;
+          color:#243043;
+        }
+        .history-table tbody tr:hover {
+          background:#f3f7fb;
+        }
+        .history-pill {
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:4px 10px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:0.78rem;
+        }
+        .pill-low { background:#e8f7ee; color:#15803d; }
+        .pill-med { background:#fff7e6; color:#b45309; }
+        .pill-high { background:#fde8e8; color:#b91c1c; }
+        .pill-unk { background:#eef2f7; color:#475569; }
 
         .dark-shell {
-          background:#17191c;
+          background: linear-gradient(135deg, rgba(23,25,28,1) 0%, rgba(18,20,24,1) 100%);
           border:1px solid #24272b;
-          border-radius:14px;
+          border-radius:16px;
           overflow:hidden;
+          box-shadow: 0 24px 48px rgba(2, 6, 23, 0.35);
         }
         .dark-bar {
-          background:#1e2124;
+          background: linear-gradient(90deg, rgba(29,33,38,1) 0%, rgba(24,27,31,1) 100%);
           border-bottom:1px solid #2a2e33;
-          padding:12px 14px;
+          padding:14px 18px;
           color:#e5e7eb;
           display:flex;
           justify-content:space-between;
@@ -419,41 +322,379 @@ def inject_css() -> None:
           gap:12px;
         }
         .dark-sub { color:#9ca3af; font-size:0.8rem; }
-        .dark-grid { display:grid; grid-template-columns: 1.35fr 0.82fr 1fr; min-height: 580px; }
+        .dark-grid { display:grid; grid-template-columns: 1.32fr 0.92fr 1.12fr; min-height: 600px; max-height: 76vh; }
         .dark-panel { border-right:1px solid #2a2e33; }
         .dark-panel:last-child { border-right:none; }
-        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 16px; display:flex; align-items:center; justify-content:center; }
-        .dark-findings { background:#1a1c1e; padding: 0; }
-        .dark-report { background:#1e2124; padding: 0; }
-        .dark-head { padding: 12px 14px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; }
+        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 18px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .dark-viewer img { max-height: 66vh; object-fit: contain; border-radius: 10px; }
+        .dark-findings { background:#1a1c1e; padding: 0; overflow-y:auto; }
+        .dark-report { background:#1e2124; padding: 0; overflow-y:auto; }
+        .dark-head { position: sticky; top: 0; z-index: 4; padding: 12px 16px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; background:#1f2226; }
         .dark-title { font-size:0.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#9ca3af; }
-        .finding-card { margin: 12px 14px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.4); background: rgba(30,41,59,0.35); border: 1px solid rgba(148,163,184,0.14); }
+        .finding-card { margin: 12px 16px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.45); background: rgba(15,23,42,0.72); border: 1px solid rgba(148,163,184,0.22); }
         .finding-card.active { border-left-color: rgba(20,143,184,1); box-shadow: 0 0 16px rgba(20,143,184,0.2); border-color: rgba(20,143,184,0.22); }
         .finding-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
         .finding-name { font-weight:800; color:#f8fafc; }
         .finding-conf { font-size:0.68rem; font-weight:800; color: rgba(20,143,184,1); background: rgba(20,143,184,0.15); border:1px solid rgba(20,143,184,0.2); padding: 3px 8px; border-radius: 999px; white-space:nowrap; }
         .finding-text { margin-top: 8px; color:#94a3b8; font-size:0.86rem; line-height:1.4; }
-        .report-body { padding: 14px; color:#cbd5e1; font-size:1.06rem; line-height:1.65; }
-        .note-box { margin: 14px; padding: 14px; border-radius: 14px; background: rgba(223,73,90,0.08); border:1px solid rgba(223,73,90,0.16); }
-        .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#fb7185; }
-        .note-text { margin-top: 8px; color:#cbd5e1; }
+        .report-body { padding: 16px; color:#e2e8f0; font-size:1.05rem; line-height:1.7; }
+        .note-box { margin: 14px 16px; padding: 14px; border-radius: 14px; background: #8b5a63; border:1px solid #a56a73; }
+        .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#ffe4e6; }
+        .note-text { margin-top: 8px; color:#f8fafc; }
+        .raw-report {
+          margin: 12px 16px 16px;
+          padding: 16px 18px;
+          border-radius: 14px;
+          background: #0f172a;
+          border: 1px solid #233044;
+          color: #e2e8f0;
+          font-family: "Manrope", sans-serif;
+          font-size: 0.96rem;
+          line-height: 1.7;
+          white-space: pre-wrap;
+        }
+        .ai-report-card {
+          margin: 12px 16px 16px;
+          padding: 18px 20px;
+          border-radius: 16px;
+          background: #0f172a;
+          border: 1px solid #243247;
+          color: #e2e8f0;
+          box-shadow: 0 18px 36px rgba(2, 6, 23, 0.25);
+        }
+        .ai-report-title {
+          font-family: "Lexend", sans-serif;
+          font-size: 1.2rem;
+          font-weight: 800;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+          color: #e2e8f0;
+        }
+        .ai-report-meta {
+          margin-top: 10px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 8px 14px;
+          font-size: 0.92rem;
+          color: #cbd5f5;
+        }
+        .ai-report-meta strong { color:#93c5fd; font-weight:700; }
+        .ai-report-divider {
+          margin: 14px 0;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(148,163,184,0) 0%, rgba(148,163,184,0.45) 50%, rgba(148,163,184,0) 100%);
+        }
+        .ai-report-section {
+          margin-top: 12px;
+          font-weight: 800;
+          color: #f8fafc;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          font-size: 0.78rem;
+        }
+        .ai-report-list { margin: 8px 0 0 18px; padding:0; color:#e2e8f0; }
+        .ai-report-list li { margin: 6px 0; }
+        .ai-report-text { color:#d1d5db; line-height:1.65; font-size:0.95rem; }
+
+        .export-shell {
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:16px;
+          padding:20px;
+          box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+        }
+        .export-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .export-title { font-size:2rem; font-weight:800; }
+        .export-sub { color:#6b7b8c; margin-top:4px; }
+        .export-badges { display:flex; gap:8px; flex-wrap:wrap; }
+        .export-badge {
+          padding:6px 12px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:0.75rem;
+          letter-spacing:.02em;
+        }
+        .export-badge.low { background:#e8f7ee; color:#15803d; }
+        .export-badge.med { background:#fff7e6; color:#b45309; }
+        .export-badge.high { background:#fde8e8; color:#b91c1c; }
+        .export-card {
+          border:1px solid #e2e8f0;
+          border-radius:14px;
+          padding:14px 16px;
+          background:#f8fafc;
+        }
+        .export-kv { display:flex; justify-content:space-between; gap:10px; }
+        .export-kv span { color:#64748b; }
+        .export-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .export-card [data-testid="stDownloadButton"] button {
+          background:#e8f1ff !important;
+          border:1px solid #c7ddff !important;
+          color:#1f66ad !important;
+          font-weight:700 !important;
+          border-radius:12px !important;
+        }
+        .export-card [data-testid="stDownloadButton"] button:hover {
+          background:#dbeafe !important;
+          border-color:#bfd6fb !important;
+          color:#1f66ad !important;
+        }
+        [data-testid="stDownloadButton"] button {
+          background:#e8f1ff !important;
+          border:1px solid #c7ddff !important;
+          color:#1f66ad !important;
+          font-weight:700 !important;
+          border-radius:12px !important;
+        }
+        [data-testid="stDownloadButton"] button:hover {
+          background:#dbeafe !important;
+          border-color:#bfd6fb !important;
+          color:#1f66ad !important;
+        }
+
+        .disc-shell {
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:16px;
+          padding:20px;
+          box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+        }
+        .disc-grid { display:grid; grid-template-columns: 1.1fr 1.4fr; gap:16px; }
+        .disc-card {
+          border:1px solid #e2e8f0;
+          border-radius:14px;
+          padding:14px 16px;
+          background:#f8fafc;
+        }
+        .disc-pill {
+          display:inline-flex; align-items:center; gap:6px;
+          padding:6px 12px; border-radius:999px; font-weight:700; font-size:0.78rem;
+        }
+        .disc-pill.mismatch { background:#fde8e8; color:#b91c1c; }
+        .disc-pill.omission { background:#fff7e6; color:#b45309; }
+        .disc-pill.match { background:#e8f7ee; color:#15803d; }
+        .disc-table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+        .disc-table th { text-align:left; padding:10px; background:#f1f5f9; border-bottom:1px solid #e2e8f0; }
+        .disc-table td { padding:10px; border-bottom:1px solid #eef2f7; color:#334155; }
+        .disc-table tr:hover { background:#f8fafc; }
+        .analysis-wrap { margin-top: 8px; }
+        .agreement-row { text-align:right; padding:8px 16px 14px; color:#cbd5e1; }
+        @media (max-width: 1100px) {
+          .dark-grid { grid-template-columns: 1fr; max-height:none; }
+          .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; }
+          .dark-panel:last-child { border-bottom:none; }
+          .dark-viewer img { max-height: 52vh; }
+        }
+
+        /* Tabs visibility on dark panels */
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab-list"] {
+          background:#f8fafc !important;
+          border:1px solid #e2e8f0 !important;
+          border-radius:999px !important;
+          padding:4px !important;
+          gap:4px !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"],
+        .dark-panel [data-testid="stTabs"] button[role="tab"],
+        .dark-panel [data-testid="stTabs"] div[role="tab"] {
+          background:transparent !important;
+          color:#111827 !important;
+          font-weight:700 !important;
+          border-radius:999px !important;
+          padding:6px 14px !important;
+          border:none !important;
+          opacity:1 !important;
+          mix-blend-mode:normal !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"] *,
+        .dark-panel [data-testid="stTabs"] button[role="tab"] *,
+        .dark-panel [data-testid="stTabs"] div[role="tab"] * {
+          color:#111827 !important;
+          opacity:1 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [role="tab"] {
+          color:#111827 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [role="tab"] * {
+          color:#111827 !important;
+        }
+        [data-testid="stTabs"] [data-baseweb="tab"] span,
+        [data-testid="stTabs"] [data-baseweb="tab"] p,
+        [data-testid="stTabs"] [data-baseweb="tab"] div {
+          color:#111827 !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+          background:#1f66ad !important;
+          color:#ffffff !important;
+          box-shadow: 0 8px 20px rgba(31, 102, 173, 0.35) !important;
+        }
+        .dark-panel [data-testid="stTabs"] [data-baseweb="tab"]::after {
+          border-bottom:none !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 
-def status_pill_html(result: Optional[Dict[str, Any]]) -> str:
-    if not result:
+def api_headers() -> Dict[str, str]:
+    return {"X-API-Key": API_KEY}
+
+
+def call_verify(file_name: str, image_bytes: bytes, report_text: str) -> Dict[str, Any]:
+    files = {"scan": (file_name, image_bytes, "application/octet-stream")}
+    data = {"report": report_text, "enhance": "true"}
+    resp = requests.post(f"{API_BASE}/verify", files=files, data=data, headers=api_headers(), timeout=180)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def fetch_history(limit: int = 10) -> List[Dict[str, Any]]:
+    resp = requests.get(f"{API_BASE}/history", headers=api_headers(), params={"limit": limit}, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _resolve_image_bytes(path_value: Any) -> bytes | None:
+    if not path_value:
+        return None
+    try:
+        path = str(path_value)
+        if not path:
+            return None
+        file_path = Path(path)
+        if not file_path.is_absolute():
+            repo_root = Path(__file__).resolve().parents[1]
+            candidate = repo_root / file_path
+            if candidate.exists():
+                return candidate.read_bytes()
+            normalized = Path(str(path).replace("\\", "/"))
+            candidate = repo_root / normalized
+            if candidate.exists():
+                return candidate.read_bytes()
+        if file_path.exists():
+            return file_path.read_bytes()
+    except Exception:
+        return None
+    return None
+
+
+def _flatten_ai_findings(raw: Dict[str, Any]) -> List[Dict[str, Any]]:
+    findings: List[Dict[str, Any]] = []
+    structures = (raw.get("ai_findings") or {}).get("structures_detected") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            confidence = float(info.get("confidence") or 0.0)
+            present = info.get("present")
+            findings.append(
+                {
+                    "name": name.replace("_", " ").title(),
+                    "confidence": confidence,
+                    "rationale": f"Category: {group}. Present={present}.",
+                }
+            )
+    findings.sort(key=lambda item: item.get("confidence", 0.0), reverse=True)
+    return findings
+
+
+def _build_comparison_table(verification: Dict[str, Any]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    measurements = verification.get("measurement_comparisons") or {}
+    for name, info in measurements.items():
+        if not isinstance(info, dict):
+            continue
+        rows.append(
+            {
+                "type": "measurement",
+                "name": name,
+                "status": info.get("status"),
+                "ai_value": info.get("ai_value"),
+                "doctor_value": info.get("doctor_value"),
+                "difference": info.get("difference"),
+                "tolerance": info.get("tolerance"),
+                "severity": info.get("severity"),
+            }
+        )
+    structures = verification.get("structure_comparisons") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            rows.append(
+                {
+                    "type": f"structure:{group}",
+                    "name": name,
+                    "status": info.get("status"),
+                    "ai_present": info.get("ai_present"),
+                    "ai_confidence": info.get("ai_confidence"),
+                    "doctor_mentioned": info.get("doctor_mentioned"),
+                    "doctor_negated": info.get("doctor_negated"),
+                    "severity": info.get("severity"),
+                }
+            )
+    return rows
+
+
+def _render_ai_report_html(ai_report: str) -> str:
+    if not ai_report:
         return ""
-    counts = (result.get("comparison") or {}).get("discrepancy_counts") or {}
-    mism = int(counts.get("mismatches") or 0)
-    omis = int(counts.get("omissions") or 0) + int(counts.get("overstatements") or 0)
-    if mism > 0:
-        return "<span class='pill pill-bad'>Discrepancy</span>"
-    if omis > 0:
-        return "<span class='pill pill-warn'>Review Needed</span>"
-    return "<span class='pill pill-ok'>Match</span>"
+    lines = [ln.strip() for ln in ai_report.splitlines() if ln.strip()]
+    title = "AI Generated Ultrasound Report"
+    meta_pairs: List[tuple[str, str]] = []
+    sections: List[tuple[str, List[str]]] = []
+    current_section = ""
+    current_items: List[str] = []
+
+    def _flush_section() -> None:
+        nonlocal current_section, current_items
+        if current_section or current_items:
+            sections.append((current_section or "Section", current_items))
+        current_section = ""
+        current_items = []
+
+    for ln in lines:
+        if set(ln) <= {"=", "━", "-", "—", "_"}:
+            continue
+        if ln.upper().startswith("PREGNANCY ULTRASOUND REPORT"):
+            title = ln.replace("(", " (").strip()
+            continue
+        if ln.endswith(":") and len(ln.split()) <= 4:
+            _flush_section()
+            current_section = ln.replace(":", "").strip()
+            continue
+        if ":" in ln and current_section == "":
+            key, val = ln.split(":", 1)
+            if len(key) <= 24:
+                meta_pairs.append((key.strip().title(), val.strip()))
+                continue
+        if ln.startswith("-"):
+            current_items.append(ln.lstrip("-").strip())
+        else:
+            current_items.append(ln)
+
+    _flush_section()
+    meta_html = "".join([f"<div><strong>{k}:</strong> {v}</div>" for k, v in meta_pairs])
+    sections_html = ""
+    for sec, items in sections:
+        sec_title = sec or "Details"
+        items_html = "".join([f"<li>{item}</li>" for item in items])
+        sections_html += (
+            f"<div class='ai-report-section'>{sec_title}</div>"
+            f"<ul class='ai-report-list'>{items_html}</ul>"
+        )
+    return (
+        "<div class='ai-report-card'>"
+        f"<div class='ai-report-title'>{title}</div>"
+        f"<div class='ai-report-meta'>{meta_html}</div>"
+        "<div class='ai-report-divider'></div>"
+        f"<div class='ai-report-text'>{sections_html}</div>"
+        "</div>"
+    )
 
 
 def render_sidebar() -> None:
@@ -483,19 +724,27 @@ def render_sidebar() -> None:
             ("Analysis Workspace", "Analysis Workspace"),
             ("Discrepancy Resolution", "Discrepancy Resolution"),
             ("Final Export", "Final Export"),
-            ("Protocol Library", "Protocol Library"),
             ("History & Archive", "History & Archive"),
             ("Help Center", "Help Center"),
+            ("Comparative Analytics", "Comparative Analytics"),
+            ("Settings", "Settings"),
         ]
         for label, page in nav_items:
             is_active = st.session_state.active_page == page
-            if st.button(label, width="stretch", key=f"nav_{page}", type="primary" if is_active else "secondary"):
+            if st.button(label, use_container_width=True, key=f"nav_{page}", type="primary" if is_active else "secondary"):
                 st.session_state.active_page = page
                 st.rerun()
 
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='sidebar-card'><div class='api-title'>DEMO MODE</div>", unsafe_allow_html=True)
-        st.markdown("<div class='subtle' style='font-size:0.88rem;'>Offline · Mock data</div>", unsafe_allow_html=True)
+        st.markdown("<div class='sidebar-card'><div class='api-title'>API STATUS</div>", unsafe_allow_html=True)
+        try:
+            h = requests.get(f"{API_BASE}/health", timeout=5)
+            if h.ok:
+                st.markdown("<span class='status-ok'>Online (FastAPI connected)</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span class='status-bad'>Unavailable</span>", unsafe_allow_html=True)
+        except Exception:
+            st.markdown("<span class='status-bad'>Unavailable</span>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown(
             """
@@ -514,124 +763,46 @@ def render_sidebar() -> None:
 def top_header() -> None:
     c1, c2 = st.columns([6, 1.6])
     with c1:
-        pill = status_pill_html(st.session_state.last_result)
-        page = st.session_state.active_page
-        meta = PAGES.get(page, {"title": page, "sub": ""})
         st.markdown(
             f"""
             <div class="top-shell">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                  <div>
-                    <div style="font-size:2.15rem;font-weight:800;line-height:1;">{meta.get('title','')}</div>
-                    <div class="small-kicker">{meta.get('sub','')}</div>
-                  </div>
-                  <div>{pill}</div>
-                </div>
+                <div style="font-size:2.15rem;font-weight:800;line-height:1;">Upload Portal</div>
+                <div class="small-kicker">Clinical input and processing</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with c2:
-        if st.button("+ New Analysis", type="primary", width="stretch"):
-            st.session_state.scans = []
-            st.session_state.active_scan_idx = 0
+        if st.button("+ New Analysis", type="primary", use_container_width=True):
             st.session_state.image_bytes = None
             st.session_state.image_name = ""
             st.session_state.report_text = ""
-            st.session_state.enhanced_report_text = ""
             st.session_state.last_result = None
             st.session_state.last_error = ""
             st.rerun()
 
 
 def render_dashboard() -> None:
-    st.markdown(
-        """
-        <div style="max-width: 980px;">
-          <div class='panel-label'>Verify New Medical Scans</div>
-          <p class='small-kicker'>Pair medical imagery with human-written reports for high-precision cross-validation.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    history = st.session_state.history_cache
-    total = len(history)
-    high = sum(1 for h in history if str(h.get("risk", "")).upper() == "HIGH")
-    low = sum(1 for h in history if str(h.get("risk", "")).upper() == "LOW")
-    st.markdown(
-        f"""
-        <div class='metric-grid'>
-          <div class='metric'>
-            <div class='metric-label'>Total Scans</div>
-            <div class='metric-value'>{total}</div>
-            <div class='metric-sub'>Demo audit archive</div>
-          </div>
-          <div class='metric'>
-            <div class='metric-label'>High Risk</div>
-            <div class='metric-value' style='color:#b42318;'>{high}</div>
-            <div class='metric-sub'>Priority review cases</div>
-          </div>
-          <div class='metric'>
-            <div class='metric-label'>Low Risk</div>
-            <div class='metric-value' style='color:#15803d;'>{low}</div>
-            <div class='metric-sub'>Low discrepancy probability</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='panel-label'>Verify New Medical Scans</div>", unsafe_allow_html=True)
+    st.markdown("<p class='small-kicker'>Pair medical imagery with human-written reports for high-precision cross-validation.</p>", unsafe_allow_html=True)
     st.write("")
 
     left, right = st.columns(2, gap="large")
 
     with left:
         st.markdown("### 1. Upload Medical Scans")
-        files = st.file_uploader(
+        file = st.file_uploader(
             "Drag and drop files here. Support for DICOM, JPEG, PNG",
             type=["png", "jpg", "jpeg", "dcm"],
             label_visibility="collapsed",
-            accept_multiple_files=True,
         )
-
-        if files:
-            scans = [{"name": f.name, "bytes": f.getvalue()} for f in files]
-            if scans != st.session_state.scans:
-                st.session_state.scans = scans
-                st.session_state.active_scan_idx = 0
-
-        if st.session_state.scans:
-            names = [s.get("name", "Scan") for s in st.session_state.scans]
-            if len(names) > 1:
-                st.session_state.active_scan_idx = st.selectbox(
-                    "Active scan",
-                    list(range(len(names))),
-                    format_func=lambda i: names[i],
-                    index=min(int(st.session_state.active_scan_idx or 0), len(names) - 1),
-                    key="active_scan_select",
-                )
-
-            idx = int(st.session_state.active_scan_idx or 0)
-            active = st.session_state.scans[idx]
-            st.session_state.image_bytes = active.get("bytes")
-            st.session_state.image_name = active.get("name", "")
-
-            st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-            st.markdown(
-                f"<div style='font-family:Lexend,sans-serif;font-weight:900;margin-bottom:8px;'>Selected scan</div><div class='subtle' style='margin-bottom:10px;'>{st.session_state.image_name}</div>",
-                unsafe_allow_html=True,
-            )
-            st.image(st.session_state.image_bytes, width="stretch")
-            st.markdown("</div>", unsafe_allow_html=True)
-        else:
-            st.info("You can upload 4+ scans at once. Select the active scan to analyze.")
+        if file is not None:
+            st.session_state.image_bytes = file.getvalue()
+            st.session_state.image_name = file.name
+            # no extra pill display
 
     with right:
         st.markdown("### 2. Human-Written Radiology Report")
-        st.session_state.study_date = st.date_input(
-            "Study date",
-            value=st.session_state.study_date,
-        )
         st.session_state.report_text = st.text_area(
             "Report",
             value=st.session_state.report_text,
@@ -645,28 +816,17 @@ def render_dashboard() -> None:
         st.markdown("<div class='action-bar'>Ensure all patient identifiers are redacted if required by local policy.</div>", unsafe_allow_html=True)
     with c2:
         can_run = bool(st.session_state.image_bytes) and bool(st.session_state.report_text.strip())
-        if st.button("Start AI Analysis", type="primary", width="stretch", disabled=not can_run):
+        if st.button("Start AI Analysis", type="primary", use_container_width=True, disabled=not can_run):
             st.session_state.last_error = ""
             with st.spinner("Running AI verification..."):
                 try:
-                    date_str = st.session_state.study_date.strftime("%b %d, %Y")
-                    result = mock_verify(st.session_state.image_name, st.session_state.report_text.strip(), date_str)
+                    result = call_verify(
+                        st.session_state.image_name,
+                        st.session_state.image_bytes,
+                        st.session_state.report_text.strip(),
+                    )
                     st.session_state.last_result = result
-                    st.session_state.enhanced_report_text = (result.get("report") or {}).get("ai_enhanced_text") or ""
                     st.session_state.active_page = "Analysis Workspace"
-
-                    st.session_state.history_cache = [
-                        {
-                            "id": result.get("meta", {}).get("study_id", "CASE") + "-DEMO",
-                            "scan_type": st.session_state.image_name or "Uploaded Scan",
-                            "patient_id": "PAT-DEMO",
-                            "created_at": datetime.now().strftime("%b %d, %I:%M %p"),
-                            "verification_status": "Discrepancy Found",
-                            "risk": str((result.get("comparison") or {}).get("risk_level") or "-").upper(),
-                        },
-                        *st.session_state.history_cache,
-                    ]
-
                     st.rerun()
                 except Exception as exc:
                     st.session_state.last_error = str(exc)
@@ -674,28 +834,31 @@ def render_dashboard() -> None:
     if st.session_state.last_error:
         st.error(st.session_state.last_error)
 
+    st.write("")
+
 
 def render_analysis() -> None:
     result = st.session_state.last_result
     if not result:
         st.info("Run analysis from Dashboard first.")
         return
+    meta = result.get("metadata") or result.get("meta") or {}
+    verification = result.get("verification_results") or {}
+    counts = verification.get("discrepancy_counts") or {}
+    ai_findings = _flatten_ai_findings(result)
 
-    meta = result.get("meta") or {}
-    cmp = result.get("comparison") or {}
-    counts = cmp.get("discrepancy_counts") or {}
-
+    st.markdown("<div class='analysis-wrap'>", unsafe_allow_html=True)
     st.markdown(
         f"""
         <div class='dark-shell'>
           <div class='dark-bar'>
             <div>
-              <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','')}</div>
-              <div class='dark-sub'>STUDY ID: {meta.get('study_id','')} · {meta.get('timestamp','')} · <span style='color:rgba(20,143,184,1)'>STAT</span></div>
+              <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','Uploaded Study')}</div>
+              <div class='dark-sub'>STUDY ID: {meta.get('study_id','CASE')} · {meta.get('timestamp','')} · <span style='color:rgba(20,143,184,1)'>STAT</span></div>
             </div>
             <div style='display:flex;gap:8px;flex-wrap:wrap;'>
               <span style='padding:6px 10px;border-radius:999px;background:rgba(223,73,90,0.14);border:1px solid rgba(223,73,90,0.25);color:#fb7185;font-weight:800;font-size:0.75rem;'>Mismatch {int(counts.get('mismatches') or 0)}</span>
-              <span style='padding:6px 10px;border-radius:999px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.26);color:#fbbf24;font-weight:800;font-size:0.75rem;'>Omission {int(counts.get('omissions') or 0)}</span>
+              <span style='padding:6px 10px;border-radius:999px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.25);color:#fbbf24;font-weight:800;font-size:0.75rem;'>Omission {int(counts.get('omissions') or 0)}</span>
             </div>
           </div>
         """,
@@ -706,24 +869,20 @@ def render_analysis() -> None:
 
     with col1:
         st.markdown("<div class='dark-panel dark-viewer'>", unsafe_allow_html=True)
-        if st.session_state.image_name:
-            st.markdown(
-                f"<div style='position:absolute;left:0;right:0;margin-top:-2px;padding:10px 12px;color:#cbd5e1;font-weight:800;font-size:0.95rem;'>Uploaded: {st.session_state.image_name}</div>",
-                unsafe_allow_html=True,
-            )
-        if st.session_state.image_bytes:
-            st.image(st.session_state.image_bytes, width="stretch")
-            if st.session_state.scans and len(st.session_state.scans) > 1:
-                st.markdown(
-                    f"<div style='margin-top:10px;color:#9ca3af;font-size:0.82rem;'>Active scan {int(st.session_state.active_scan_idx or 0) + 1} of {len(st.session_state.scans)}</div>",
-                    unsafe_allow_html=True,
-                )
-        else:
-            st.image(
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuD57tZCNaKTyMhcARHi_e-_h-n7kbEwkDiu0bPOhG77MnZk9-Grvq1m0lT1ibcLZrbmk84D_B0As5R3nMwHzzNmBNqB40E0o9u_T49Cjw2KN9nPWd2dBribnY_2lgYQsbde1AKX4Y8NnbtkxyGjc997jLmqBRPTBz7TiVNZIuyjmnY2Le6GUrz5UVhDi_a-pN8lc9vGjkcEsJIONcykPB4qNQF1zdKqQ2UVYPH2WRgXlHtrx0lAe9o0sUJ3AcKDswdk7rd-07p_FxI",
-                width="stretch",
-            )
-
+        enhanced_bytes = _resolve_image_bytes(result.get("enhanced_image_path"))
+        original_bytes = st.session_state.image_bytes
+        if enhanced_bytes or original_bytes:
+            tabs = st.tabs(["Enhanced", "Original"])
+            with tabs[0]:
+                if enhanced_bytes:
+                    st.image(enhanced_bytes, use_container_width=True, caption="Enhanced scan")
+                else:
+                    st.info("Enhanced image not available.")
+            with tabs[1]:
+                if original_bytes:
+                    st.image(original_bytes, use_container_width=True, caption="Original scan")
+                else:
+                    st.info("Original image not available.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
@@ -731,9 +890,8 @@ def render_analysis() -> None:
             "<div class='dark-panel dark-findings'><div class='dark-head'><div class='dark-title'>AI Findings</div><div style='font-size:0.72rem;color:#9ca3af;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.15);padding:2px 8px;border-radius:999px;'>v2.4.1</div></div>",
             unsafe_allow_html=True,
         )
-
         cards_html = ""
-        for idx, f in enumerate(result.get("ai_findings") or []):
+        for idx, f in enumerate(ai_findings):
             active = "active" if idx == 0 else ""
             cards_html += (
                 f"<div class='finding-card {active}'>"
@@ -744,460 +902,319 @@ def render_analysis() -> None:
         st.markdown(cards_html + "</div>", unsafe_allow_html=True)
 
     with col3:
-        view = st.radio(
-            "Report view",
-            ["Doctor Report", "AI Enhanced Report"],
-            horizontal=True,
-            label_visibility="collapsed",
+        st.markdown(
+            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Report Views</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
+            unsafe_allow_html=True,
         )
-        if view == "Doctor Report":
-            st.markdown(
-                "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Doctor Report</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
-                unsafe_allow_html=True,
-            )
+        tabs = st.tabs(["Doctor Report", "AI Generated Report"])
+
+        with tabs[0]:
+            report_text = (result.get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+            report_html = "<br>".join((report_text or "").splitlines())
             st.markdown("<div class='report-body'>", unsafe_allow_html=True)
-            st.markdown((result.get("report") or {}).get("highlighted_html") or "", unsafe_allow_html=True)
+            st.markdown(report_html, unsafe_allow_html=True)
+            counts = verification.get("discrepancy_counts") or {}
+            risk_level = str(verification.get("risk_level") or "-").upper()
+            agreement = verification.get("agreement_rate")
+            agreement_pct = int(float(agreement or 0) * 100)
+            measurement_lines = []
+            for name, info in (verification.get("measurement_comparisons") or {}).items():
+                if not isinstance(info, dict):
+                    continue
+                measurement_lines.append(
+                    f"{name}: {str(info.get('status','-')).upper()} (AI={info.get('ai_value')}, Doctor={info.get('doctor_value')}, diff={info.get('difference')}, tol={info.get('tolerance')})"
+                )
+            if not measurement_lines:
+                measurement_lines.append("No measurement discrepancies.")
+            bullets = "".join([f"<li>{line}</li>" for line in measurement_lines])
             st.markdown(
                 f"""
                 <div class='note-box'>
                   <div class='note-title'>Discrepancy Detail</div>
-                  <div class='note-text'>{cmp.get('comparison_report_text','')}</div>
+                  <div class='note-text'>
+                    Clean comparison summary:<br/>
+                    Risk Level: <b>{risk_level}</b> &nbsp; Agreement: <b>{agreement_pct}%</b><br/>
+                    Counts: matches={counts.get('matches',0)}, omissions={counts.get('omissions',0)}, mismatches={counts.get('mismatches',0)}, overstatements={counts.get('overstatements',0)}<br/>
+                    Measurement Comparison:
+                    <ul style='margin:8px 0 0 18px; padding:0;'>{bullets}</ul>
+                  </div>
                 </div>
-                """ + "</div></div>",
+                """,
                 unsafe_allow_html=True,
             )
-        else:
+
+        with tabs[1]:
+            ai_report = result.get("ai_report_text") or ""
+            if ai_report:
+                st.markdown(_render_ai_report_html(ai_report), unsafe_allow_html=True)
+                with st.expander("View full AI report"):
+                    st.markdown(
+                        f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.info("AI report not available for this case.")
+
+        with st.expander("View full JSON report"):
+            st.json(result)
+
+        agreement = verification.get("agreement_rate")
+        risk = verification.get("risk_level")
+        if agreement is not None or risk:
             st.markdown(
-                "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>AI Enhanced Report</div><div style='font-size:0.72rem;color:#9ca3af;'>Draft</div></div>",
+                f"<div class='agreement-row'>Agreement: {int(float(agreement or 0) * 100)}% · Risk: <b>{str(risk or '-').upper()}</b></div>",
                 unsafe_allow_html=True,
             )
-            st.session_state.enhanced_report_text = st.text_area(
-                "AI Enhanced Report",
-                value=st.session_state.enhanced_report_text,
-                label_visibility="collapsed",
-                height=430,
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
 
-    b1, b2, b3 = st.columns([1.2, 1.2, 1.6])
-    with b1:
-        if st.button("Open Resolution Workspace", type="secondary", width="stretch"):
-            st.session_state.active_page = "Discrepancy Resolution"
-            st.rerun()
-    with b2:
-        if st.button("Proceed to Export", type="secondary", width="stretch"):
-            st.session_state.active_page = "Final Export"
-            st.rerun()
-    with b3:
-        st.markdown(
-            f"<div class='subtle' style='text-align:right;padding-top:10px;'>Agreement: {int(float(cmp.get('agreement_rate',0)) * 100)}% · Risk: <b>{str(cmp.get('risk_level','-')).upper()}</b></div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 def render_history() -> None:
     st.markdown("## History & Archive")
-    history = st.session_state.history_cache
-    st.dataframe(history, width="stretch", hide_index=True)
-
-
-def render_help_center() -> None:
-    st.markdown(
-        """
-        <div style="text-align:center; padding: 30px; border-radius: 18px; background: radial-gradient(1200px 420px at 20% 0%, rgba(255,255,255,0.24), rgba(255,255,255,0) 60%), linear-gradient(135deg, rgba(31,102,173,1), rgba(26,67,110,1)); color: white; box-shadow: 0 20px 50px rgba(13, 42, 70, 0.25);">
-          <h1 style="margin:0; font-family:Lexend,sans-serif; font-weight:900; font-size:2.2rem; letter-spacing:-0.02em;">How can we help you today?</h1>
-          <div style="opacity:0.92; margin-top: 10px; font-size:1.02rem;">Search documentation, workflows, and common actions.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+    st.markdown("<p class='small-kicker'>Review and export prior verification cases.</p>", unsafe_allow_html=True)
     st.write("")
-    q = st.text_input("Search docs", placeholder="Search docs...", label_visibility="collapsed")
-
-    cards = [
-        ("Getting Started", "Upload scan + report, run analysis, resolve discrepancies, export bundle."),
-        ("Analysis Workspace", "Understand confidence, overlays, and the discrepancy summary."),
-        ("Resolution Workflow", "Accept AI, dismiss false positives, or modify findings before export."),
-        ("Export & Audit", "Download compliance bundle and trace changes across sessions."),
-    ]
-
-    if q:
-        ql = q.lower()
-        cards = [c for c in cards if ql in c[0].lower() or ql in c[1].lower()]
-
-    cols = st.columns(2, gap="large")
-    for i, (title, desc) in enumerate(cards):
-        with cols[i % 2]:
-            st.markdown(
-                f"""
-                <div class='table-shell'>
-                  <div style='display:flex;align-items:center;justify-content:space-between;gap:10px;'>
-                    <div style='font-family:Lexend,sans-serif;font-weight:900;font-size:1.12rem;margin-bottom:6px;'>{title}</div>
-                    <div style='width:10px;height:10px;border-radius:999px;background:rgba(31,102,173,0.35);'></div>
-                  </div>
-                  <div class='subtle' style='font-size:0.98rem;line-height:1.5;'>{desc}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
+    try:
+        history = fetch_history(limit=50)
+        st.session_state.history_cache = history
+        rows = []
+        for item in history:
+            risk = str((item.get("verification_results") or {}).get("risk_level", "-")).upper()
+            if risk == "LOW":
+                risk_class = "pill-low"
+            elif risk == "MEDIUM":
+                risk_class = "pill-med"
+            elif risk == "HIGH":
+                risk_class = "pill-high"
+            else:
+                risk_class = "pill-unk"
+            rows.append(
+                {
+                    "case_id": item.get("id") or item.get("case_id") or "-",
+                    "patient": item.get("patient_id", "-"),
+                    "risk": f"<span class='history-pill {risk_class}'>{risk}</span>",
+                    "created": item.get("created_at", "-"),
+                    "status": item.get("status") or item.get("stage") or "-",
+                }
             )
-
-
-def render_protocol_library() -> None:
-    st.markdown(
-        """
-        <div class='panel-label' style='font-size:2.35rem;margin-bottom:.2rem;'>Diagnostic Protocol Library</div>
-        <p class='small-kicker'>Configure and deploy clinical AI sensitivity thresholds across the network.</p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    t1, t2, t3 = st.columns([1.4, 1.4, 1.0])
-    with t1:
-        q = st.text_input(
-            "Search",
-            placeholder="Search protocols by clinical indication...",
-            label_visibility="collapsed",
-            key="proto_search",
+        table_rows = "".join(
+            [
+                f"<tr><td>{r['case_id']}</td><td>{r['patient']}</td><td>{r['risk']}</td><td>{r['created']}</td><td>{r['status']}</td></tr>"
+                for r in rows
+            ]
         )
-    with t2:
-        dept = st.selectbox(
-            "Department",
-            ["All Departments", "Radiology", "Emergency", "Pediatrics", "Oncology"],
-            index=0,
-            key="proto_dept",
-        )
-    with t3:
-        creator = st.selectbox(
-            "Creator",
-            ["All Creators", "Dr. Aris (Lead)", "System Defaults", "Clinic Admin"],
-            index=0,
-            key="proto_creator",
-        )
-
-    a1, a2, a3 = st.columns([1.05, 1.05, 1.1])
-    with a1:
-        export_payload = {
-            "active_protocol_id": st.session_state.active_protocol_id,
-            "protocols": st.session_state.protocols,
-        }
-        st.download_button(
-            "Export All",
-            data=json.dumps(export_payload, indent=2),
-            file_name="raven_protocols.json",
-            mime="application/json",
-            width="stretch",
-        )
-    with a2:
-        create_open = st.button("Create New Protocol", type="primary", width="stretch")
-    with a3:
         st.markdown(
-            """
-            <div class='table-shell' style='margin-top:0;'>
-              <div class='metric-label'>Active Preset</div>
-              <div class='metric-value' style='font-size:1.35rem;margin-top:6px;'>"""
-            + f"{st.session_state.active_protocol_id}"
-            + """</div>
-              <div class='metric-sub'>Quick Apply updates demo state only</div>
+            f"""
+            <div class='history-wrap'>
+              <table class='history-table'>
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Patient Ref</th>
+                    <th>Risk</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {table_rows}
+                </tbody>
+              </table>
             </div>
             """,
             unsafe_allow_html=True,
         )
-
-    if create_open:
-        st.session_state["proto_create_open"] = True
-
-    if st.session_state.get("proto_create_open"):
-        st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-        st.markdown("### Create New Protocol")
-        c1, c2 = st.columns([1, 1])
-        with c1:
-            new_name = st.text_input("Protocol name", value="", key="proto_new_name")
-            new_dept = st.selectbox(
-                "Department",
-                ["Radiology", "Emergency", "Pediatrics", "Oncology"],
-                index=0,
-                key="proto_new_dept",
-            )
-        with c2:
-            new_creator = st.selectbox(
-                "Creator",
-                ["Clinic Admin", "Dr. Aris (Lead)", "System Defaults"],
-                index=0,
-                key="proto_new_creator",
-            )
-            new_tag = st.selectbox(
-                "Tag",
-                ["Standard", "Urgent Care", "Advanced", "Pediatric", "Cardiovascular"],
-                index=0,
-                key="proto_new_tag",
-            )
-        new_desc = st.text_area("Description", value="", height=110, key="proto_new_desc")
-        st.markdown("**Target thresholds (demo)**")
-        m1, m2 = st.columns([1, 1])
-        with m1:
-            a_val = st.slider(
-                "Sensitivity",
-                min_value=0.50,
-                max_value=0.99,
-                value=0.86,
-                step=0.01,
-                key="proto_new_sens",
-            )
-        with m2:
-            b_val = st.slider(
-                "Specificity",
-                min_value=0.50,
-                max_value=0.99,
-                value=0.78,
-                step=0.01,
-                key="proto_new_spec",
-            )
-
-        b1, b2 = st.columns([1, 1])
-        with b1:
-            if st.button("Cancel", type="secondary", width="stretch", key="proto_new_cancel"):
-                st.session_state["proto_create_open"] = False
-                st.rerun()
-        with b2:
-            if st.button("Save Protocol", type="primary", width="stretch", key="proto_new_save"):
-                pid = f"PROTO-{int(datetime.now().timestamp())}"
-                st.session_state.protocols = [
-                    {
-                        "id": pid,
-                        "name": (new_name or "Custom Protocol").strip(),
-                        "department": new_dept,
-                        "creator": new_creator,
-                        "tag": new_tag,
-                        "accent": "#1f66ad",
-                        "metric_a_label": "Sensitivity",
-                        "metric_a": float(a_val),
-                        "metric_b_label": "Specificity",
-                        "metric_b": float(b_val),
-                        "updated": "Updated just now",
-                        "description": (new_desc or "Custom diagnostic protocol.").strip(),
-                    },
-                    *st.session_state.protocols,
-                ]
-                st.session_state.active_protocol_id = pid
-                st.session_state["proto_create_open"] = False
-                st.success("Protocol created (demo).")
-                st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    protocols = st.session_state.protocols
-    if q:
-        ql = q.lower().strip()
-        protocols = [
-            p
-            for p in protocols
-            if ql in str(p.get("name", "")).lower() or ql in str(p.get("description", "")).lower()
-        ]
-    if dept != "All Departments":
-        protocols = [p for p in protocols if p.get("department") == dept]
-    if creator != "All Creators":
-        protocols = [p for p in protocols if p.get("creator") == creator]
-
-    st.write("")
-    if not protocols:
-        st.info("No protocols match your filters.")
-        return
-
-    cols = st.columns(3, gap="large")
-    for i, p in enumerate(protocols):
-        with cols[i % 3]:
-            is_active = st.session_state.active_protocol_id == p.get("id")
-            a = str(p.get("accent") or "#1f66ad")
-            tag = str(p.get("tag") or "")
-            st.markdown(
-                """
-                <div class='table-shell' style='position:relative;'>
-                  <div style='display:flex;align-items:flex-start;justify-content:space-between;gap:12px;'>
-                    <div style='display:flex;gap:10px;align-items:center;'>
-                      <div style='width:38px;height:38px;border-radius:12px;background:"""
-                + a
-                + """;opacity:0.12; border:1px solid rgba(17,24,39,0.08);'></div>
-                      <div>
-                        <div style='font-family:Lexend,sans-serif;font-weight:900;font-size:1.08rem;'>"""
-                + str(p.get("name") or "")
-                + """</div>
-                        <div class='subtle' style='font-size:0.92rem;'>"""
-                + str(p.get("description") or "")
-                + """</div>
-                      </div>
-                    </div>
-                    <div class='pill' style='background:rgba(31,102,173,0.10);border:1px solid rgba(31,102,173,0.18);color:#1f66ad;'>"""
-                + tag
-                + """</div>
-                  </div>
-                  <div style='margin-top:12px;'>
-                    <div class='subtle' style='font-size:0.85rem;font-weight:700;'>"""
-                + str(p.get("metric_a_label") or "Metric A")
-                + """</div>
-                    <div style='display:flex;align-items:center;justify-content:space-between;margin-top:4px;'>
-                      <div style='font-family:Lexend,sans-serif;font-weight:900;font-size:1.35rem;'>"""
-                + f"{int(float(p.get('metric_a') or 0) * 100)}%"
-                + """</div>
-                      <div class='subtle' style='font-size:0.85rem;'>"""
-                + str(p.get("department") or "")
-                + """</div>
-                    </div>
-                    <div style='height:8px;background:rgba(17,24,39,0.06);border-radius:999px;overflow:hidden;margin-top:8px;'>
-                      <div style='height:100%;width:"""
-                + f"{int(float(p.get('metric_a') or 0) * 100)}%"
-                + """;background:rgba(31,102,173,0.85);'></div>
-                    </div>
-
-                    <div style='margin-top:12px;' class='subtle'>"""
-                + str(p.get("metric_b_label") or "Metric B")
-                + """</div>
-                    <div style='display:flex;align-items:center;justify-content:space-between;margin-top:4px;'>
-                      <div style='font-family:Lexend,sans-serif;font-weight:900;font-size:1.12rem;'>"""
-                + f"{int(float(p.get('metric_b') or 0) * 100)}%"
-                + """</div>
-                      <div class='subtle' style='font-size:0.85rem;'>"""
-                + str(p.get("creator") or "")
-                + """</div>
-                    </div>
-                    <div style='height:8px;background:rgba(17,24,39,0.06);border-radius:999px;overflow:hidden;margin-top:8px;'>
-                      <div style='height:100%;width:"""
-                + f"{int(float(p.get('metric_b') or 0) * 100)}%"
-                + """;background:rgba(100,116,139,0.55);'></div>
-                    </div>
-                  </div>
-                """
-                + ("<div style='position:absolute;top:12px;right:12px;' class='pill pill-ok'>Active</div>" if is_active else "")
-                + """
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            b1, b2 = st.columns([1, 1])
-            with b1:
-                if st.button("Edit", type="secondary", width="stretch", key=f"proto_edit_{p.get('id')}"):
-                    st.info("Edit flow can be added next (demo).")
-            with b2:
-                label = "In Use" if is_active else "Quick Apply"
-                if st.button(
-                    label,
-                    type="primary" if not is_active else "secondary",
-                    width="stretch",
-                    key=f"proto_apply_{p.get('id')}",
-                ):
-                    if not is_active:
-                        st.session_state.active_protocol_id = str(p.get("id"))
-                        st.success("Preset applied (demo).")
-                        st.rerun()
-
-
-def render_discrepancy_resolution() -> None:
-    result = st.session_state.last_result
-    if not result:
-        st.info("Run analysis from Dashboard first.")
-        return
-
-    st.markdown("## Discrepancy Resolution")
-    st.markdown("<p class='subtle'>Resolve each discrepancy before final export.</p>", unsafe_allow_html=True)
-
-    items = [f for f in (result.get("ai_findings") or []) if f.get("status") in {"mismatch", "omission"}]
-    if not items:
-        st.success("No active discrepancies.")
-        return
-
-    st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-    for idx, item in enumerate(items):
-        c1, c2, c3, c4 = st.columns([2.2, 1.2, 1.1, 1.8])
-        with c1:
-            st.markdown(f"<b>{item.get('name','')}</b>", unsafe_allow_html=True)
-        with c2:
-            st.markdown("<span class='subtle'>Category</span>", unsafe_allow_html=True)
-        with c3:
-            st.markdown(f"<span class='subtle'>{str(item.get('status','')).upper()}</span>", unsafe_allow_html=True)
-        with c4:
-            key = f"res_{idx}_{item.get('name','')}"
-            stored = st.session_state.resolution.get(key) or {}
-            current = stored.get("action") or "Accept AI"
-            choice = st.selectbox(
-                "Resolution",
-                ["Accept AI", "Dismiss", "Modify"],
-                index=["Accept AI", "Dismiss", "Modify"].index(current),
-                key=f"{key}_action",
-                label_visibility="collapsed",
-            )
-            payload = {"action": choice, "finding": item.get("name", ""), "status": item.get("status", "")}
-            if choice == "Modify":
-                payload["modified_text"] = st.text_input(
-                    "Modified text",
-                    value=str(stored.get("modified_text") or ""),
-                    key=f"{key}_modified",
-                    label_visibility="collapsed",
-                    placeholder="Type your corrected sentence...",
-                )
-            st.session_state.resolution[key] = payload
-        st.divider()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    b1, b2 = st.columns([1, 1])
-    with b1:
-        if st.button("Back to Analysis", type="secondary", width="stretch"):
-            st.session_state.active_page = "Analysis Workspace"
-            st.rerun()
-    with b2:
-        if st.button("Save & Continue Export", type="primary", width="stretch"):
-            st.session_state.active_page = "Final Export"
-            st.rerun()
-
-
-def render_final_export() -> None:
-    result = st.session_state.last_result
-    if not result:
-        st.info("Run analysis from Dashboard first.")
-        return
-
-    st.markdown("## Final Export")
-    st.markdown("<p class='subtle'>Generated document preview for archive and compliance (demo).</p>", unsafe_allow_html=True)
-
-    cfg = st.session_state.export_config
-    c1, c2 = st.columns([1.2, 1])
-    with c1:
-        st.markdown("### Export Options")
-        cfg["heatmap"] = st.checkbox("Include heatmap overlay", value=bool(cfg.get("heatmap")))
-        cfg["summary"] = st.checkbox("Include AI summary", value=bool(cfg.get("summary")))
-        cfg["narrative"] = st.checkbox("Include narrative", value=bool(cfg.get("narrative")))
-        cfg["discrepancy"] = st.checkbox("Include discrepancy log", value=bool(cfg.get("discrepancy")))
-        st.session_state.export_config = cfg
-
-    with c2:
-        st.markdown("### Export")
-        payload = {
-            "study_date": st.session_state.study_date.strftime("%b %d, %Y") if st.session_state.study_date else "",
-            "uploaded_file": st.session_state.image_name,
-            "original_report": st.session_state.report_text,
-            "ai_enhanced_report": st.session_state.enhanced_report_text,
-            "export_config": cfg,
-            "resolution": st.session_state.resolution,
-            "result": result,
-        }
-        st.download_button(
-            "Download JSON Bundle",
-            data=json.dumps(payload, indent=2),
-            file_name=f"raven_export_{int(datetime.now().timestamp())}.json",
-            mime="application/json",
-            width="stretch",
-        )
-
-    st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-    st.json(payload)
-    st.markdown("</div>", unsafe_allow_html=True)
+    except Exception as exc:
+        st.warning(f"Could not load history: {exc}")
 
 
 def render_simple(title: str) -> None:
     st.markdown(f"## {title}")
     st.info("This section is available. Next I can wire full interactions screen-by-screen.")
 
+
+def render_export() -> None:
+    result = st.session_state.last_result
+    verification = (result or {}).get("verification_results") or {}
+    risk = str(verification.get("risk_level") or "unknown").lower()
+    risk_class = "low" if risk == "low" else "med" if risk == "medium" else "high" if risk == "high" else "med"
+    agreement = verification.get("agreement_rate")
+    agreement_pct = int(float(agreement or 0) * 100)
+    case_id = (result or {}).get("case_id") or "-"
+    created = (result or {}).get("metadata", {}).get("timestamp") or "-"
+
+    st.markdown(
+        f"""
+        <div class="export-shell">
+          <div class="export-header">
+            <div>
+              <div class="export-title">Final Export</div>
+              <div class="export-sub">Package and download the verification results.</div>
+            </div>
+            <div class="export-badges">
+              <span class="export-badge {risk_class}">Risk: {risk.upper()}</span>
+              <span class="export-badge" style="background:#e8f1ff;color:#1f66ad;">Agreement: {agreement_pct}%</span>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.write("")
+    col1, col2 = st.columns([1.1, 1])
+    with col1:
+        st.markdown(
+            f"""
+            <div class="export-card">
+              <div class="export-kv"><span>Case ID</span><b>{case_id}</b></div>
+              <div class="export-kv"><span>Generated</span><b>{created}</b></div>
+              <div class="export-kv"><span>Model</span><b>{(result or {}).get('ai_findings', {}).get('model_used','-')}</b></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        st.markdown(
+            """
+            <div class="export-card">
+              <div style="font-weight:700;margin-bottom:6px;">Export Checklist</div>
+              <ul style="margin:0 0 0 18px; padding:0; color:#475569;">
+                <li>AI report included</li>
+                <li>Doctor report included</li>
+                <li>Comparison summary included</li>
+                <li>Images attached (if available)</li>
+              </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown("<div class='export-card'>", unsafe_allow_html=True)
+        st.markdown("<div style='font-weight:700;margin-bottom:6px;'>Download Files</div>", unsafe_allow_html=True)
+        json_payload = result or {}
+        st.download_button(
+            "Download JSON Report",
+            data=json.dumps(json_payload, indent=2),
+            file_name="radverify_report.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+        ai_report = (result or {}).get("ai_report_text") or ""
+        if ai_report:
+            st.download_button(
+                "Download AI Report (TXT)",
+                data=ai_report,
+                file_name="ai_report.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+        doctor_report = ((result or {}).get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+        if doctor_report:
+            st.download_button(
+                "Download Doctor Report (TXT)",
+                data=doctor_report,
+                file_name="doctor_report.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_discrepancy() -> None:
+    result = st.session_state.last_result
+    if not result:
+        st.info("Run analysis from Dashboard first.")
+        return
+    verification = result.get("verification_results") or {}
+    counts = verification.get("discrepancy_counts") or {}
+    rows = _build_comparison_table(verification)
+    mismatch_rows = [r for r in rows if str(r.get("status")).lower() == "mismatch"]
+    omission_rows = [r for r in rows if str(r.get("status")).lower() == "omission"]
+
+    st.markdown(
+        """
+        <div class="disc-shell">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div>
+              <div class="export-title">Discrepancy Resolution</div>
+              <div class="export-sub">Review mismatches and document resolution decisions.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="disc-pill mismatch">Mismatches: {m}</span>
+              <span class="disc-pill omission">Omissions: {o}</span>
+              <span class="disc-pill match">Matches: {a}</span>
+            </div>
+          </div>
+        </div>
+        """.format(m=counts.get("mismatches", 0), o=counts.get("omissions", 0), a=counts.get("matches", 0)),
+        unsafe_allow_html=True,
+    )
+    st.write("")
+
+    col1, col2 = st.columns([1, 1.35], gap="large")
+    with col1:
+        st.markdown(
+            """
+            <div class="disc-card">
+              <div style="font-weight:700;margin-bottom:8px;">Resolution Checklist</div>
+              <ul style="margin:0 0 0 18px; padding:0; color:#475569;">
+                <li>Confirm measurement mismatches</li>
+                <li>Validate report omissions</li>
+                <li>Attach reviewer notes</li>
+                <li>Assign final disposition</li>
+              </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        st.text_area("Reviewer Notes", placeholder="Add discrepancy review notes...", height=160)
+        st.selectbox("Disposition", ["Needs Review", "Resolved", "Escalate to Radiologist"])
+        st.button("Save Resolution", type="primary", use_container_width=True)
+
+    with col2:
+        risk_level = str(verification.get("risk_level") or "unknown").upper()
+        agreement = verification.get("agreement_rate")
+        agreement_pct = int(float(agreement or 0) * 100)
+        st.markdown(
+            f"""
+            <div class="disc-card" style="margin-bottom:12px;">
+              <div style="font-weight:700;margin-bottom:8px;">Resolution Summary</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span class="disc-pill match">Agreement: {agreement_pct}%</span>
+                <span class="disc-pill mismatch">Risk: {risk_level}</span>
+                <span class="disc-pill omission">Items: {len(rows)}</span>
+              </div>
+              <div style="margin-top:10px;color:#64748b;font-size:0.9rem;">
+                Focus on high-severity mismatches first. Add notes before saving.
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div class='disc-card'>", unsafe_allow_html=True)
+        st.markdown("<div style='font-weight:700;margin-bottom:8px;'>Mismatch Details</div>", unsafe_allow_html=True)
+        if mismatch_rows or omission_rows:
+            display_rows = mismatch_rows + omission_rows
+            table_rows = "".join(
+                [
+                    f"<tr><td>{r.get('name')}</td><td>{r.get('status')}</td><td>{r.get('ai_value') or r.get('ai_present')}</td><td>{r.get('doctor_value') or r.get('doctor_mentioned')}</td><td>{r.get('severity')}</td></tr>"
+                    for r in display_rows
+                ]
+            )
+            st.markdown(
+                f"""
+                <table class="disc-table">
+                  <thead><tr><th>Item</th><th>Status</th><th>AI</th><th>Doctor</th><th>Severity</th></tr></thead>
+                  <tbody>{table_rows}</tbody>
+                </table>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No discrepancies detected for this case.")
+        st.markdown("</div>", unsafe_allow_html=True)
 
 def main() -> None:
     st.set_page_config(page_title="RAVEN Web App", page_icon="R", layout="wide", initial_sidebar_state="expanded")
@@ -1215,15 +1232,15 @@ def main() -> None:
     elif page == "History & Archive":
         render_history()
     elif page == "Discrepancy Resolution":
-        render_discrepancy_resolution()
+        render_discrepancy()
     elif page == "Final Export":
-        render_final_export()
-    elif page == "Protocol Library":
-        render_protocol_library()
+        render_export()
     elif page == "Help Center":
-        render_help_center()
+        render_simple("Help Center")
+    elif page == "Comparative Analytics":
+        render_simple("Comparative Analytics")
     else:
-        render_dashboard()
+        render_simple("Settings")
 
 
 if __name__ == "__main__":

@@ -3,108 +3,15 @@
 from __future__ import annotations
 
 from datetime import datetime
-import html
-import json
-import os
+import io
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 import streamlit as st
 
-
-PAGES: Dict[str, Dict[str, str]] = {
-    "Dashboard": {"title": "Upload Portal", "sub": "Clinical input and processing"},
-    "Analysis Workspace": {"title": "Analysis Workspace", "sub": "AI findings and report comparison"},
-    "Discrepancy Resolution": {"title": "Discrepancy Resolution", "sub": "Accept, dismiss, or modify AI findings"},
-    "Final Export": {"title": "Final Export", "sub": "Finalize and archive verified report"},
-    "History & Archive": {"title": "History & Archive", "sub": "Compliance-grade audit retrieval"},
-    "Help Center": {"title": "Help Center", "sub": "Tutorials and support channels"},
-}
-
-
-def demo_history() -> List[Dict[str, Any]]:
-    return [
-        {
-            "id": "SCN-9021",
-            "scan_type": "Chest PA/Lateral X-Ray",
-            "patient_id": "PAT-7728-B",
-            "created_at": "Oct 24, 10:45 AM",
-            "verification_status": "Verified",
-            "risk": "LOW",
-        },
-        {
-            "id": "SCN-8842",
-            "scan_type": "Abdominal Ultrasound",
-            "patient_id": "PAT-9102-X",
-            "created_at": "Oct 24, 09:12 AM",
-            "verification_status": "Discrepancy Found",
-            "risk": "HIGH",
-        },
-        {
-            "id": "SCN-8811",
-            "scan_type": "Lumbar Spine MRI",
-            "patient_id": "PAT-1142-D",
-            "created_at": "Oct 23, 04:55 PM",
-            "verification_status": "Processing",
-            "risk": "MEDIUM",
-        },
-    ]
-
-
-def mock_verify(file_name: str, report_text: str) -> Dict[str, Any]:
-    now = datetime.now().strftime("%b %d, %I:%M %p")
-    return {
-        "meta": {
-            "file_name": file_name,
-            "generated_at": now,
-            "study": "DOE, JOHN | 45Y | Chest X-Ray (PA View)",
-            "study_id": "88291-XA",
-            "timestamp": "OCT 24, 2023 09:42 AM",
-        },
-        "ai_findings": [
-            {
-                "name": "Cardiomegaly",
-                "confidence": 0.98,
-                "rationale": "Transverse heart diameter exceeds 50% of thoracic diameter. Likely indicative of underlying CHF.",
-                "status": "mismatch",
-            },
-            {
-                "name": "Pleural Effusion",
-                "confidence": 0.82,
-                "rationale": "Blunting of the right costophrenic angle suggesting mild fluid accumulation.",
-                "status": "omission",
-            },
-            {
-                "name": "Pulmonary Nodule",
-                "confidence": 0.22,
-                "rationale": "Shadow in upper left lobe; likely vessel end-on or artifact.",
-                "status": "low_confidence",
-            },
-        ],
-        "report": {
-            "raw_text": report_text,
-            "highlighted_html": (
-                "<p>Lungs are clear bilaterally without focal consolidation. "
-                "<span style='background:rgba(223,73,90,0.18);border-bottom:2px solid #DF495A;padding:0 .1rem;' "
-                "title='AI detected Cardiomegaly (98% confidence)'>The cardiomediastinal silhouette is within normal limits.</span> "
-                "The pulmonary vasculature is not congested.</p>"
-                "<p>No evidence of pneumothorax is seen. "
-                "<span style='background:rgba(245,158,11,0.22);border-bottom:2px solid #f59e0b;padding:0 .1rem;' "
-                "title='Potential Omission: AI detected mild blunting of right costophrenic angle'>Bony structures and soft tissues are unremarkable.</span></p>"
-                "<p style='color:#6b7280;font-style:italic;'>IMPRESSION: No acute cardiopulmonary abnormality.</p>"
-            ),
-        },
-        "comparison": {
-            "risk_level": "HIGH",
-            "agreement_rate": 0.78,
-            "discrepancy_counts": {"mismatches": 1, "omissions": 1, "overstatements": 0},
-            "comparison_report_text": (
-                "The human report indicates a \"normal\" heart size, but Raven Analysis detects a cardiothoracic ratio "
-                "of 0.58, which constitutes cardiomegaly."
-            ),
-        },
-    }
+API_BASE = "http://localhost:8000"
+API_KEY = "radverify_secret_key"
 
 
 def init_state() -> None:
@@ -115,224 +22,19 @@ def init_state() -> None:
         "report_text": "",
         "last_result": None,
         "last_error": "",
-        "history_cache": demo_history(),
         "resolution": {},
-        "export_config": {
-            "heatmap": True,
-            "summary": True,
-            "narrative": True,
-            "discrepancy": True,
+        "export_config": {"include_raw": True, "include_resolution": True, "include_tables": True},
+        "settings": {
+            "api_base": API_BASE,
+            "api_key": API_KEY,
+            "prefer_backend": True,
+            "backend_timeout_sec": 180,
         },
-        "backend_url": os.getenv("RADVERIFY_BACKEND_URL", "http://localhost:8000"),
-        "backend_api_key": os.getenv("RADVERIFY_API_KEY", "radverify_secret_key"),
-        "backend_connected": False,
+        "history_cache": [],
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
-
-
-def _backend_headers() -> Dict[str, str]:
-    return {"X-API-Key": st.session_state.backend_api_key.strip()}
-
-
-def _backend_url(path: str) -> str:
-    return st.session_state.backend_url.rstrip("/") + path
-
-
-def backend_health_check() -> tuple[bool, str]:
-    try:
-        resp = requests.get(_backend_url("/health"), timeout=4)
-        if resp.status_code == 200:
-            return True, "Connected"
-        return False, f"Health failed: {resp.status_code}"
-    except Exception as exc:
-        return False, f"Backend unreachable: {exc}"
-
-
-def fetch_history_backend(limit: int = 20) -> List[Dict[str, Any]]:
-    resp = requests.get(
-        _backend_url("/history"),
-        params={"limit": limit},
-        headers=_backend_headers(),
-        timeout=10,
-    )
-    if resp.status_code != 200:
-        raise RuntimeError(f"/history failed: {resp.status_code} {resp.text}")
-
-    raw = resp.json()
-    history: List[Dict[str, Any]] = []
-    for item in raw:
-        vr = item.get("verification_results") or {}
-        risk = str(vr.get("risk_level") or "-").upper()
-        history.append(
-            {
-                "id": f"CASE-{item.get('id', '-')}",
-                "scan_type": item.get("image_path") or "Uploaded Scan",
-                "patient_id": item.get("patient_id", "-"),
-                "created_at": str(item.get("created_at", "-")),
-                "verification_status": "Verified" if risk == "LOW" else "Discrepancy Found",
-                "risk": risk,
-            }
-        )
-    return history
-
-
-def _flatten_structures(structures: Dict[str, Any]) -> List[Dict[str, Any]]:
-    out: List[Dict[str, Any]] = []
-    for category, vals in (structures or {}).items():
-        if isinstance(vals, dict):
-            for name, data in vals.items():
-                if isinstance(data, dict):
-                    out.append(
-                        {
-                            "name": name,
-                            "category": category,
-                            "present": bool(data.get("present", False)),
-                            "confidence": float(data.get("confidence", 0.0)),
-                        }
-                    )
-    return out
-
-
-def _resolve_enhanced_image_bytes(path_value: Optional[str]) -> Optional[bytes]:
-    if not path_value:
-        return None
-
-    raw = str(path_value).strip()
-    if not raw:
-        return None
-
-    candidates = [
-        Path(raw),
-        Path.cwd() / raw,
-        Path.cwd() / raw.replace("\\", "/"),
-    ]
-    for candidate in candidates:
-        try:
-            if candidate.exists() and candidate.is_file():
-                return candidate.read_bytes()
-        except OSError:
-            continue
-    return None
-
-
-def _build_discrepancy_summary(api_result: Dict[str, Any]) -> str:
-    vr = api_result.get("verification_results") or {}
-    risk = str(vr.get("risk_level", "unknown")).upper()
-    agreement = float(vr.get("agreement_rate", 0.0)) * 100
-    counts = vr.get("discrepancy_counts") or {}
-    comp = vr.get("measurement_comparisons") or {}
-
-    lines = [
-        f"Risk Level: {risk}",
-        f"Agreement: {agreement:.1f}%",
-        (
-            "Counts: "
-            f"matches={int(counts.get('matches', 0))}, "
-            f"omissions={int(counts.get('omissions', 0))}, "
-            f"mismatches={int(counts.get('mismatches', 0))}, "
-            f"overstatements={int(counts.get('overstatements', 0))}"
-        ),
-    ]
-
-    if comp:
-        lines.append("")
-        lines.append("Measurement Comparison:")
-        for name, row in comp.items():
-            status = str(row.get("status", "unknown")).upper()
-            ai_v = row.get("ai_value")
-            dr_v = row.get("doctor_value")
-            if ai_v is not None and dr_v is not None:
-                diff = row.get("difference")
-                tol = row.get("tolerance")
-                lines.append(f"- {name}: {status} (AI={ai_v}, Doctor={dr_v}, diff={diff}, tol={tol})")
-            else:
-                lines.append(f"- {name}: {status}")
-
-    return "\n".join(lines)
-
-
-def normalize_backend_result(api_result: Dict[str, Any], file_name: str, report_text: str) -> Dict[str, Any]:
-    ai = api_result.get("ai_findings") or {}
-    vr = api_result.get("verification_results") or {}
-    structures = _flatten_structures(ai.get("structures_detected") or {})
-    top = sorted(structures, key=lambda x: x["confidence"], reverse=True)[:6]
-
-    findings: List[Dict[str, Any]] = []
-    for row in top:
-        status = "mismatch" if row["present"] else "low_confidence"
-        findings.append(
-            {
-                "name": row["name"].replace("_", " ").title(),
-                "confidence": row["confidence"],
-                "rationale": f"Category: {row['category']}. Present={row['present']}.",
-                "status": status,
-            }
-        )
-
-    if not findings:
-        findings.append(
-            {
-                "name": "No high-confidence structure",
-                "confidence": 0.0,
-                "rationale": "No structure-level detections available in response.",
-                "status": "low_confidence",
-            }
-        )
-
-    escaped = html.escape(report_text).replace("\n", "<br/>")
-    comparison_text_raw = (
-        api_result.get("comparison_report_text")
-        or (api_result.get("final_results") or {}).get("comparison_report")
-        or "Comparison summary unavailable."
-    )
-    comparison_text_pretty = _build_discrepancy_summary(api_result)
-    enhanced_path = api_result.get("enhanced_image_path")
-
-    return {
-        "meta": {
-            "file_name": file_name,
-            "generated_at": datetime.now().strftime("%b %d, %I:%M %p"),
-            "study": f"Uploaded Study | {file_name}",
-            "study_id": f"CASE-{api_result.get('case_id', '-')}",
-            "timestamp": datetime.now().strftime("%b %d, %Y %I:%M %p").upper(),
-        },
-        "ai_findings": findings,
-        "report": {
-            "raw_text": report_text,
-            "highlighted_html": f"<p>{escaped}</p>",
-        },
-        "comparison": {
-            "risk_level": vr.get("risk_level", "unknown"),
-            "agreement_rate": float(vr.get("agreement_rate", 0.0)),
-            "discrepancy_counts": vr.get("discrepancy_counts", {}),
-            "comparison_report_text": comparison_text_pretty,
-            "comparison_report_text_raw": comparison_text_raw,
-        },
-        "enhanced_image_bytes": _resolve_enhanced_image_bytes(enhanced_path),
-        "enhanced_image_path": enhanced_path,
-        "raw_api_result": api_result,
-    }
-
-
-def verify_backend(file_name: str, image_bytes: bytes, report_text: str, enhance: bool = True) -> Dict[str, Any]:
-    files = {"scan": (file_name, image_bytes, "application/octet-stream")}
-    data = {"report": report_text, "enhance": str(enhance).lower()}
-    resp = requests.post(
-        _backend_url("/verify"),
-        headers=_backend_headers(),
-        files=files,
-        data=data,
-        timeout=240,
-    )
-    if resp.status_code != 200:
-        try:
-            detail = resp.json()
-        except Exception:
-            detail = resp.text
-        raise RuntimeError(f"/verify failed: {resp.status_code} {detail}")
-    return normalize_backend_result(resp.json(), file_name, report_text)
 
 
 def inject_css() -> None:
@@ -341,29 +43,15 @@ def inject_css() -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
-        :root {
-          --bg: #f3f5f8;
-          --panel: #ffffff;
-          --panel-2: #fcfcfd;
-          --text: #111827;
-          --muted: #657586;
-          --border: #d9e0e8;
-          --primary: #1f66ad;
-          --primary-2: #245f9d;
-          --shadow: 0 18px 40px rgba(17, 24, 39, 0.08);
-          --shadow-sm: 0 10px 24px rgba(17, 24, 39, 0.06);
-        }
-
-        .stApp { background: var(--bg); color: var(--text); font-family:'Manrope',sans-serif; }
+        .stApp { background:#f3f5f8; color:#111827; font-family:'Manrope',sans-serif; }
         h1,h2,h3,h4 { font-family:'Lexend',sans-serif; letter-spacing:-0.02em; }
-        a { color: inherit; }
 
         #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { display:none !important; }
         header[data-testid="stHeader"] { background:transparent !important; border:none !important; box-shadow:none !important; }
-        [data-testid="stAppViewContainer"] { background: var(--bg); }
+        [data-testid="stAppViewContainer"] { background:#f3f5f8; }
         [data-testid="stMainBlockContainer"] { padding-top:1.2rem; max-width:1400px; }
 
-        [data-testid="stSidebar"] { background: var(--panel); border-right:1px solid var(--border); min-width:278px; max-width:278px; }
+        [data-testid="stSidebar"] { background:#ffffff; border-right:1px solid #d9e0e8; min-width:278px; max-width:278px; }
         section[data-testid="stSidebar"] {
           transform: none !important;
           visibility: visible !important;
@@ -403,7 +91,7 @@ def inject_css() -> None:
         }
 
         .logo-wrap { display:flex; align-items:center; gap:12px; margin:6px 0 14px 2px; }
-        .logo-box { width:40px; height:40px; border-radius:12px; background: var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; box-shadow: 0 10px 24px rgba(31,102,173,0.25); }
+        .logo-box { width:40px; height:40px; border-radius:10px; background:#1f66ad; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; }
         .sidebar-card {
           margin-top:10px;
           border:1px solid #d9e3ee;
@@ -420,14 +108,12 @@ def inject_css() -> None:
         }
 
         .top-shell {
-          background: rgba(255,255,255,0.90);
-          border:1px solid rgba(217,224,232,0.9);
-          border-radius:16px;
-          padding:12px 18px;
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:0;
+          padding:10px 18px;
           margin-left:-0.5rem;
           margin-right:-0.5rem;
-          box-shadow: var(--shadow-sm);
-          backdrop-filter: blur(10px);
         }
         .hero-title { font-size:3.7rem; font-weight:800; line-height:1.06; letter-spacing:-0.03em; margin-top:.15rem; }
         .subtle { color:#657586; }
@@ -452,39 +138,58 @@ def inject_css() -> None:
 
         .stButton > button { border-radius:10px !important; font-weight:700 !important; }
         [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="primary"] {
-          background: var(--primary) !important;
-          border:1px solid var(--primary) !important;
+          background:#2b6eb6 !important;
+          border:1px solid #2b6eb6 !important;
           color:#fff !important;
-          box-shadow: 0 12px 24px rgba(31,102,173,0.20);
         }
         [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="primary"]:hover {
-          background: var(--primary-2) !important;
-          border-color: var(--primary-2) !important;
-        }
-
-        [data-testid="stVerticalBlock"]:not([data-testid="stSidebar"]) .stButton > button[kind="secondary"] {
-          border-radius: 12px !important;
-          border: 1px solid rgba(217,224,232,0.9) !important;
-          background: rgba(255,255,255,0.92) !important;
-          box-shadow: 0 10px 20px rgba(17,24,39,0.05);
+          background:#245f9d !important;
+          border-color:#245f9d !important;
         }
 
         [data-testid="stTextArea"] textarea {
           min-height:300px !important;
-          border-radius:14px !important;
-          border:1px solid rgba(217,224,232,0.95) !important;
-          box-shadow: 0 10px 20px rgba(17,24,39,0.04) !important;
+          border-radius:12px !important;
+          border:1px solid #dce0e5 !important;
+          box-shadow:none !important;
           background:#fff !important;
           color:#121417 !important;
           font-size:1.05rem !important;
         }
+        [data-testid="stTextInput"] input {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+          box-shadow:none !important;
+          padding:10px 12px !important;
+        }
+        [data-testid="stSelectbox"] div[role="combobox"] {
+          border-radius:12px !important;
+          border:1px solid #cbd5e1 !important;
+          background:#f8fafc !important;
+          color:#0f172a !important;
+        }
+        [data-testid="stSelectbox"] svg {
+          color:#475569 !important;
+        }
 
         [data-testid="stFileUploaderDropzone"] {
-          border:1px solid rgba(202,216,231,0.95) !important;
-          border-radius:14px !important;
+          border:1px solid #cad8e7 !important;
+          border-radius:12px !important;
           background:#eef3f8 !important;
           min-height:320px;
-          box-shadow: 0 14px 30px rgba(17,24,39,0.06);
+        }
+        [data-testid="stFileUploaderDropzone"] * {
+          color:#607086 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] svg {
+          color:#7a8aa0 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] small,
+        [data-testid="stFileUploaderDropzone"] p,
+        [data-testid="stFileUploaderDropzone"] span {
+          color:#607086 !important;
         }
         [data-testid="stFileUploaderDropzone"] button {
           background:#1f66ad !important;
@@ -492,47 +197,123 @@ def inject_css() -> None:
           border:1px solid #1f66ad !important;
           border-radius:10px !important;
         }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] ul {
+          padding-left:0 !important;
+          margin:6px 0 0 0 !important;
+          display:inline-flex !important;
+          flex-direction:column !important;
+          gap:6px !important;
+        }
+        [data-testid="stFileUploader"] li {
+          list-style:none !important;
+          width: fit-content !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] li > div {
+          width: fit-content !important;
+          max-width:100% !important;
+          display:inline-flex !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] div,
+        [data-testid="stFileUploader"] [data-testid="stUploadedFile"] span {
+          width:auto !important;
+          max-width:100% !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] {
+          color:#1f66ad !important;
+          font-weight:600 !important;
+          font-size:0.95rem !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderFileSize"] {
+          display:none !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"] {
+          color:#64748b !important;
+          border-radius:999px !important;
+          padding:2px !important;
+        }
+        [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"]:hover {
+          color:#ef4444 !important;
+          background:#fee2e2 !important;
+        }
+        [data-testid="stFileUploader"] svg {
+          color:#1f66ad !important;
+          width:18px !important;
+          height:18px !important;
+        }
+
+        .selected-pill {
+          margin-top:8px;
+          padding:10px 14px;
+          border-radius:12px;
+          background:#e6f4ff;
+          border:1px solid #b9d8f5;
+          color:#1f66ad;
+          font-weight:700;
+        }
+        .selected-inline { display:none !important; }
         .table-shell {
           margin-top:8px;
-          border:1px solid rgba(217,224,232,0.9);
-          border-radius:16px;
+          border:1px solid #dce3ea;
+          border-radius:12px;
           background:#fff;
           padding:12px;
-          box-shadow: var(--shadow-sm);
         }
-
-        .metric-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
-        .metric {
-          border: 1px solid rgba(217,224,232,0.9);
-          border-radius: 16px;
-          background: rgba(255,255,255,0.95);
-          padding: 14px;
-          box-shadow: var(--shadow-sm);
+        .history-wrap {
+          border:1px solid #dce3ea;
+          border-radius:12px;
+          overflow:hidden;
+          background:#fff;
         }
-        .metric-label { font-size: 0.82rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #6d7f93; }
-        .metric-value { font-family: Lexend,sans-serif; font-size: 2rem; font-weight: 900; margin-top: 6px; }
-        .metric-sub { margin-top: 4px; font-size: 0.92rem; color: var(--muted); }
-
-        @media (max-width: 980px) {
-          .metric-grid { grid-template-columns: 1fr; }
+        .history-table {
+          width:100%;
+          border-collapse:collapse;
+          font-size:0.95rem;
         }
-
-        .pill { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
-        .pill-ok { background:rgba(22,163,74,0.12); color:#15803d; border:1px solid rgba(22,163,74,0.22); }
-        .pill-warn { background:rgba(245,158,11,0.14); color:#b45309; border:1px solid rgba(245,158,11,0.26); }
-        .pill-bad { background:rgba(223,73,90,0.14); color:#b42318; border:1px solid rgba(223,73,90,0.26); }
+        .history-table th {
+          text-align:left;
+          font-weight:700;
+          color:#3a4a5a;
+          padding:10px 12px;
+          border-bottom:1px solid #e3e8ef;
+          background:#f7f9fc;
+        }
+        .history-table td {
+          padding:10px 12px;
+          border-bottom:1px solid #eef2f7;
+          color:#243043;
+        }
+        .history-table tbody tr:hover {
+          background:#f3f7fb;
+        }
+        .history-pill {
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:4px 10px;
+          border-radius:999px;
+          font-weight:700;
+          font-size:0.78rem;
+        }
+        .pill-low { background:#e8f7ee; color:#15803d; }
+        .pill-med { background:#fff7e6; color:#b45309; }
+        .pill-high { background:#fde8e8; color:#b91c1c; }
+        .pill-unk { background:#eef2f7; color:#475569; }
 
         .dark-shell {
-          background:#17191c;
+          background: linear-gradient(135deg, rgba(23,25,28,1) 0%, rgba(18,20,24,1) 100%);
           border:1px solid #24272b;
-          border-radius:14px;
+          border-radius:16px;
           overflow:hidden;
           box-shadow: 0 24px 48px rgba(2, 6, 23, 0.35);
         }
         .dark-bar {
-          background:#1e2124;
+          background: linear-gradient(90deg, rgba(29,33,38,1) 0%, rgba(24,27,31,1) 100%);
           border-bottom:1px solid #2a2e33;
-          padding:12px 14px;
+          padding:14px 18px;
           color:#e5e7eb;
           display:flex;
           justify-content:space-between;
@@ -540,33 +321,44 @@ def inject_css() -> None:
           gap:12px;
         }
         .dark-sub { color:#9ca3af; font-size:0.8rem; }
-        .dark-grid { display:grid; grid-template-columns: 1.32fr 0.92fr 1.12fr; min-height: 580px; max-height: 74vh; }
+        .dark-grid { display:grid; grid-template-columns: 1.32fr 0.92fr 1.12fr; min-height: 600px; max-height: 76vh; }
         .dark-panel { border-right:1px solid #2a2e33; }
         .dark-panel:last-child { border-right:none; }
-        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 16px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .dark-viewer { background: radial-gradient(circle at center, #2c2f33 0%, #17191c 100%); padding: 18px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
         .dark-viewer img { max-height: 66vh; object-fit: contain; border-radius: 10px; }
         .dark-findings { background:#1a1c1e; padding: 0; overflow-y:auto; }
         .dark-report { background:#1e2124; padding: 0; overflow-y:auto; }
-        .dark-head { position: sticky; top: 0; z-index: 4; padding: 12px 14px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; background:#1f2226; }
+        .dark-head { position: sticky; top: 0; z-index: 4; padding: 12px 16px; border-bottom:1px solid #2a2e33; display:flex; justify-content:space-between; align-items:center; background:#1f2226; }
         .dark-title { font-size:0.78rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#9ca3af; }
-        .finding-card { margin: 12px 14px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.45); background: rgba(15,23,42,0.72); border: 1px solid rgba(148,163,184,0.22); }
+        .finding-card { margin: 12px 16px; padding: 12px; border-radius:12px; border-left:4px solid rgba(148,163,184,0.45); background: rgba(15,23,42,0.72); border: 1px solid rgba(148,163,184,0.22); }
         .finding-card.active { border-left-color: rgba(20,143,184,1); box-shadow: 0 0 16px rgba(20,143,184,0.2); border-color: rgba(20,143,184,0.22); }
         .finding-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
         .finding-name { font-weight:800; color:#f8fafc; }
         .finding-conf { font-size:0.68rem; font-weight:800; color: rgba(20,143,184,1); background: rgba(20,143,184,0.15); border:1px solid rgba(20,143,184,0.2); padding: 3px 8px; border-radius: 999px; white-space:nowrap; }
-        .finding-text { margin-top: 8px; color:#cbd5e1; font-size:0.86rem; line-height:1.45; }
-        .report-body { padding: 14px; color:#dde6f3; font-size:1.02rem; line-height:1.62; }
-        .report-body p { margin: 0 0 0.8rem 0; }
-        .note-box { margin: 14px; padding: 14px; border-radius: 14px; background: rgba(77,23,33,0.58); border:1px solid rgba(223,73,90,0.34); }
-        .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#fb7185; }
-        .note-text { margin-top: 8px; color:#ffe4e8; }
-        .note-pre { margin-top: 8px; color:#ffe4e8; font-size:0.92rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; font-family:'Manrope',sans-serif; max-height: 36vh; overflow-y:auto; }
-
-        @media (max-width: 1500px) {
+        .finding-text { margin-top: 8px; color:#94a3b8; font-size:0.86rem; line-height:1.4; }
+        .report-body { padding: 16px; color:#e2e8f0; font-size:1.05rem; line-height:1.7; }
+        .note-box { margin: 14px 16px; padding: 14px; border-radius: 14px; background: #8b5a63; border:1px solid #a56a73; }
+        .note-title { font-size:0.74rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#ffe4e6; }
+        .note-text { margin-top: 8px; color:#f8fafc; }
+        .raw-report {
+          margin: 12px 16px 16px;
+          padding: 14px;
+          border-radius: 12px;
+          background: #101418;
+          border: 1px solid #2a2e33;
+          color: #f59e0b;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+          font-size: 0.9rem;
+          line-height: 1.55;
+          white-space: pre-wrap;
+        }
+        .analysis-wrap { margin-top: 8px; }
+        .agreement-row { text-align:right; padding:8px 16px 14px; color:#cbd5e1; }
+        @media (max-width: 1100px) {
           .dark-grid { grid-template-columns: 1fr; max-height:none; }
-          .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; min-height: 320px; }
+          .dark-panel { border-right:none; border-bottom:1px solid #2a2e33; }
           .dark-panel:last-child { border-bottom:none; }
-          .dark-viewer img { max-height: 54vh; }
+          .dark-viewer img { max-height: 52vh; }
         }
         </style>
         """,
@@ -574,17 +366,173 @@ def inject_css() -> None:
     )
 
 
-def status_pill_html(result: Optional[Dict[str, Any]]) -> str:
-    if not result:
-        return ""
-    counts = (result.get("comparison") or {}).get("discrepancy_counts") or {}
-    mism = int(counts.get("mismatches") or 0)
-    omis = int(counts.get("omissions") or 0) + int(counts.get("overstatements") or 0)
-    if mism > 0:
-        return "<span class='pill pill-bad'>Discrepancy</span>"
-    if omis > 0:
-        return "<span class='pill pill-warn'>Review Needed</span>"
-    return "<span class='pill pill-ok'>Match</span>"
+def api_headers() -> Dict[str, str]:
+    api_key = (st.session_state.get("settings") or {}).get("api_key") or API_KEY
+    return {"X-API-Key": str(api_key)}
+
+
+def call_verify(file_name: str, image_bytes: bytes, report_text: str) -> Dict[str, Any]:
+    files = {"scan": (file_name, image_bytes, "application/octet-stream")}
+    data = {"report": report_text, "enhance": "true"}
+    api_base = (st.session_state.get("settings") or {}).get("api_base") or API_BASE
+    timeout_s = int((st.session_state.get("settings") or {}).get("backend_timeout_sec") or 180)
+    resp = requests.post(f"{api_base}/verify", files=files, data=data, headers=api_headers(), timeout=timeout_s)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def fetch_history(limit: int = 10) -> List[Dict[str, Any]]:
+    api_base = (st.session_state.get("settings") or {}).get("api_base") or API_BASE
+    resp = requests.get(f"{api_base}/history", headers=api_headers(), params={"limit": limit}, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def mock_verify(file_name: str, report_text: str) -> Dict[str, Any]:
+    now = datetime.now()
+    base = {
+        "metadata": {
+            "study": f"Study: {file_name}",
+            "study_id": f"DEMO-{int(now.timestamp())}",
+            "timestamp": now.strftime("%b %d, %Y %H:%M"),
+        },
+        "doctor_findings": {"raw_text": report_text},
+        "ai_report_text": "AI report (demo):\n" + (report_text.strip() or "No doctor report provided."),
+        "enhanced_image_path": None,
+        "verification_results": {
+            "agreement_rate": 0.82,
+            "risk_level": "medium",
+            "discrepancy_counts": {"matches": 9, "omissions": 1, "mismatches": 2, "overstatements": 0},
+            "measurement_comparisons": {
+                "Cardiothoracic Ratio": {
+                    "status": "mismatch",
+                    "ai_value": 0.58,
+                    "doctor_value": "normal",
+                    "difference": "+0.08",
+                    "tolerance": "0.05",
+                    "severity": "moderate",
+                }
+            },
+            "structure_comparisons": {
+                "thorax": {
+                    "Pleural Effusion": {
+                        "status": "omission",
+                        "ai_present": True,
+                        "ai_confidence": 0.76,
+                        "doctor_mentioned": False,
+                        "doctor_negated": False,
+                        "severity": "low",
+                    }
+                }
+            },
+        },
+        "ai_findings": {
+            "structures_detected": {
+                "thorax": {
+                    "pleural_effusion": {"present": True, "confidence": 0.76},
+                    "cardiomegaly": {"present": True, "confidence": 0.81},
+                }
+            }
+        },
+    }
+    return base
+
+
+def safe_verify(file_name: str, image_bytes: bytes, report_text: str) -> Dict[str, Any]:
+    prefer_backend = bool((st.session_state.get("settings") or {}).get("prefer_backend", True))
+    if prefer_backend:
+        try:
+            return call_verify(file_name, image_bytes, report_text)
+        except Exception as exc:
+            st.session_state.last_error = f"Backend unavailable. Using demo results. Details: {exc}"
+            return mock_verify(file_name, report_text)
+    return mock_verify(file_name, report_text)
+
+
+def _resolve_image_bytes(path_value: Any) -> bytes | None:
+    if not path_value:
+        return None
+    try:
+        path = str(path_value)
+        if not path:
+            return None
+        file_path = Path(path)
+        if not file_path.is_absolute():
+            repo_root = Path(__file__).resolve().parents[1]
+            candidate = repo_root / file_path
+            if candidate.exists():
+                return candidate.read_bytes()
+            normalized = Path(str(path).replace("\\", "/"))
+            candidate = repo_root / normalized
+            if candidate.exists():
+                return candidate.read_bytes()
+        if file_path.exists():
+            return file_path.read_bytes()
+    except Exception:
+        return None
+    return None
+
+
+def _flatten_ai_findings(raw: Dict[str, Any]) -> List[Dict[str, Any]]:
+    findings: List[Dict[str, Any]] = []
+    structures = (raw.get("ai_findings") or {}).get("structures_detected") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            confidence = float(info.get("confidence") or 0.0)
+            present = info.get("present")
+            findings.append(
+                {
+                    "name": name.replace("_", " ").title(),
+                    "confidence": confidence,
+                    "rationale": f"Category: {group}. Present={present}.",
+                }
+            )
+    findings.sort(key=lambda item: item.get("confidence", 0.0), reverse=True)
+    return findings
+
+
+def _build_comparison_table(verification: Dict[str, Any]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    measurements = verification.get("measurement_comparisons") or {}
+    for name, info in measurements.items():
+        if not isinstance(info, dict):
+            continue
+        rows.append(
+            {
+                "type": "measurement",
+                "name": name,
+                "status": info.get("status"),
+                "ai_value": info.get("ai_value"),
+                "doctor_value": info.get("doctor_value"),
+                "difference": info.get("difference"),
+                "tolerance": info.get("tolerance"),
+                "severity": info.get("severity"),
+            }
+        )
+    structures = verification.get("structure_comparisons") or {}
+    for group, entries in structures.items():
+        if not isinstance(entries, dict):
+            continue
+        for name, info in entries.items():
+            if not isinstance(info, dict):
+                continue
+            rows.append(
+                {
+                    "type": f"structure:{group}",
+                    "name": name,
+                    "status": info.get("status"),
+                    "ai_present": info.get("ai_present"),
+                    "ai_confidence": info.get("ai_confidence"),
+                    "doctor_mentioned": info.get("doctor_mentioned"),
+                    "doctor_negated": info.get("doctor_negated"),
+                    "severity": info.get("severity"),
+                }
+            )
+    return rows
 
 
 def render_sidebar() -> None:
@@ -616,22 +564,26 @@ def render_sidebar() -> None:
             ("Final Export", "Final Export"),
             ("History & Archive", "History & Archive"),
             ("Help Center", "Help Center"),
+            ("Comparative Analytics", "Comparative Analytics"),
+            ("Settings", "Settings"),
         ]
         for label, page in nav_items:
             is_active = st.session_state.active_page == page
-            if st.button(label, use_container_width=True, key=f"nav_{page}", type="primary" if is_active else "secondary"):
+            if st.button(label, width="stretch", key=f"nav_{page}", type="primary" if is_active else "secondary"):
                 st.session_state.active_page = page
                 st.rerun()
 
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-        st.session_state.backend_url = st.text_input("Backend URL", value=st.session_state.backend_url)
-        st.session_state.backend_api_key = st.text_input("API Key", value=st.session_state.backend_api_key, type="password")
-        connected, status_msg = backend_health_check()
-        st.session_state.backend_connected = connected
-        mode_title = "BACKEND MODE" if connected else "DEMO FALLBACK"
-        mode_sub = status_msg if connected else f"{status_msg} - using mock data"
-        st.markdown(f"<div class='sidebar-card'><div class='api-title'>{mode_title}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='subtle' style='font-size:0.88rem;'>{mode_sub}</div>", unsafe_allow_html=True)
+        st.markdown("<div class='sidebar-card'><div class='api-title'>API STATUS</div>", unsafe_allow_html=True)
+        try:
+            api_base = (st.session_state.get("settings") or {}).get("api_base") or API_BASE
+            h = requests.get(f"{api_base}/health", timeout=5)
+            if h.ok:
+                st.markdown("<span class='status-ok'>Online (FastAPI connected)</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span class='status-bad'>Unavailable</span>", unsafe_allow_html=True)
+        except Exception:
+            st.markdown("<span class='status-bad'>Unavailable</span>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown(
             """
@@ -650,76 +602,29 @@ def render_sidebar() -> None:
 def top_header() -> None:
     c1, c2 = st.columns([6, 1.6])
     with c1:
-        pill = status_pill_html(st.session_state.last_result)
-        page = st.session_state.active_page
-        meta = PAGES.get(page, {"title": page, "sub": ""})
         st.markdown(
             f"""
             <div class="top-shell">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                  <div>
-                    <div style="font-size:2.15rem;font-weight:800;line-height:1;">{meta.get('title','')}</div>
-                    <div class="small-kicker">{meta.get('sub','')}</div>
-                  </div>
-                  <div>{pill}</div>
-                </div>
+                <div style="font-size:2.15rem;font-weight:800;line-height:1;">Upload Portal</div>
+                <div class="small-kicker">Clinical input and processing</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with c2:
-        if st.button("+ New Analysis", type="primary", use_container_width=True):
+        if st.button("+ New Analysis", type="primary", width="stretch"):
             st.session_state.image_bytes = None
             st.session_state.image_name = ""
             st.session_state.report_text = ""
             st.session_state.last_result = None
             st.session_state.last_error = ""
+            st.session_state.resolution = {}
             st.rerun()
 
 
 def render_dashboard() -> None:
-    if st.session_state.backend_connected:
-        try:
-            st.session_state.history_cache = fetch_history_backend(limit=20)
-        except Exception as exc:
-            st.session_state.last_error = str(exc)
-
-    st.markdown(
-        """
-        <div style="max-width: 980px;">
-          <div class='panel-label'>Verify New Medical Scans</div>
-          <p class='small-kicker'>Pair medical imagery with human-written reports for high-precision cross-validation.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    history = st.session_state.history_cache
-    total = len(history)
-    high = sum(1 for h in history if str(h.get("risk", "")).upper() == "HIGH")
-    low = sum(1 for h in history if str(h.get("risk", "")).upper() == "LOW")
-    st.markdown(
-        f"""
-        <div class='metric-grid'>
-          <div class='metric'>
-            <div class='metric-label'>Total Scans</div>
-            <div class='metric-value'>{total}</div>
-            <div class='metric-sub'>Demo audit archive</div>
-          </div>
-          <div class='metric'>
-            <div class='metric-label'>High Risk</div>
-            <div class='metric-value' style='color:#b42318;'>{high}</div>
-            <div class='metric-sub'>Priority review cases</div>
-          </div>
-          <div class='metric'>
-            <div class='metric-label'>Low Risk</div>
-            <div class='metric-value' style='color:#15803d;'>{low}</div>
-            <div class='metric-sub'>Low discrepancy probability</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='panel-label'>Verify New Medical Scans</div>", unsafe_allow_html=True)
+    st.markdown("<p class='small-kicker'>Pair medical imagery with human-written reports for high-precision cross-validation.</p>", unsafe_allow_html=True)
     st.write("")
 
     left, right = st.columns(2, gap="large")
@@ -734,7 +639,7 @@ def render_dashboard() -> None:
         if file is not None:
             st.session_state.image_bytes = file.getvalue()
             st.session_state.image_name = file.name
-            st.success(f"Selected: {file.name}")
+            # no extra pill display
 
     with right:
         st.markdown("### 2. Human-Written Radiology Report")
@@ -751,37 +656,17 @@ def render_dashboard() -> None:
         st.markdown("<div class='action-bar'>Ensure all patient identifiers are redacted if required by local policy.</div>", unsafe_allow_html=True)
     with c2:
         can_run = bool(st.session_state.image_bytes) and bool(st.session_state.report_text.strip())
-        if st.button("Start AI Analysis", type="primary", use_container_width=True, disabled=not can_run):
+        if st.button("Start AI Analysis", type="primary", width="stretch", disabled=not can_run):
             st.session_state.last_error = ""
             with st.spinner("Running AI verification..."):
                 try:
-                    if st.session_state.backend_connected:
-                        result = verify_backend(
-                            st.session_state.image_name,
-                            st.session_state.image_bytes,
-                            st.session_state.report_text.strip(),
-                            enhance=True,
-                        )
-                    else:
-                        result = mock_verify(st.session_state.image_name, st.session_state.report_text.strip())
+                    result = safe_verify(
+                        st.session_state.image_name,
+                        st.session_state.image_bytes,
+                        st.session_state.report_text.strip(),
+                    )
                     st.session_state.last_result = result
                     st.session_state.active_page = "Analysis Workspace"
-
-                    if st.session_state.backend_connected:
-                        st.session_state.history_cache = fetch_history_backend(limit=20)
-                    else:
-                        st.session_state.history_cache = [
-                            {
-                                "id": result.get("meta", {}).get("study_id", "CASE") + "-DEMO",
-                                "scan_type": st.session_state.image_name or "Uploaded Scan",
-                                "patient_id": "PAT-DEMO",
-                                "created_at": datetime.now().strftime("%b %d, %I:%M %p"),
-                                "verification_status": "Discrepancy Found",
-                                "risk": str((result.get("comparison") or {}).get("risk_level") or "-").upper(),
-                            },
-                            *st.session_state.history_cache,
-                        ]
-
                     st.rerun()
                 except Exception as exc:
                     st.session_state.last_error = str(exc)
@@ -790,25 +675,6 @@ def render_dashboard() -> None:
         st.error(st.session_state.last_error)
 
     st.write("")
-    h1, h2 = st.columns([4, 1])
-    with h1:
-        st.markdown("### Recent Activity")
-    with h2:
-        st.markdown("<div style='text-align:right;color:#1f66ad;font-weight:700;margin-top:8px;'>View Full History</div>", unsafe_allow_html=True)
-    history = st.session_state.history_cache
-    rows = []
-    for item in history:
-        rows.append(
-            {
-                "Scan ID / Type": f"#{item.get('id', '-') } - {item.get('scan_type','-')}",
-                "Patient Ref": item.get("patient_id", "-"),
-                "Timestamp": item.get("created_at", "-"),
-                "Verification Status": item.get("verification_status", "-"),
-            }
-        )
-    st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-    st.dataframe(rows, use_container_width=True, hide_index=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_analysis() -> None:
@@ -816,18 +682,19 @@ def render_analysis() -> None:
     if not result:
         st.info("Run analysis from Dashboard first.")
         return
+    meta = result.get("metadata") or result.get("meta") or {}
+    verification = result.get("verification_results") or {}
+    counts = verification.get("discrepancy_counts") or {}
+    ai_findings = _flatten_ai_findings(result)
 
-    meta = result.get("meta") or {}
-    cmp = result.get("comparison") or {}
-    counts = cmp.get("discrepancy_counts") or {}
-
+    st.markdown("<div class='analysis-wrap'>", unsafe_allow_html=True)
     st.markdown(
         f"""
         <div class='dark-shell'>
           <div class='dark-bar'>
             <div>
-              <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','')}</div>
-              <div class='dark-sub'>STUDY ID: {meta.get('study_id','')} - {meta.get('timestamp','')} - <span style='color:rgba(20,143,184,1)'>STAT</span></div>
+              <div style='font-weight:800;font-size:1.05rem;'>{meta.get('study','Uploaded Study')}</div>
+              <div class='dark-sub'>STUDY ID: {meta.get('study_id','CASE')} · {meta.get('timestamp','')} · <span style='color:rgba(20,143,184,1)'>STAT</span></div>
             </div>
             <div style='display:flex;gap:8px;flex-wrap:wrap;'>
               <span style='padding:6px 10px;border-radius:999px;background:rgba(223,73,90,0.14);border:1px solid rgba(223,73,90,0.25);color:#fb7185;font-weight:800;font-size:0.75rem;'>Mismatch {int(counts.get('mismatches') or 0)}</span>
@@ -842,16 +709,20 @@ def render_analysis() -> None:
 
     with col1:
         st.markdown("<div class='dark-panel dark-viewer'>", unsafe_allow_html=True)
-        enhanced_bytes = result.get("enhanced_image_bytes")
-        if enhanced_bytes:
-            st.image(enhanced_bytes, use_container_width=True, caption="Enhanced scan")
-        elif st.session_state.image_bytes:
-            st.image(st.session_state.image_bytes, use_container_width=True, caption="Original scan")
-        else:
-            st.image(
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuD57tZCNaKTyMhcARHi_e-_h-n7kbEwkDiu0bPOhG77MnZk9-Grvq1m0lT1ibcLZrbmk84D_B0As5R3nMwHzzNmBNqB40E0o9u_T49Cjw2KN9nPWd2dBribnY_2lgYQsbde1AKX4Y8NnbtkxyGjc997jLmqBRPTBz7TiVNZIuyjmnY2Le6GUrz5UVhDi_a-pN8lc9vGjkcEsJIONcykPB4qNQF1zdKqQ2UVYPH2WRgXlHtrx0lAe9o0sUJ3AcKDswdk7rd-07p_FxI",
-                use_container_width=True,
-            )
+        enhanced_bytes = _resolve_image_bytes(result.get("enhanced_image_path"))
+        original_bytes = st.session_state.image_bytes
+        if enhanced_bytes or original_bytes:
+            tabs = st.tabs(["Enhanced", "Original"])
+            with tabs[0]:
+                if enhanced_bytes:
+                    st.image(enhanced_bytes, width="stretch", caption="Enhanced scan")
+                else:
+                    st.info("Enhanced image not available.")
+            with tabs[1]:
+                if original_bytes:
+                    st.image(original_bytes, width="stretch", caption="Original scan")
+                else:
+                    st.info("Original image not available.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
@@ -859,9 +730,8 @@ def render_analysis() -> None:
             "<div class='dark-panel dark-findings'><div class='dark-head'><div class='dark-title'>AI Findings</div><div style='font-size:0.72rem;color:#9ca3af;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.15);padding:2px 8px;border-radius:999px;'>v2.4.1</div></div>",
             unsafe_allow_html=True,
         )
-
         cards_html = ""
-        for idx, f in enumerate(result.get("ai_findings") or []):
+        for idx, f in enumerate(ai_findings):
             active = "active" if idx == 0 else ""
             cards_html += (
                 f"<div class='finding-card {active}'>"
@@ -872,101 +742,135 @@ def render_analysis() -> None:
         st.markdown(cards_html + "</div>", unsafe_allow_html=True)
 
     with col3:
-        report_html = (result.get("report") or {}).get("highlighted_html") or ""
-        if not report_html:
-            report_html = f"<p>{html.escape((result.get('report') or {}).get('raw_text', ''))}</p>"
-        cmp_text = cmp.get("comparison_report_text", "")
-        cmp_html = f"<pre class='note-pre'>{html.escape(str(cmp_text))}</pre>"
         st.markdown(
-            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Human Authored Report</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
+            "<div class='dark-panel dark-report'><div class='dark-head'><div class='dark-title'>Report Views</div><div style='display:flex;gap:6px;'><div style='width:10px;height:10px;border-radius:999px;background:#DF495A;'></div><div style='width:10px;height:10px;border-radius:999px;background:#f59e0b;'></div></div></div>",
             unsafe_allow_html=True,
         )
-        st.markdown("<div class='report-body'>", unsafe_allow_html=True)
-        st.markdown(report_html, unsafe_allow_html=True)
-        st.markdown(
-            f"""
-            <div class='note-box'>
-              <div class='note-title'>Discrepancy Detail</div>
-              <div class='note-text'>Clean comparison summary:</div>
-              {cmp_html}
-            </div>
-            """ + "</div></div>",
-            unsafe_allow_html=True,
-        )
-        raw_cmp = cmp.get("comparison_report_text_raw")
-        if raw_cmp and raw_cmp != cmp_text:
-            with st.expander("Show raw backend comparison text"):
-                st.code(str(raw_cmp))
+        tabs = st.tabs(["Doctor Report", "AI Generated Report"])
 
-    b1, b2, b3 = st.columns([1.2, 1.2, 1.6])
-    with b1:
-        if st.button("Open Resolution Workspace", type="secondary", use_container_width=True):
-            st.session_state.active_page = "Discrepancy Resolution"
-            st.rerun()
-    with b2:
-        if st.button("Proceed to Export", type="secondary", use_container_width=True):
-            st.session_state.active_page = "Final Export"
-            st.rerun()
-    with b3:
-        st.markdown(
-            f"<div class='subtle' style='text-align:right;padding-top:10px;'>Agreement: {int(float(cmp.get('agreement_rate',0)) * 100)}% - Risk: <b>{str(cmp.get('risk_level','-')).upper()}</b></div>",
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def render_history() -> None:
-    st.markdown("## History & Archive")
-    if st.session_state.backend_connected:
-        try:
-            st.session_state.history_cache = fetch_history_backend(limit=50)
-        except Exception as exc:
-            st.error(str(exc))
-    history = st.session_state.history_cache
-    st.dataframe(history, use_container_width=True, hide_index=True)
-
-
-def render_help_center() -> None:
-    st.markdown(
-        """
-        <div style="text-align:center; padding: 30px; border-radius: 18px; background: radial-gradient(1200px 420px at 20% 0%, rgba(255,255,255,0.24), rgba(255,255,255,0) 60%), linear-gradient(135deg, rgba(31,102,173,1), rgba(26,67,110,1)); color: white; box-shadow: 0 20px 50px rgba(13, 42, 70, 0.25);">
-          <h1 style="margin:0; font-family:Lexend,sans-serif; font-weight:900; font-size:2.2rem; letter-spacing:-0.02em;">How can we help you today?</h1>
-          <div style="opacity:0.92; margin-top: 10px; font-size:1.02rem;">Search documentation, workflows, and common actions.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.write("")
-    q = st.text_input("Search docs", placeholder="Search docs...", label_visibility="collapsed")
-
-    cards = [
-        ("Getting Started", "Upload scan + report, run analysis, resolve discrepancies, export bundle."),
-        ("Analysis Workspace", "Understand confidence, overlays, and the discrepancy summary."),
-        ("Resolution Workflow", "Accept AI, dismiss false positives, or modify findings before export."),
-        ("Export & Audit", "Download compliance bundle and trace changes across sessions."),
-    ]
-
-    if q:
-        ql = q.lower()
-        cards = [c for c in cards if ql in c[0].lower() or ql in c[1].lower()]
-
-    cols = st.columns(2, gap="large")
-    for i, (title, desc) in enumerate(cards):
-        with cols[i % 2]:
+        with tabs[0]:
+            report_text = (result.get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
+            report_html = "<br>".join((report_text or "").splitlines())
+            st.markdown("<div class='report-body'>", unsafe_allow_html=True)
+            st.markdown(report_html, unsafe_allow_html=True)
+            counts = verification.get("discrepancy_counts") or {}
+            risk_level = str(verification.get("risk_level") or "-").upper()
+            agreement = verification.get("agreement_rate")
+            agreement_pct = int(float(agreement or 0) * 100)
+            measurement_lines = []
+            for name, info in (verification.get("measurement_comparisons") or {}).items():
+                if not isinstance(info, dict):
+                    continue
+                measurement_lines.append(
+                    f"{name}: {str(info.get('status','-')).upper()} (AI={info.get('ai_value')}, Doctor={info.get('doctor_value')}, diff={info.get('difference')}, tol={info.get('tolerance')})"
+                )
+            if not measurement_lines:
+                measurement_lines.append("No measurement discrepancies.")
+            bullets = "".join([f"<li>{line}</li>" for line in measurement_lines])
             st.markdown(
                 f"""
-                <div class='table-shell'>
-                  <div style='display:flex;align-items:center;justify-content:space-between;gap:10px;'>
-                    <div style='font-family:Lexend,sans-serif;font-weight:900;font-size:1.12rem;margin-bottom:6px;'>{title}</div>
-                    <div style='width:10px;height:10px;border-radius:999px;background:rgba(31,102,173,0.35);'></div>
+                <div class='note-box'>
+                  <div class='note-title'>Discrepancy Detail</div>
+                  <div class='note-text'>
+                    Clean comparison summary:<br/>
+                    Risk Level: <b>{risk_level}</b> &nbsp; Agreement: <b>{agreement_pct}%</b><br/>
+                    Counts: matches={counts.get('matches',0)}, omissions={counts.get('omissions',0)}, mismatches={counts.get('mismatches',0)}, overstatements={counts.get('overstatements',0)}<br/>
+                    Measurement Comparison:
+                    <ul style='margin:8px 0 0 18px; padding:0;'>{bullets}</ul>
                   </div>
-                  <div class='subtle' style='font-size:0.98rem;line-height:1.5;'>{desc}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+
+        with tabs[1]:
+            ai_report = result.get("ai_report_text") or ""
+            if ai_report:
+                parts = [p for p in ai_report.splitlines() if p.strip()]
+                preview = "\n".join(parts[:20])
+                st.markdown("<div class='raw-report'>", unsafe_allow_html=True)
+                st.markdown(preview, unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+                with st.expander("View full AI report"):
+                    st.markdown(
+                        f"<div class='raw-report' style='margin:0;'>{ai_report}</div>",
+                        unsafe_allow_html=True,
+                    )
+            else:
+                st.info("AI report not available for this case.")
+
+        with st.expander("View full JSON report"):
+            st.json(result)
+
+        agreement = verification.get("agreement_rate")
+        risk = verification.get("risk_level")
+        if agreement is not None or risk:
+            st.markdown(
+                f"<div class='agreement-row'>Agreement: {int(float(agreement or 0) * 100)}% · Risk: <b>{str(risk or '-').upper()}</b></div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+
+def render_history() -> None:
+    st.markdown("## History & Archive")
+    st.markdown("<p class='small-kicker'>Review and export prior verification cases.</p>", unsafe_allow_html=True)
+    st.write("")
+    try:
+        history = fetch_history(limit=50)
+        st.session_state.history_cache = history
+        rows = []
+        for item in history:
+            risk = str((item.get("verification_results") or {}).get("risk_level", "-")).upper()
+            if risk == "LOW":
+                risk_class = "pill-low"
+            elif risk == "MEDIUM":
+                risk_class = "pill-med"
+            elif risk == "HIGH":
+                risk_class = "pill-high"
+            else:
+                risk_class = "pill-unk"
+            rows.append(
+                {
+                    "case_id": item.get("id") or item.get("case_id") or "-",
+                    "patient": item.get("patient_id", "-"),
+                    "risk": f"<span class='history-pill {risk_class}'>{risk}</span>",
+                    "created": item.get("created_at", "-"),
+                    "status": item.get("status") or item.get("stage") or "-",
+                }
+            )
+        table_rows = "".join(
+            [
+                f"<tr><td>{r['case_id']}</td><td>{r['patient']}</td><td>{r['risk']}</td><td>{r['created']}</td><td>{r['status']}</td></tr>"
+                for r in rows
+            ]
+        )
+        st.markdown(
+            f"""
+            <div class='history-wrap'>
+              <table class='history-table'>
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Patient Ref</th>
+                    <th>Risk</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {table_rows}
+                </tbody>
+              </table>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    except Exception as exc:
+        st.warning(f"Could not load history: {exc}")
 
 
 def render_discrepancy_resolution() -> None:
@@ -975,44 +879,69 @@ def render_discrepancy_resolution() -> None:
         st.info("Run analysis from Dashboard first.")
         return
 
-    st.markdown("## Discrepancy Resolution")
-    st.markdown("<p class='subtle'>Resolve each discrepancy before final export.</p>", unsafe_allow_html=True)
+    verification = result.get("verification_results") or {}
+    rows = _build_comparison_table(verification)
+    items = [r for r in rows if str(r.get("status") or "").lower() in {"mismatch", "omission", "overstatement"}]
 
-    items = [f for f in (result.get("ai_findings") or []) if f.get("status") in {"mismatch", "omission"}]
+    st.markdown("## Discrepancy Resolution")
+    st.markdown("<p class='small-kicker'>Accept, dismiss, or modify AI discrepancies before export.</p>", unsafe_allow_html=True)
     if not items:
-        st.success("No active discrepancies.")
+        st.success("No discrepancies detected for this case.")
         return
 
     st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
     for idx, item in enumerate(items):
-        c1, c2, c3, c4 = st.columns([2.2, 1.2, 1.1, 1.8])
+        name = str(item.get("name") or "-")
+        status = str(item.get("status") or "-").upper()
+        kind = str(item.get("type") or "-")
+        key = f"res_{idx}_{kind}_{name}"
+        stored = st.session_state.resolution.get(key) or {}
+        current = stored.get("action") or "Accept AI"
+
+        c1, c2, c3, c4 = st.columns([2.4, 1.3, 1.0, 1.8])
         with c1:
-            st.markdown(f"<b>{item.get('name','')}</b>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-weight:800;'>{name}</div><div class='subtle' style='font-size:0.88rem;'>{kind}</div>", unsafe_allow_html=True)
         with c2:
-            st.markdown("<span class='subtle'>Category</span>", unsafe_allow_html=True)
+            st.markdown("<div class='subtle' style='font-size:0.8rem;'>Status</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-weight:800;'>{status}</div>", unsafe_allow_html=True)
         with c3:
-            st.markdown(f"<span class='subtle'>{str(item.get('status','')).upper()}</span>", unsafe_allow_html=True)
+            sev = str(item.get("severity") or "-").upper()
+            st.markdown("<div class='subtle' style='font-size:0.8rem;'>Severity</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-weight:800;'>{sev}</div>", unsafe_allow_html=True)
         with c4:
-            key = f"res_{idx}_{item.get('name','')}"
-            current = st.session_state.resolution.get(key, "Accept AI")
             choice = st.selectbox(
                 "Resolution",
                 ["Accept AI", "Dismiss", "Modify"],
                 index=["Accept AI", "Dismiss", "Modify"].index(current),
-                key=key,
+                key=f"{key}_action",
                 label_visibility="collapsed",
             )
-            st.session_state.resolution[key] = choice
+            payload: Dict[str, Any] = {
+                "action": choice,
+                "name": name,
+                "type": kind,
+                "status": str(item.get("status") or ""),
+            }
+            if choice == "Modify":
+                payload["modified_text"] = st.text_input(
+                    "Modified text",
+                    value=str(stored.get("modified_text") or ""),
+                    key=f"{key}_modified",
+                    label_visibility="collapsed",
+                    placeholder="Type your corrected statement...",
+                )
+            st.session_state.resolution[key] = payload
+
         st.divider()
     st.markdown("</div>", unsafe_allow_html=True)
 
     b1, b2 = st.columns([1, 1])
     with b1:
-        if st.button("Back to Analysis", type="secondary", use_container_width=True):
+        if st.button("Back to Analysis", type="secondary", width="stretch"):
             st.session_state.active_page = "Analysis Workspace"
             st.rerun()
     with b2:
-        if st.button("Save & Continue Export", type="primary", use_container_width=True):
+        if st.button("Save & Continue Export", type="primary", width="stretch"):
             st.session_state.active_page = "Final Export"
             st.rerun()
 
@@ -1024,36 +953,584 @@ def render_final_export() -> None:
         return
 
     st.markdown("## Final Export")
-    st.markdown("<p class='subtle'>Generated document preview for archive and compliance (demo).</p>", unsafe_allow_html=True)
+    st.markdown("<p class='small-kicker'>Download a bundle containing the scan metadata, doctor report, AI report, and your resolutions.</p>", unsafe_allow_html=True)
 
-    cfg = st.session_state.export_config
-    c1, c2 = st.columns([1.2, 1])
+    cfg = st.session_state.export_config or {}
+    c1, c2 = st.columns([1.2, 1.0], gap="large")
     with c1:
         st.markdown("### Export Options")
-        cfg["heatmap"] = st.checkbox("Include heatmap overlay", value=bool(cfg.get("heatmap")))
-        cfg["summary"] = st.checkbox("Include AI summary", value=bool(cfg.get("summary")))
-        cfg["narrative"] = st.checkbox("Include narrative", value=bool(cfg.get("narrative")))
-        cfg["discrepancy"] = st.checkbox("Include discrepancy log", value=bool(cfg.get("discrepancy")))
+        cfg["include_raw"] = st.checkbox("Include raw backend JSON", value=bool(cfg.get("include_raw", True)))
+        cfg["include_tables"] = st.checkbox("Include discrepancy tables", value=bool(cfg.get("include_tables", True)))
+        cfg["include_resolution"] = st.checkbox("Include discrepancy resolutions", value=bool(cfg.get("include_resolution", True)))
         st.session_state.export_config = cfg
 
+        verification = result.get("verification_results") or {}
+        counts = verification.get("discrepancy_counts") or {}
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.metric("Mismatch", int(counts.get("mismatches") or 0))
+        with m2:
+            st.metric("Omission", int(counts.get("omissions") or 0))
+        with m3:
+            st.metric("Risk", str(verification.get("risk_level") or "-").upper())
+
     with c2:
-        st.markdown("### Export")
-        payload = {
+        payload: Dict[str, Any] = {
+            "exported_at": datetime.now().isoformat(timespec="seconds"),
+            "uploaded_file": st.session_state.image_name,
+            "doctor_report": st.session_state.report_text,
+            "ai_report": result.get("ai_report_text") or "",
             "export_config": cfg,
-            "resolution": st.session_state.resolution,
-            "result": result,
         }
+        if cfg.get("include_resolution"):
+            payload["resolution"] = st.session_state.resolution
+        if cfg.get("include_tables"):
+            payload["comparison_table"] = _build_comparison_table(result.get("verification_results") or {})
+        if cfg.get("include_raw"):
+            payload["result"] = result
+
         st.download_button(
             "Download JSON Bundle",
-            data=json.dumps(payload, indent=2),
-            file_name=f"raven_export_{int(datetime.now().timestamp())}.json",
+            data=st.session_state.get("_export_json") or "",
+            file_name=f"radverify_export_{int(datetime.now().timestamp())}.json",
             mime="application/json",
-            use_container_width=True,
+            width="stretch",
+            disabled=True,
+        )
+        export_json = ""
+        try:
+            import json
+
+            export_json = json.dumps(payload, indent=2)
+        except Exception:
+            export_json = str(payload)
+        st.session_state["_export_json"] = export_json
+        st.download_button(
+            "Download JSON Bundle",
+            data=export_json,
+            file_name=f"radverify_export_{int(datetime.now().timestamp())}.json",
+            mime="application/json",
+            width="stretch",
         )
 
-    st.markdown("<div class='table-shell'>", unsafe_allow_html=True)
-    st.json(payload)
+    with st.expander("Preview export"):
+        st.json(payload)
+
+
+def render_help_center() -> None:
+    st.markdown("<div class='page-title'>Help Center</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Search documentation, workflows, and common actions for doctors and technicians.</div>",
+        unsafe_allow_html=True,
+    )
+
+    q = st.text_input("Help search", placeholder="Search… (upload scans, discrepancies, export)")
+
+    a1, a2, a3, a4 = st.columns(4, gap="small")
+    with a1:
+        if st.button("Upload Scan", type="secondary", width="stretch"):
+            st.session_state.active_page = "Dashboard"
+            st.rerun()
+    with a2:
+        if st.button("Resolve", type="secondary", width="stretch"):
+            st.session_state.active_page = "Discrepancy Resolution"
+            st.rerun()
+    with a3:
+        if st.button("Export", type="secondary", width="stretch"):
+            st.session_state.active_page = "Final Export"
+            st.rerun()
+    with a4:
+        if st.button("Settings", type="secondary", width="stretch"):
+            st.session_state.active_page = "Settings"
+            st.rerun()
+
+    st.write("")
+    st.markdown("### Categories")
+    cats = [
+        {"k": "Getting Started", "d": "First time setup"},
+        {"k": "Uploading Scans", "d": "DICOM / PNG / JPEG"},
+        {"k": "AI Analysis", "d": "Verification basics"},
+        {"k": "Discrepancies", "d": "Accept / dismiss / modify"},
+        {"k": "Export", "d": "Download bundles"},
+        {"k": "Troubleshooting", "d": "Common issues"},
+    ]
+    c1, c2, c3 = st.columns(3, gap="large")
+    for idx, cat in enumerate(cats):
+        col = [c1, c2, c3][idx % 3]
+        with col:
+            st.markdown(
+                "<div class='card'>"
+                f"<div class='card-title'>{cat['k']} <span class='badge'>Help</span></div>"
+                f"<div class='subtle'>{cat['d']}</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+    st.write("")
+    st.markdown("### Guides")
+    guides = {
+        "Upload DICOM scans": [
+            "Go to Dashboard.",
+            "Upload DICOM / PNG / JPEG.",
+            "Paste the doctor report.",
+            "Click Start AI Analysis.",
+        ],
+        "Resolve discrepancies": [
+            "Open Discrepancy Resolution.",
+            "Choose Accept / Dismiss / Modify.",
+            "Continue to Final Export.",
+        ],
+        "Export final report": [
+            "Open Final Export.",
+            "Select export options.",
+            "Download JSON bundle.",
+        ],
+    }
+    selected = st.selectbox("Choose a guide", list(guides.keys()), index=0)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card-title'>{selected} <span class='badge'>Steps</span></div>", unsafe_allow_html=True)
+    st.markdown("\n".join([f"- {s}" for s in guides.get(selected, [])]))
     st.markdown("</div>", unsafe_allow_html=True)
+
+    st.write("")
+    st.markdown("### FAQ")
+    faq = [
+        ("Supported formats", "DICOM (.dcm), PNG, JPG. Backend support depends on server configuration."),
+        ("If AI and doctor differ", "Use Discrepancy Resolution to accept, dismiss, or modify before export."),
+        ("Backend not connected", "You can still use the UI; it will fall back to demo results if the API is unavailable."),
+    ]
+    for q_item, a_item in faq:
+        with st.expander(q_item):
+            st.write(a_item)
+
+    st.write("")
+    st.markdown("### Contact")
+    c_left, c_right = st.columns([1.2, 0.8], gap="large")
+    with c_left:
+        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<div class='card-title'>Contact Support <span class='badge'>Support</span></div>", unsafe_allow_html=True)
+        st.text_input("Email", placeholder="you@hospital.org")
+        st.text_area("Message", placeholder="Describe the issue...")
+        st.button("Send", type="primary", width="stretch")
+        st.markdown("</div>", unsafe_allow_html=True)
+    with c_right:
+        st.markdown(
+            "<div class='card'>"
+            "<div class='card-title'>Support Info <span class='badge'>Info</span></div>"
+            "<div class='subtle'><b>Email:</b> support@raven-ai.local</div>"
+            "<div class='subtle' style='margin-top:8px;'><b>Hours:</b> Mon–Fri, 9am–5pm</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+    if q:
+        query = q.strip().lower()
+        haystack = "\n".join([c["k"] + " " + c["d"] for c in cats] + list(guides.keys()) + [f[0] + " " + f[1] for f in faq])
+        if query and query not in haystack.lower():
+            st.info("No results found.")
+
+
+def render_comparative_analytics() -> None:
+    st.markdown("<div class='page-title'>Comparative Analytics</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Compare AI results with radiologist diagnoses across cases. Filters and charts update instantly.</div>",
+        unsafe_allow_html=True,
+    )
+
+    # Demo dataset (used when backend history is unavailable).
+    demo_cases = [
+        {
+            "case_id": "CASE-1001",
+            "date": "2026-03-20",
+            "scan_type": "X-Ray",
+            "ai_prediction": "Abnormal",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.86,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Patel",
+        },
+        {
+            "case_id": "CASE-1002",
+            "date": "2026-03-21",
+            "scan_type": "CT",
+            "ai_prediction": "Critical",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.73,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Nguyen",
+        },
+        {
+            "case_id": "CASE-1003",
+            "date": "2026-03-22",
+            "scan_type": "MRI",
+            "ai_prediction": "Normal",
+            "radiologist_diagnosis": "Normal",
+            "confidence": 0.91,
+            "model": "v2.3.9",
+            "radiologist": "Dr. Chen",
+        },
+        {
+            "case_id": "CASE-1004",
+            "date": "2026-03-23",
+            "scan_type": "X-Ray",
+            "ai_prediction": "Abnormal",
+            "radiologist_diagnosis": "Critical",
+            "confidence": 0.67,
+            "model": "v2.3.9",
+            "radiologist": "Dr. Patel",
+        },
+        {
+            "case_id": "CASE-1005",
+            "date": "2026-03-24",
+            "scan_type": "CT",
+            "ai_prediction": "Normal",
+            "radiologist_diagnosis": "Abnormal",
+            "confidence": 0.62,
+            "model": "v2.4.1",
+            "radiologist": "Dr. Nguyen",
+        },
+    ]
+
+    with st.expander("Filters", expanded=True):
+        f1, f2, f3, f4 = st.columns([1.2, 1.0, 1.0, 1.0], gap="large")
+        with f1:
+            date_start = st.date_input("Start date", value=datetime(2026, 3, 20).date())
+            date_end = st.date_input("End date", value=datetime(2026, 3, 24).date())
+        with f2:
+            scan_type = st.selectbox("Scan type", ["All", "CT", "MRI", "X-Ray"], index=0)
+        with f3:
+            model_ver = st.selectbox("AI model", ["All", "v2.4.1", "v2.3.9"], index=0)
+        with f4:
+            rad_name = st.selectbox("Radiologist", ["All", "Dr. Patel", "Dr. Nguyen", "Dr. Chen"], index=0)
+
+    def _in_range(d: str) -> bool:
+        try:
+            dt = datetime.strptime(d, "%Y-%m-%d").date()
+        except Exception:
+            return True
+        return bool(date_start <= dt <= date_end)
+
+    filtered = [c for c in demo_cases if _in_range(c["date"])]
+    if scan_type != "All":
+        filtered = [c for c in filtered if c["scan_type"] == scan_type]
+    if model_ver != "All":
+        filtered = [c for c in filtered if c["model"] == model_ver]
+    if rad_name != "All":
+        filtered = [c for c in filtered if c["radiologist"] == rad_name]
+
+    total = len(filtered)
+    matches = len([c for c in filtered if c["ai_prediction"] == c["radiologist_diagnosis"]])
+    mismatches = total - matches
+    accuracy = (matches / total) if total else 0.0
+    # Agreement rate ties to most recent analysis when available.
+    last = st.session_state.last_result or {}
+    last_ver = (last.get("verification_results") or {}) if isinstance(last, dict) else {}
+    agreement = float(last_ver.get("agreement_rate") or accuracy)
+
+    m1, m2, m3, m4 = st.columns(4, gap="large")
+    with m1:
+        st.markdown(f"<div class='metric-card'><div class='metric-k'>Total Scans</div><div class='metric-v'>{total}</div></div>", unsafe_allow_html=True)
+    with m2:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>AI Accuracy</div><div class='metric-v'>{int(accuracy * 100)}%</div></div>",
+            unsafe_allow_html=True,
+        )
+    with m3:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>Agreement Rate</div><div class='metric-v'>{int(agreement * 100)}%</div></div>",
+            unsafe_allow_html=True,
+        )
+    with m4:
+        st.markdown(
+            f"<div class='metric-card'><div class='metric-k'>Discrepancies</div><div class='metric-v'>{mismatches}</div></div>",
+            unsafe_allow_html=True,
+        )
+
+    st.write("")
+    st.markdown("### Interactive Charts")
+
+    # Bar chart: AI vs Radiologist findings counts.
+    classes = ["Normal", "Abnormal", "Critical"]
+    ai_counts = {c: 0 for c in classes}
+    rad_counts = {c: 0 for c in classes}
+    for row in filtered:
+        ai_counts[row["ai_prediction"]] = ai_counts.get(row["ai_prediction"], 0) + 1
+        rad_counts[row["radiologist_diagnosis"]] = rad_counts.get(row["radiologist_diagnosis"], 0) + 1
+    bar_data = []
+    for c in classes:
+        bar_data.append({"category": c, "series": "AI", "count": ai_counts.get(c, 0)})
+        bar_data.append({"category": c, "series": "Radiologist", "count": rad_counts.get(c, 0)})
+
+    # Line chart: accuracy over time.
+    daily = {}
+    for row in filtered:
+        d = row["date"]
+        daily.setdefault(d, {"date": d, "total": 0, "match": 0})
+        daily[d]["total"] += 1
+        daily[d]["match"] += 1 if row["ai_prediction"] == row["radiologist_diagnosis"] else 0
+    line_data = []
+    for d in sorted(daily.keys()):
+        entry = daily[d]
+        acc = (entry["match"] / entry["total"]) if entry["total"] else 0
+        line_data.append({"date": entry["date"], "accuracy": round(acc * 100, 1)})
+
+    # Pie chart: classification distribution (AI).
+    pie_data = [{"label": c, "value": ai_counts.get(c, 0)} for c in classes]
+
+    ch1, ch2, ch3 = st.columns([1.1, 1.1, 0.9], gap="large")
+    with ch1:
+        st.markdown("<div class='card'><div class='card-title'>AI vs Radiologist Findings <span class='badge'>Bar</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": bar_data},
+                "mark": {"type": "bar", "cornerRadiusTopLeft": 6, "cornerRadiusTopRight": 6},
+                "encoding": {
+                    "x": {"field": "category", "type": "nominal", "axis": {"labelAngle": 0}},
+                    "y": {"field": "count", "type": "quantitative"},
+                    "color": {
+                        "field": "series",
+                        "type": "nominal",
+                        "scale": {"range": ["#1f66ad", "#0ea5e9"]},
+                    },
+                    "xOffset": {"field": "series"},
+                    "tooltip": [
+                        {"field": "series", "type": "nominal"},
+                        {"field": "category", "type": "nominal"},
+                        {"field": "count", "type": "quantitative"},
+                    ],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    with ch2:
+        st.markdown("<div class='card'><div class='card-title'>Accuracy Over Time <span class='badge'>Line</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": line_data},
+                "mark": {"type": "line", "point": True},
+                "encoding": {
+                    "x": {"field": "date", "type": "temporal", "title": "Date"},
+                    "y": {"field": "accuracy", "type": "quantitative", "title": "Accuracy (%)"},
+                    "color": {"value": "#1f66ad"},
+                    "tooltip": [
+                        {"field": "date", "type": "temporal"},
+                        {"field": "accuracy", "type": "quantitative"},
+                    ],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    with ch3:
+        st.markdown("<div class='card'><div class='card-title'>AI Distribution <span class='badge'>Pie</span></div>", unsafe_allow_html=True)
+        st.vega_lite_chart(
+            {
+                "data": {"values": pie_data},
+                "mark": {"type": "arc", "innerRadius": 55},
+                "encoding": {
+                    "theta": {"field": "value", "type": "quantitative"},
+                    "color": {
+                        "field": "label",
+                        "type": "nominal",
+                        "scale": {"range": ["#22c55e", "#f59e0b", "#ef4444"]},
+                    },
+                    "tooltip": [{"field": "label", "type": "nominal"}, {"field": "value", "type": "quantitative"}],
+                },
+                "width": "container",
+                "height": 240,
+            },
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.write("")
+    st.markdown("### Comparison Table")
+    table_rows = []
+    for row in filtered:
+        match = row["ai_prediction"] == row["radiologist_diagnosis"]
+        table_rows.append(
+            {
+                "Case ID": row["case_id"],
+                "Scan Type": row["scan_type"],
+                "AI Prediction": row["ai_prediction"],
+                "Radiologist Diagnosis": row["radiologist_diagnosis"],
+                "Confidence Score": round(float(row["confidence"]), 2),
+                "Status": "Match" if match else "Mismatch",
+            }
+        )
+    st.dataframe(table_rows, width="stretch", hide_index=True)
+
+    st.write("")
+    st.markdown("### Export Options")
+    exp1, exp2, exp3 = st.columns([1, 1, 1], gap="large")
+    export_payload = {
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "filters": {
+            "start": str(date_start),
+            "end": str(date_end),
+            "scan_type": scan_type,
+            "model": model_ver,
+            "radiologist": rad_name,
+        },
+        "summary": {"total": total, "accuracy": accuracy, "agreement_rate": agreement, "discrepancies": mismatches},
+        "rows": table_rows,
+    }
+
+    try:
+        import json
+
+        export_json = json.dumps(export_payload, indent=2)
+    except Exception:
+        export_json = str(export_payload)
+
+    csv_buf = io.StringIO()
+    if table_rows:
+        headers = list(table_rows[0].keys())
+        csv_buf.write(",".join(headers) + "\n")
+        for r in table_rows:
+            csv_buf.write(",".join([str(r.get(h, "")).replace(",", " ") for h in headers]) + "\n")
+    export_csv = csv_buf.getvalue()
+
+    with exp1:
+        st.download_button("Download analytics report (JSON)", data=export_json, file_name="raven_analytics.json", mime="application/json", width="stretch")
+    with exp2:
+        st.download_button("CSV data export", data=export_csv, file_name="raven_analytics.csv", mime="text/csv", width="stretch")
+    with exp3:
+        st.button("Export charts as PDF", type="secondary", width="stretch", disabled=True)
+
+
+def render_settings() -> None:
+    st.markdown("<div class='page-title'>Settings</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-subtitle'>Manage your profile, preferences, AI configuration, security, and integrations.</div>",
+        unsafe_allow_html=True,
+    )
+
+    settings = st.session_state.settings or {}
+    if "user_profile" not in settings:
+        settings["user_profile"] = {"name": "", "email": "", "role": "Radiologist", "avatar_bytes": None}
+    if "system_prefs" not in settings:
+        settings["system_prefs"] = {
+            "theme": "Light",
+            "language": "English",
+            "notifications": True,
+            "default_export": "JSON",
+        }
+    if "ai_config" not in settings:
+        settings["ai_config"] = {"model_version": "v2.4.1", "confidence": 0.75, "auto_verify": True}
+    if "security" not in settings:
+        settings["security"] = {"two_factor": False, "data_retention_days": 365, "api_keys": [{"name": "Default", "key": settings.get("api_key", "")}]}
+    if "integrations" not in settings:
+        settings["integrations"] = {
+            "pacs_status": "Disconnected",
+            "dicom_host": "",
+            "dicom_port": 104,
+            "api_endpoint": settings.get("api_base", API_BASE),
+        }
+
+    left, right = st.columns([1.15, 0.85], gap="large")
+
+    with left:
+        st.markdown("<div class='card'><div class='card-title'>User Profile Settings <span class='badge'>Profile</span></div>", unsafe_allow_html=True)
+        up = settings["user_profile"]
+        avatar = st.file_uploader("Profile picture", type=["png", "jpg", "jpeg"], key="settings_avatar")
+        if avatar is not None:
+            up["avatar_bytes"] = avatar.getvalue()
+        if up.get("avatar_bytes"):
+            st.image(up["avatar_bytes"], width=96)
+        up["name"] = st.text_input("Name", value=str(up.get("name") or ""))
+        up["email"] = st.text_input("Email", value=str(up.get("email") or ""))
+        up["role"] = st.selectbox("Role", ["Radiologist", "Admin", "Technician"], index=["Radiologist", "Admin", "Technician"].index(str(up.get("role") or "Radiologist")))
+        with st.expander("Change password"):
+            st.text_input("Current password", type="password")
+            st.text_input("New password", type="password")
+            st.text_input("Confirm new password", type="password")
+            st.button("Update password", type="secondary", width="stretch", disabled=True)
+        settings["user_profile"] = up
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>System Preferences <span class='badge'>Preferences</span></div>", unsafe_allow_html=True)
+        prefs = settings["system_prefs"]
+        prefs["theme"] = st.radio("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(str(prefs.get("theme") or "Light")), horizontal=True)
+        prefs["language"] = st.selectbox("Language", ["English", "Spanish", "French", "German"], index=["English", "Spanish", "French", "German"].index(str(prefs.get("language") or "English")))
+        prefs["notifications"] = st.toggle("Notification preferences", value=bool(prefs.get("notifications", True)))
+        prefs["default_export"] = st.selectbox("Default export format", ["PDF", "CSV", "JSON"], index=["PDF", "CSV", "JSON"].index(str(prefs.get("default_export") or "JSON")))
+        settings["system_prefs"] = prefs
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>AI Model Configuration <span class='badge'>AI</span></div>", unsafe_allow_html=True)
+        ai = settings["ai_config"]
+        ai["model_version"] = st.selectbox("AI model version", ["v2.4.1", "v2.3.9", "v2.3.1"], index=["v2.4.1", "v2.3.9", "v2.3.1"].index(str(ai.get("model_version") or "v2.4.1")))
+        ai["confidence"] = st.slider("Confidence threshold", min_value=0.50, max_value=0.99, value=float(ai.get("confidence") or 0.75), step=0.01)
+        ai["auto_verify"] = st.toggle("Auto verification", value=bool(ai.get("auto_verify", True)))
+        settings["ai_config"] = ai
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with right:
+        st.markdown("<div class='card'><div class='card-title'>Data & Security <span class='badge'>Security</span></div>", unsafe_allow_html=True)
+        sec = settings["security"]
+        sec["two_factor"] = st.toggle("Two-factor authentication", value=bool(sec.get("two_factor", False)))
+        sec["data_retention_days"] = st.number_input("Data retention (days)", min_value=30, max_value=3650, value=int(sec.get("data_retention_days") or 365), step=30)
+        st.markdown("<div class='subtle' style='margin-top:8px;font-weight:700;'>API key management</div>", unsafe_allow_html=True)
+        api_key_value = st.text_input("Active API key", value=str(settings.get("api_key") or ""), type="password")
+        settings["api_key"] = api_key_value
+        sec["api_keys"] = sec.get("api_keys") or []
+        st.markdown("</div>", unsafe_allow_html=True)
+        settings["security"] = sec
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>Integration Settings <span class='badge'>Integrations</span></div>", unsafe_allow_html=True)
+        integ = settings["integrations"]
+        status = str(integ.get("pacs_status") or "Disconnected")
+        pacs_badge = "<span class='badge'>Connected</span>" if status.lower() == "connected" else "<span class='badge'>Offline</span>"
+        st.markdown(f"<div class='subtle' style='margin-bottom:8px;'><b>PACS integration status:</b> {status} {pacs_badge}</div>", unsafe_allow_html=True)
+        integ["dicom_host"] = st.text_input("DICOM server host", value=str(integ.get("dicom_host") or ""), placeholder="pacs.hospital.local")
+        integ["dicom_port"] = st.number_input("DICOM port", min_value=1, max_value=65535, value=int(integ.get("dicom_port") or 104))
+        integ["api_endpoint"] = st.text_input("API endpoint configuration", value=str(settings.get("api_base") or API_BASE))
+        settings["api_base"] = integ["api_endpoint"]
+        settings["integrations"] = integ
+
+        st.write("")
+        st.markdown("<div class='card'><div class='card-title'>Backend Connectivity <span class='badge'>API</span></div>", unsafe_allow_html=True)
+        settings["prefer_backend"] = st.toggle("Prefer backend (fallback to demo)", value=bool(settings.get("prefer_backend", True)))
+        settings["backend_timeout_sec"] = st.number_input(
+            "Backend timeout (seconds)",
+            min_value=5,
+            max_value=600,
+            value=int(settings.get("backend_timeout_sec") or 180),
+            step=5,
+        )
+        if st.button("Test Connection", type="secondary", width="stretch"):
+            try:
+                h = requests.get(f"{settings['api_base']}/health", timeout=5)
+                if h.ok:
+                    st.success("Backend is reachable.")
+                else:
+                    st.warning("Backend responded but is not healthy.")
+            except Exception as exc:
+                st.warning(f"Could not reach backend: {exc}")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.write("")
+    a1, a2 = st.columns([1, 1])
+    with a1:
+        if st.button("Save Settings", type="primary", width="stretch"):
+            st.session_state.settings = settings
+            st.success("Settings saved.")
+    with a2:
+        if st.button("Reset", type="secondary", width="stretch"):
+            st.session_state.settings = {
+                "api_base": API_BASE,
+                "api_key": API_KEY,
+                "prefer_backend": True,
+                "backend_timeout_sec": 180,
+            }
+            st.session_state.last_error = ""
+            st.rerun()
 
 
 def render_simple(title: str) -> None:
@@ -1082,8 +1559,10 @@ def main() -> None:
         render_final_export()
     elif page == "Help Center":
         render_help_center()
+    elif page == "Comparative Analytics":
+        render_comparative_analytics()
     else:
-        render_dashboard()
+        render_settings()
 
 
 if __name__ == "__main__":
