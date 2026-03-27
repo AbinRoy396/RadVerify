@@ -148,6 +148,15 @@ def inject_css() -> None:
           color:#121417 !important;
           font-size:1.05rem !important;
         }
+        [data-testid="stTextArea"] label,
+        [data-testid="stSelectbox"] label {
+          color:#1f2937 !important;
+          font-weight:700 !important;
+        }
+        [data-testid="stTextArea"] textarea::placeholder {
+          color:#94a3b8 !important;
+          opacity:1 !important;
+        }
         [data-testid="stTextInput"] input {
           border-radius:12px !important;
           border:1px solid #cbd5e1 !important;
@@ -441,6 +450,32 @@ def inject_css() -> None:
           border-color:#bfd6fb !important;
           color:#1f66ad !important;
         }
+
+        .disc-shell {
+          background:#ffffff;
+          border:1px solid #dce3ea;
+          border-radius:16px;
+          padding:20px;
+          box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+        }
+        .disc-grid { display:grid; grid-template-columns: 1.1fr 1.4fr; gap:16px; }
+        .disc-card {
+          border:1px solid #e2e8f0;
+          border-radius:14px;
+          padding:14px 16px;
+          background:#f8fafc;
+        }
+        .disc-pill {
+          display:inline-flex; align-items:center; gap:6px;
+          padding:6px 12px; border-radius:999px; font-weight:700; font-size:0.78rem;
+        }
+        .disc-pill.mismatch { background:#fde8e8; color:#b91c1c; }
+        .disc-pill.omission { background:#fff7e6; color:#b45309; }
+        .disc-pill.match { background:#e8f7ee; color:#15803d; }
+        .disc-table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+        .disc-table th { text-align:left; padding:10px; background:#f1f5f9; border-bottom:1px solid #e2e8f0; }
+        .disc-table td { padding:10px; border-bottom:1px solid #eef2f7; color:#334155; }
+        .disc-table tr:hover { background:#f8fafc; }
         .analysis-wrap { margin-top: 8px; }
         .agreement-row { text-align:right; padding:8px 16px 14px; color:#cbd5e1; }
         @media (max-width: 1100px) {
@@ -1086,6 +1121,101 @@ def render_export() -> None:
         st.markdown("</div>", unsafe_allow_html=True)
 
 
+def render_discrepancy() -> None:
+    result = st.session_state.last_result
+    if not result:
+        st.info("Run analysis from Dashboard first.")
+        return
+    verification = result.get("verification_results") or {}
+    counts = verification.get("discrepancy_counts") or {}
+    rows = _build_comparison_table(verification)
+    mismatch_rows = [r for r in rows if str(r.get("status")).lower() == "mismatch"]
+    omission_rows = [r for r in rows if str(r.get("status")).lower() == "omission"]
+
+    st.markdown(
+        """
+        <div class="disc-shell">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div>
+              <div class="export-title">Discrepancy Resolution</div>
+              <div class="export-sub">Review mismatches and document resolution decisions.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="disc-pill mismatch">Mismatches: {m}</span>
+              <span class="disc-pill omission">Omissions: {o}</span>
+              <span class="disc-pill match">Matches: {a}</span>
+            </div>
+          </div>
+        </div>
+        """.format(m=counts.get("mismatches", 0), o=counts.get("omissions", 0), a=counts.get("matches", 0)),
+        unsafe_allow_html=True,
+    )
+    st.write("")
+
+    col1, col2 = st.columns([1, 1.35], gap="large")
+    with col1:
+        st.markdown(
+            """
+            <div class="disc-card">
+              <div style="font-weight:700;margin-bottom:8px;">Resolution Checklist</div>
+              <ul style="margin:0 0 0 18px; padding:0; color:#475569;">
+                <li>Confirm measurement mismatches</li>
+                <li>Validate report omissions</li>
+                <li>Attach reviewer notes</li>
+                <li>Assign final disposition</li>
+              </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.write("")
+        st.text_area("Reviewer Notes", placeholder="Add discrepancy review notes...", height=160)
+        st.selectbox("Disposition", ["Needs Review", "Resolved", "Escalate to Radiologist"])
+        st.button("Save Resolution", type="primary", use_container_width=True)
+
+    with col2:
+        risk_level = str(verification.get("risk_level") or "unknown").upper()
+        agreement = verification.get("agreement_rate")
+        agreement_pct = int(float(agreement or 0) * 100)
+        st.markdown(
+            f"""
+            <div class="disc-card" style="margin-bottom:12px;">
+              <div style="font-weight:700;margin-bottom:8px;">Resolution Summary</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span class="disc-pill match">Agreement: {agreement_pct}%</span>
+                <span class="disc-pill mismatch">Risk: {risk_level}</span>
+                <span class="disc-pill omission">Items: {len(rows)}</span>
+              </div>
+              <div style="margin-top:10px;color:#64748b;font-size:0.9rem;">
+                Focus on high-severity mismatches first. Add notes before saving.
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div class='disc-card'>", unsafe_allow_html=True)
+        st.markdown("<div style='font-weight:700;margin-bottom:8px;'>Mismatch Details</div>", unsafe_allow_html=True)
+        if mismatch_rows or omission_rows:
+            display_rows = mismatch_rows + omission_rows
+            table_rows = "".join(
+                [
+                    f"<tr><td>{r.get('name')}</td><td>{r.get('status')}</td><td>{r.get('ai_value') or r.get('ai_present')}</td><td>{r.get('doctor_value') or r.get('doctor_mentioned')}</td><td>{r.get('severity')}</td></tr>"
+                    for r in display_rows
+                ]
+            )
+            st.markdown(
+                f"""
+                <table class="disc-table">
+                  <thead><tr><th>Item</th><th>Status</th><th>AI</th><th>Doctor</th><th>Severity</th></tr></thead>
+                  <tbody>{table_rows}</tbody>
+                </table>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No discrepancies detected for this case.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
 def main() -> None:
     st.set_page_config(page_title="RAVEN Web App", page_icon="R", layout="wide", initial_sidebar_state="expanded")
     init_state()
@@ -1102,7 +1232,7 @@ def main() -> None:
     elif page == "History & Archive":
         render_history()
     elif page == "Discrepancy Resolution":
-        render_simple("Discrepancy Resolution")
+        render_discrepancy()
     elif page == "Final Export":
         render_export()
     elif page == "Help Center":
