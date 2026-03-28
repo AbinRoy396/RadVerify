@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Deque, Dict, List
 
 import numpy as np
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Security, UploadFile
+from fastapi import Body, Depends, FastAPI, File, Form, HTTPException, Request, Security, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.security.api_key import APIKey, APIKeyHeader
@@ -65,6 +65,22 @@ ALLOWED_CONTENT_TYPES = {
 API_KEY_ENV = "RADVERIFY_API_KEY"
 API_KEY = os.getenv(API_KEY_ENV)
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+SETTINGS_FILE = Path("data") / "settings.json"
+SETTINGS_CACHE: Dict[str, Any] = {}
+
+
+def _load_settings() -> Dict[str, Any]:
+    if SETTINGS_FILE.exists():
+        try:
+            return json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def _save_settings(data: Dict[str, Any]) -> None:
+    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SETTINGS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
 class InMemoryRateLimiter:
@@ -437,6 +453,8 @@ def _startup_check() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    global SETTINGS_CACHE
+    SETTINGS_CACHE = _load_settings()
     _startup_check()
     yield
 
@@ -574,6 +592,23 @@ def metrics_prometheus(api_key: APIKey = Depends(get_api_key)) -> str:
             ]
         )
     return "\n".join(lines) + "\n"
+
+
+@app.get("/settings")
+def get_settings(api_key: APIKey = Depends(get_api_key)) -> Dict[str, Any]:
+    return SETTINGS_CACHE or {}
+
+
+@app.put("/settings")
+def put_settings(
+    payload: Dict[str, Any] = Body(...),
+    api_key: APIKey = Depends(get_api_key),
+) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        _error(400, "invalid_settings_payload", "Settings payload must be an object.")
+    SETTINGS_CACHE.update(payload)
+    _save_settings(SETTINGS_CACHE)
+    return SETTINGS_CACHE
 
 
 @app.post("/verify", response_model=Dict[str, Any])
