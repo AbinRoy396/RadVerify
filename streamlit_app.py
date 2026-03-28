@@ -995,6 +995,7 @@ def render_final_export() -> None:
             file_name=f"radverify_export_{int(datetime.now().timestamp())}.json",
             mime="application/json",
             width="stretch",
+            key="export_json_disabled",
             disabled=True,
         )
         export_json = ""
@@ -1011,6 +1012,7 @@ def render_final_export() -> None:
             file_name=f"radverify_export_{int(datetime.now().timestamp())}.json",
             mime="application/json",
             width="stretch",
+            key="export_json_ready",
         )
 
     with st.expander("Preview export"):
