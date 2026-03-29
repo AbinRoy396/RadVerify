@@ -969,7 +969,7 @@ def render_sidebar() -> None:
         ]
         for label, page in nav_items:
             is_active = st.session_state.active_page == page
-            if st.button(label, use_container_width=True, key=f"nav_{page}", type="primary" if is_active else "secondary"):
+            if st.button(label, width='stretch', key=f"nav_{page}", type="primary" if is_active else "secondary"):
                 st.session_state.active_page = page
                 st.rerun()
 
@@ -1019,7 +1019,7 @@ def top_header() -> None:
             unsafe_allow_html=True,
         )
     with c2:
-        if st.button("+ New Analysis", type="primary", use_container_width=True):
+        if st.button("+ New Analysis", type="primary", width='stretch'):
             st.session_state.image_bytes = None
             st.session_state.image_name = ""
             st.session_state.report_text = ""
@@ -1062,7 +1062,7 @@ def render_dashboard() -> None:
         st.markdown("<div class='action-bar'>Ensure all patient identifiers are redacted if required by local policy.</div>", unsafe_allow_html=True)
     with c2:
         can_run = bool(st.session_state.image_bytes) and bool(st.session_state.report_text.strip())
-        if st.button("Start AI Analysis", type="primary", use_container_width=True, disabled=not can_run):
+        if st.button("Start AI Analysis", type="primary", width='stretch', disabled=not can_run):
             st.session_state.last_error = ""
             with st.spinner("Running AI verification..."):
                 try:
@@ -1125,12 +1125,12 @@ def render_analysis() -> None:
             tabs = st.tabs(["Enhanced", "Original"])
             with tabs[0]:
                 if enhanced_bytes:
-                    st.image(enhanced_bytes, use_container_width=True, caption="Enhanced scan")
+                    st.image(enhanced_bytes, width='stretch', caption="Enhanced scan")
                 else:
                     st.info("Enhanced image not available.")
             with tabs[1]:
                 if original_bytes:
-                    st.image(original_bytes, use_container_width=True, caption="Original scan")
+                    st.image(original_bytes, width='stretch', caption="Original scan")
                 else:
                     st.info("Original image not available.")
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1376,19 +1376,19 @@ def render_help_center() -> None:
     st.markdown("<div class='settings-card-title'>Guided Actions</div>", unsafe_allow_html=True)
     a1, a2, a3, a4 = st.columns(4, gap="small")
     with a1:
-        if st.button("Go to Upload", type="secondary", use_container_width=True):
+        if st.button("Go to Upload", type="secondary", width='stretch'):
             st.session_state.active_page = "Dashboard"
             st.rerun()
     with a2:
-        if st.button("Resolve Mismatch", type="secondary", use_container_width=True):
+        if st.button("Resolve Mismatch", type="secondary", width='stretch'):
             st.session_state.active_page = "Discrepancy Resolution"
             st.rerun()
     with a3:
-        if st.button("Final Export", type="secondary", use_container_width=True):
+        if st.button("Final Export", type="secondary", width='stretch'):
             st.session_state.active_page = "Final Export"
             st.rerun()
     with a4:
-        if st.button("Settings", type="secondary", use_container_width=True):
+        if st.button("Settings", type="secondary", width='stretch'):
             st.session_state.active_page = "Settings"
             st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1616,9 +1616,9 @@ def render_comparative_analytics() -> None:
         csv_lines.append(f"{r['case']},{r['date']},{r['scan']},{r['ai']},{r['doctor']},{int(r['confidence']*100)}%")
     csv_data = "\n".join(csv_lines)
     with ex1:
-        st.download_button("Download JSON", data=export_json, file_name="comparative_analytics.json", mime="application/json", use_container_width=True)
+        st.download_button("Download JSON", data=export_json, file_name="comparative_analytics.json", mime="application/json", width='stretch')
     with ex2:
-        st.download_button("Download CSV", data=csv_data, file_name="comparative_analytics.csv", mime="text/csv", use_container_width=True)
+        st.download_button("Download CSV", data=csv_data, file_name="comparative_analytics.csv", mime="text/csv", width='stretch')
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -1705,7 +1705,7 @@ def render_export() -> None:
             data=json.dumps(json_payload, indent=2),
             file_name="radverify_report.json",
             mime="application/json",
-            use_container_width=True,
+            width='stretch',
         )
         ai_report = (result or {}).get("ai_report_text") or ""
         if ai_report:
@@ -1714,7 +1714,7 @@ def render_export() -> None:
                 data=ai_report,
                 file_name="ai_report.txt",
                 mime="text/plain",
-                use_container_width=True,
+                width='stretch',
             )
         doctor_report = ((result or {}).get("doctor_findings") or {}).get("raw_text") or st.session_state.report_text
         if doctor_report:
@@ -1723,7 +1723,7 @@ def render_export() -> None:
                 data=doctor_report,
                 file_name="doctor_report.txt",
                 mime="text/plain",
-                use_container_width=True,
+                width='stretch',
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1778,7 +1778,7 @@ def render_discrepancy() -> None:
         st.write("")
         st.text_area("Reviewer Notes", placeholder="Add discrepancy review notes...", height=160)
         st.selectbox("Disposition", ["Needs Review", "Resolved", "Escalate to Radiologist"])
-        st.button("Save Resolution", type="primary", use_container_width=True)
+        st.button("Save Resolution", type="primary", width='stretch')
 
     with col2:
         risk_level = str(verification.get("risk_level") or "unknown").upper()
@@ -1874,7 +1874,7 @@ def render_settings() -> None:
         )
         test_col, _ = st.columns([1, 2])
         with test_col:
-            if st.button("Test Connection", type="secondary", use_container_width=True):
+            if st.button("Test Connection", type="secondary", width='stretch'):
                 try:
                     resp = requests.get(f"{api_base}/health", headers={"X-API-Key": api_key}, timeout=3)
                     if resp.ok:
@@ -1919,13 +1919,13 @@ def render_settings() -> None:
             "<div class='settings-inline'><span class='pill'>SOC2 ready</span><span class='pill'>Audit logs enabled</span></div>",
             unsafe_allow_html=True,
         )
-        st.button("Rotate API key", type="secondary", use_container_width=True, disabled=True)
+        st.button("Rotate API key", type="secondary", width='stretch', disabled=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.write("")
     a1, a2 = st.columns([1, 1])
     with a1:
-        if st.button("Save Settings", type="primary", use_container_width=True):
+        if st.button("Save Settings", type="primary", width='stretch'):
             st.session_state.settings = {
                 "api_base": api_base,
                 "api_key": api_key,
@@ -1953,7 +1953,7 @@ def render_settings() -> None:
             except Exception as exc:
                 st.warning(f"Saved locally, but backend sync failed: {exc}")
     with a2:
-        if st.button("Reset to Defaults", type="secondary", use_container_width=True):
+        if st.button("Reset to Defaults", type="secondary", width='stretch'):
             st.session_state.settings = {
                 "api_base": API_BASE,
                 "api_key": API_KEY,
