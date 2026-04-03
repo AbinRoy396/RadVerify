@@ -239,7 +239,9 @@ class FetalUltrasoundTrainer:
 
         per_class = {}
         for i, name in enumerate(class_names):
-            tp = cm[i, i]; fp = cm[:, i].sum() - tp; fn = cm[i, :].sum() - tp
+            tp = cm[i, i]
+            fp = cm[:, i].sum() - tp
+            fn = cm[i, :].sum() - tp
             pr = tp / (tp + fp) if (tp + fp) > 0 else 0.0
             rc = tp / (tp + fn) if (tp + fn) > 0 else 0.0
             f1 = 2 * pr * rc / (pr + rc) if (pr + rc) > 0 else 0.0
@@ -386,7 +388,7 @@ class FetalUltrasoundTrainer:
 
         with open(os.path.join(output_dir, 'MODEL_CARD.md'), 'w') as f:
             f.write("# RadVerify Model Card\n\n")
-            f.write(f"- Version: v5 (oversampling + focal loss)\n")
+            f.write("- Version: v5 (oversampling + focal loss)\n")
             f.write(f"- Timestamp: {ts}\n")
             f.write(f"- Classes: {class_names}\n")
             f.write(f"- Val Accuracy: {val_metrics['accuracy']*100:.1f}%\n")
@@ -395,10 +397,10 @@ class FetalUltrasoundTrainer:
                 f.write(f"- Test Accuracy: {test_metrics['accuracy']*100:.1f}%\n")
 
         print(f"\n{'='*50}")
-        print(f"OK: Training complete! (v5)")
+        print("OK: Training complete! (v5)")
         print(f"  Val Accuracy: {val_metrics['accuracy']*100:.1f}%")
         print(f"  Val Macro F1: {val_metrics['macro_f1']:.4f}")
-        print(f"  Per-class F1:")
+        print("  Per-class F1:")
         for cls, m in val_metrics['per_class'].items():
             print(f"    {cls}: F1={m['f1']:.3f}  (precision={m['precision']:.2f}, recall={m['recall']:.2f})")
         print(f"{'='*50}\n")
